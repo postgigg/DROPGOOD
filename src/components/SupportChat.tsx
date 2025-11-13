@@ -390,6 +390,29 @@ export default function SupportChat() {
       if (error) throw error;
 
       setMessages((prev) => prev.map((msg) => (msg.id === tempId ? data : msg)));
+
+      // Send admin email notification for new chat message
+      try {
+        await supabase.functions.invoke('send-notification', {
+          body: {
+            type: 'new_chat_message',
+            recipient_email: 'exontract@gmail.com',
+            recipient_name: 'DropGood Admin',
+            send_email: true,
+            send_sms: false,
+            data: {
+              session_id: sessionId,
+              visitor_name: visitorName || 'Anonymous',
+              message_text: messageText,
+              has_image: !!uploadedImageUrl,
+              timestamp: new Date().toISOString()
+            }
+          }
+        });
+      } catch (notifError) {
+        console.error('Failed to send admin notification:', notifError);
+        // Don't fail the message send if notification fails
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));

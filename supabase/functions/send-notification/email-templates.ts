@@ -527,3 +527,45 @@ export function newCharitySubmissionEmail(data: {
     html: emailWrapper(content),
   };
 }
+
+export function newChatMessageEmail(data: {
+  session_id: string;
+  visitor_name: string;
+  message_text: string;
+  has_image: boolean;
+  timestamp: string;
+}): { subject: string; html: string } {
+  const content = `
+    <div class="content">
+      <h1>💬 New Chat Message</h1>
+
+      <p>You have a new support chat message from a visitor.</p>
+
+      <div class="info-box">
+        <p><strong>Visitor:</strong> ${data.visitor_name}</p>
+        <p><strong>Session ID:</strong> ${data.session_id.substring(0, 8).toUpperCase()}</p>
+        <p><strong>Time:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
+      </div>
+
+      <div style="background-color: #1F2937; border-left: 4px solid #3B82F6; padding: 16px; border-radius: 8px; margin: 24px 0;">
+        <p style="margin: 0; color: #E5E7EB; font-style: italic;">
+          "${data.message_text}"
+        </p>
+        ${data.has_image ? '<p style="margin-top: 8px; color: #9CA3AF; font-size: 14px;">📎 Image attached</p>' : ''}
+      </div>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://dropgood.com/admin/operations" class="button">View in Admin Dashboard</a>
+      </div>
+
+      <p style="margin-top: 32px;">
+        <strong>The DropGood System</strong>
+      </p>
+    </div>
+  `;
+
+  return {
+    subject: `💬 New Chat Message from ${data.visitor_name}`,
+    html: emailWrapper(content),
+  };
+}

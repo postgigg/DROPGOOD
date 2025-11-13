@@ -312,36 +312,33 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         console.error('Failed to send confirmation SMS:', err);
       }
 
-      if (manualMode) {
-        try {
-          const adminEmail = import.meta.env.VITE_ADMIN_NOTIFICATION_EMAIL;
-          if (adminEmail) {
-            await fetch(
-              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-admin`,
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  booking_id: completedBookingId,
-                  customer_name: pickupAddress.street.split(',')[0],
-                  customer_phone: phone,
-                  customer_email: contactMethod === 'both' ? email : null,
-                  pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
-                  donation_center_name: charity.name,
-                  scheduled_date: schedule.date,
-                  scheduled_time: schedule.timeStart,
-                  total_price: recalculatedPricing.total_price,
-                  items_description: itemsTypes.join(', '),
-                }),
-              }
-            );
+      // Send admin notification for ALL bookings (not just manual mode)
+      try {
+        await supabase.functions.invoke('send-notification', {
+          body: {
+            type: 'booking_confirmation',
+            recipient_email: 'exontract@gmail.com',
+            recipient_name: 'DropGood Admin',
+            send_email: true,
+            send_sms: false,
+            data: {
+              booking_id: completedBookingId,
+              customer_name: name,
+              customer_phone: phone,
+              customer_email: contactMethod === 'both' ? email : '',
+              pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
+              donation_center_name: charity.name,
+              scheduled_date: schedule.date,
+              scheduled_time: schedule.timeStart,
+              total_price: recalculatedPricing.total_price,
+              items_description: itemsTypes.join(', '),
+              boxes_count: itemsCount,
+            }
           }
-        } catch (err) {
-          console.error('Failed to notify admin:', err);
-        }
+        });
+        console.log('✅ Admin notification sent');
+      } catch (err) {
+        console.error('Failed to notify admin:', err);
       }
 
       console.log('🚀 Navigating to confirmation page:', `/confirmation/${completedBookingId}`);
