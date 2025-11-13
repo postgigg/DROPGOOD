@@ -436,6 +436,14 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       const selectedLocation = selectedAddressResult;
 
       // Create the donation center in database (inactive)
+      console.log('🏪 Attempting to insert charity:', {
+        name: newCharityName.trim(),
+        address: selectedLocation.address,
+        city: selectedLocation.city,
+        state: selectedLocation.state,
+        is_active: false
+      });
+
       const { data: newCenter, error: insertError } = await supabase
         .from('donation_centers')
         .insert({
@@ -454,7 +462,17 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('❌ Insert error details:', {
+          message: insertError.message,
+          code: insertError.code,
+          details: insertError.details,
+          hint: insertError.hint
+        });
+        throw insertError;
+      }
+
+      console.log('✅ Successfully inserted charity:', newCenter);
 
       // Send email notification to admin
       await supabase.functions.invoke('send-notification', {
