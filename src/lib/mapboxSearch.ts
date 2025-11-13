@@ -69,16 +69,23 @@ export async function searchAddress(query: string): Promise<AddressSearchResult[
 }
 
 export async function retrieveAddressDetails(mapbox_id: string): Promise<AddressSearchResult | null> {
-  if (!mapbox_id) return null;
+  if (!mapbox_id) {
+    console.warn('⚠️ No mapbox_id provided to retrieve');
+    return null;
+  }
 
   try {
     const url = `https://api.mapbox.com/search/searchbox/v1/retrieve/${mapbox_id}?` +
       `session_token=${Date.now()}&` +
       `access_token=${MAPBOX_TOKEN}`;
 
+    console.log('📍 Fetching retrieve URL:', url.replace(MAPBOX_TOKEN || '', 'TOKEN'));
+
     const response = await fetch(url);
     if (!response.ok) {
-      console.error('Mapbox retrieve failed:', response.status);
+      console.error('❌ Mapbox retrieve failed:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Error details:', errorText);
       return null;
     }
 

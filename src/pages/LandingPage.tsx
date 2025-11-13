@@ -99,15 +99,19 @@ export default function LandingPage() {
 
     // Fetch full details using Mapbox retrieve endpoint
     try {
-      console.log('📍 Retrieving full details for:', suggestion.mapbox_id);
+      console.log('📍 Selected suggestion:', suggestion);
+      console.log('📍 Retrieving full details for mapbox_id:', suggestion.mapbox_id);
 
       const fullDetails = await retrieveAddressDetails(suggestion.mapbox_id);
 
+      console.log('📍 Retrieved full details result:', fullDetails);
+
       if (!fullDetails || fullDetails.coordinates.latitude === 0) {
+        console.warn('⚠️ Retrieve failed or returned 0,0 coordinates, trying fallback');
         throw new Error('Could not retrieve coordinates');
       }
 
-      console.log('📍 Retrieved full details:', fullDetails);
+      console.log('📍 Using coordinates from retrieve:', fullDetails.coordinates);
 
       // Now use reverse geocoding to get structured address components
       const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
