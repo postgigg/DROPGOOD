@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { MessageCircle, Send, Paperclip, Clock, CheckCircle, X, Loader2 } from 'lucide-react';
+import { chatNotifications, isPageVisible } from '../lib/chatNotifications';
 
 interface SupportSession {
   id: string;
@@ -43,6 +44,20 @@ export default function AdminSupportChat({ adminName, adminId }: AdminSupportCha
   useEffect(() => {
     loadSessions();
     subscribeToSessions();
+
+    // Listen for page visibility changes to stop notifications when user returns
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        chatNotifications.stopTitleNotification();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      chatNotifications.cleanup();
+    };
   }, [filter]);
 
   useEffect(() => {
@@ -155,7 +170,14 @@ export default function AdminSupportChat({ adminName, adminId }: AdminSupportCha
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setMessages((prev) => [...prev, payload.new as Message]);
+            const newMsg = payload.new as Message;
+
+            // Notify if message is from visitor and page is not visible
+            if (newMsg.sender_type === 'visitor' && !isPageVisible()) {
+              chatNotifications.notifyNewMessage(newMsg.sender_name);
+            }
+
+            setMessages((prev) => [...prev, newMsg]);
           }
         }
       )

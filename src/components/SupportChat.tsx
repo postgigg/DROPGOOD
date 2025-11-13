@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, X, Check, CheckCheck, Loader2, Minimize2, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { chatNotifications, isPageVisible } from '../lib/chatNotifications';
 
 interface Message {
   id: string;
@@ -87,8 +88,19 @@ export default function SupportChat() {
 
       const lastSeenInterval = setInterval(updateLastSeen, 30000);
 
+      // Listen for page visibility changes to stop notifications when user returns
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          chatNotifications.stopTitleNotification();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
       return () => {
         clearInterval(lastSeenInterval);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        chatNotifications.cleanup();
       };
     }
   }, [sessionId, isOpen]);
@@ -218,6 +230,11 @@ export default function SupportChat() {
               );
               if (hasTempMsg && newMsg.sender_type === 'visitor') {
                 return prev;
+              }
+
+              // Notify if message is from admin and page is not visible or chat is closed
+              if (newMsg.sender_type === 'admin' && (!isPageVisible() || !isOpen)) {
+                chatNotifications.notifyNewMessage(newMsg.sender_name);
               }
 
               return [...prev, newMsg];

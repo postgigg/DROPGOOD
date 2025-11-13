@@ -99,21 +99,6 @@ export default function DonationCenterAuth() {
           </p>
         </div>
 
-        {/* Sponsorship Disclaimer */}
-        <div className="mb-6 bg-gradient-to-r from-blue-900/20 to-green-900/20 border border-blue-700/50 rounded-xl p-5">
-          <div className="flex items-start gap-3">
-            <Heart className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-bold text-green-300 mb-1">
-                Open Sponsorship Model
-              </h3>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                Anyone can create sponsorships for any charity. When you add funds, you're helping subsidize donation pickups to that center. It's about generosity, not ownership. The real charity benefits regardless of who sponsors them.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-8">
           <div className="flex gap-2 mb-6">
             <button
