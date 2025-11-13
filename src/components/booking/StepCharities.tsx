@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Star, Clock, Loader2, Sparkles, DollarSign, Search, Building2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Star, Clock, Loader2, Sparkles, DollarSign, Search, Building2, MapPin, X, Loader } from 'lucide-react';
 import { supabase, type DonationCenter } from '../../lib/supabase';
 import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE } from '../../lib/pricing';
 import { searchDonationCentersNearby } from '../../lib/mapboxSearch';
@@ -64,6 +64,8 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [selectedAddressResult, setSelectedAddressResult] = useState<any>(null);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const [companyBenefit, setCompanyBenefit] = useState<{
     company_id: string;
     company_name: string;
@@ -342,20 +344,62 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       return;
     }
 
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      await searchAddressMapbox(query);
+    }, 300);
+  }
+
+  async function searchAddressMapbox(query: string) {
+    if (!query || query.length < 3) return;
+
+    setIsSearchingAddress(true);
     try {
-      const results = await import('../../lib/mapboxSearch').then(m =>
-        m.searchAddress(query)
+      const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=address,poi&limit=5`
       );
-      setAddressSuggestions(results);
-      setShowAddressSuggestions(results.length > 0);
+
+      if (!response.ok) throw new Error('Search failed');
+
+      const data = await response.json();
+      setAddressSuggestions(data.features || []);
+      setShowAddressSuggestions(true);
     } catch (error) {
       console.error('Address search error:', error);
+      setAddressSuggestions([]);
+    } finally {
+      setIsSearchingAddress(false);
     }
   }
 
-  function selectAddress(result: any) {
-    setNewCharityAddress(result.address);
-    setSelectedAddressResult(result);
+  function selectAddress(suggestion: any) {
+    const [lng, lat] = suggestion.center;
+
+    const streetNum = suggestion.address || '';
+    const streetName = suggestion.text || '';
+    const fullStreet = streetNum ? `${streetNum} ${streetName}` : streetName;
+
+    const cityObj = suggestion.context?.find((c: any) => c.id.startsWith('place'));
+    const stateObj = suggestion.context?.find((c: any) => c.id.startsWith('region'));
+    const zipObj = suggestion.context?.find((c: any) => c.id.startsWith('postcode'));
+
+    const selectedCity = cityObj?.text || '';
+    const selectedState = stateObj?.text?.split('-')[1] || stateObj?.text || '';
+    const selectedZip = zipObj?.text || '';
+
+    setNewCharityAddress(suggestion.place_name);
+    setSelectedAddressResult({
+      address: fullStreet,
+      city: selectedCity,
+      state: selectedState,
+      zip: selectedZip,
+      latitude: lat,
+      longitude: lng
+    });
     setShowAddressSuggestions(false);
   }
 
@@ -540,36 +584,65 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Charity Address
                 </label>
-                <input
-                  type="text"
-                  value={newCharityAddress}
-                  onChange={(e) => handleAddressSearch(e.target.value)}
-                  onFocus={() => addressSuggestions.length > 0 && setShowAddressSuggestions(true)}
-                  placeholder="Enter full address..."
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  We'll verify this location before it goes live
-                </p>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={newCharityAddress}
+                    onChange={(e) => handleAddressSearch(e.target.value)}
+                    onFocus={() => addressSuggestions.length > 0 && setShowAddressSuggestions(true)}
+                    placeholder="Start typing the address..."
+                    autoComplete="off"
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                  />
+                  {isSearchingAddress && (
+                    <Loader className="absolute right-3 top-3.5 h-5 w-5 animate-spin text-blue-400" />
+                  )}
+                  {newCharityAddress && !isSearchingAddress && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewCharityAddress('');
+                        setAddressSuggestions([]);
+                        setShowAddressSuggestions(false);
+                        setSelectedAddressResult(null);
+                      }}
+                      className="absolute right-3 top-3.5 text-gray-400 hover:text-white"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
 
                 {/* Address Suggestions Dropdown */}
                 {showAddressSuggestions && addressSuggestions.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                    {addressSuggestions.map((suggestion, index) => (
+                    {addressSuggestions.map((suggestion) => (
                       <button
-                        key={index}
+                        key={suggestion.id}
                         type="button"
                         onClick={() => selectAddress(suggestion)}
-                        className="w-full px-4 py-3 text-left hover:bg-gray-700 transition text-white border-b border-gray-700 last:border-b-0"
+                        className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white border-b border-gray-700 last:border-b-0 flex items-start gap-2"
                       >
-                        <div className="font-medium">{suggestion.address}</div>
-                        <div className="text-sm text-gray-400">
-                          {suggestion.city}, {suggestion.state} {suggestion.zip}
+                        <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-medium">{suggestion.text}</div>
+                          <div className="text-sm text-gray-400">{suggestion.place_name}</div>
                         </div>
                       </button>
                     ))}
                   </div>
                 )}
+
+                {selectedAddressResult && (
+                  <div className="mt-2 flex items-center gap-2 text-green-400 text-sm">
+                    <MapPin className="h-4 w-4" />
+                    <span>Address verified: {selectedAddressResult.address}, {selectedAddressResult.city}, {selectedAddressResult.state} {selectedAddressResult.zip}</span>
+                  </div>
+                )}
+
+                <p className="text-xs text-gray-400 mt-1">
+                  We'll verify this location before it goes live
+                </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
