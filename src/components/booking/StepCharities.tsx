@@ -368,46 +368,48 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
 
   if (charities.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-12 px-4">
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-8">
-          <h3 className="text-xl font-bold text-white mb-4">No Donation Centers Available</h3>
-          <p className="text-gray-300 mb-6">
-            There are currently no donation centers in our database near{' '}
-            <span className="text-blue-400">{pickupAddress.city}, {pickupAddress.state}</span>
-          </p>
+      <div className="max-w-2xl mx-auto text-center py-8 sm:py-12 px-4">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 sm:p-10 space-y-6">
+          <div className="space-y-3">
+            <h3 className="text-2xl sm:text-3xl font-bold text-white">No Donation Centers Available</h3>
+            <p className="text-base sm:text-lg text-gray-300">
+              There are currently no donation centers in our database near{' '}
+              <span className="text-blue-400 font-semibold">{pickupAddress.city}, {pickupAddress.state}</span>
+            </p>
+          </div>
 
-          <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-6 mb-6 text-left">
-            <h4 className="text-lg font-semibold text-blue-300 mb-3">How to Add Donation Centers:</h4>
-            <ol className="space-y-2 text-sm text-gray-300">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 font-bold">1.</span>
-                <span>Go to the <strong className="text-white">Donation Center Dashboard</strong></span>
+          <div className="bg-blue-900/20 border border-blue-700 rounded-xl p-6 sm:p-8 text-left space-y-4">
+            <h4 className="text-lg sm:text-xl font-semibold text-blue-300">How to Add Donation Centers:</h4>
+            <ol className="space-y-3 sm:space-y-4">
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Go to the <strong className="text-white">Donation Center Dashboard</strong></span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 font-bold">2.</span>
-                <span>Sign up or log in with your center's information</span>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Sign up or log in with your center's information</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 font-bold">3.</span>
-                <span>Add your center's location, hours, and accepted items</span>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Add your center's location, hours, and accepted items</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 font-bold">4.</span>
-                <span>Your center will appear here for donors to book pickups</span>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
+                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Your center will appear here for donors to book pickups</span>
               </li>
             </ol>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
             <a
               href="/donation-center"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-8 py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-blue-700 transition"
             >
               Add Your Donation Center
             </a>
             <button
               onClick={onBack}
-              className="bg-gray-700 text-gray-200 px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition"
+              className="bg-gray-700 text-gray-200 px-8 py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-gray-600 transition"
             >
               Try Different Address
             </button>
@@ -528,10 +530,10 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         {sortedCharities.map((charity) => (
           <div
             key={charity.id}
-            className={`border rounded-lg p-4 sm:p-6 hover:shadow-lg transition ${
-              charity.sponsorship
-                ? 'border-2 border-blue-500 bg-gradient-to-br from-blue-900/20 to-purple-900/20'
-                : 'border-gray-700 bg-gray-800'
+            className={`relative border rounded-2xl p-5 sm:p-7 hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 ${
+              charity.sponsorship || charity.company_benefit
+                ? 'border-2 border-blue-500 bg-gradient-to-br from-blue-900/10 to-purple-900/10'
+                : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
             }`}
           >
             {/* Subsidy badges */}
@@ -557,92 +559,97 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
               <div className="flex-1">
-                <h3 className="text-lg sm:text-xl font-semibold text-white">{charity.name}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">{charity.name}</h3>
 
-                <div className="mt-2 space-y-1 text-xs sm:text-sm text-gray-400">
-                  {charity.rating && (
-                    <div className="flex items-center gap-2">
-                      <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                      <span>
-                        {charity.rating.toFixed(1)}
-                      </span>
+                <div className="flex items-center gap-4 text-sm text-gray-300">
+                  {charity.rating && charity.rating > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold">{charity.rating.toFixed(1)}</span>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="line-clamp-1">{charity.street_address}, {charity.city}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    <span>{charity.distance_miles.toFixed(1)} mi</span>
                   </div>
                 </div>
 
+                <div className="mt-2 text-sm text-gray-400">
+                  <span>{charity.street_address}, {charity.city}</span>
+                </div>
+
                 {charity.accepted_items && charity.accepted_items.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-xs sm:text-sm text-gray-400 line-clamp-2">
-                      ✅ Accepts: {charity.accepted_items.join(', ')}
-                    </p>
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Accepts</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {charity.accepted_items.slice(0, 4).map((item: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2.5 py-1 bg-gray-700/50 border border-gray-600 rounded-full text-xs font-medium text-gray-200"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                      {charity.accepted_items.length > 4 && (
+                        <span className="inline-flex items-center px-2.5 py-1 bg-gray-700/50 border border-gray-600 rounded-full text-xs font-medium text-gray-400">
+                          +{charity.accepted_items.length - 4} more
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-4 flex items-center gap-2">
                   {charity.can_auto_issue_receipts ? (
-                    <div className="bg-green-900/30 border border-green-700/50 px-3 py-1.5 rounded-lg">
-                      <span className="text-xs font-semibold text-green-400">✓ Auto Tax Receipt</span>
+                    <div className="inline-flex items-center gap-1.5 bg-green-500/10 border border-green-500/30 px-3 py-1.5 rounded-full">
+                      <span className="text-xs font-semibold text-green-400">✓ Instant Tax Receipt</span>
                     </div>
                   ) : (
-                    <div className="bg-amber-900/30 border border-amber-700/50 px-3 py-1.5 rounded-lg">
+                    <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-full">
                       <span className="text-xs font-semibold text-amber-400">📄 Manual Receipt</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="sm:ml-6 flex flex-col sm:items-end">
-                {/* Show original price if subsidized */}
-                {(charity.sponsorship || charity.company_benefit) && charity.pricing.original_price && (
-                  <div className="text-lg text-gray-500 line-through">
-                    ${charity.pricing.original_price.toFixed(2)}
+              <div className="sm:ml-8 flex flex-col sm:items-end sm:justify-between sm:min-w-[180px]">
+                <div>
+                  {/* Show original price if subsidized */}
+                  {(charity.sponsorship || charity.company_benefit) && charity.pricing.original_price && (
+                    <div className="text-base text-gray-500 line-through mb-1">
+                      ${charity.pricing.original_price.toFixed(2)}
+                    </div>
+                  )}
+
+                  {/* Final price */}
+                  <div className={`text-3xl sm:text-4xl font-black ${
+                    (charity.sponsorship || charity.company_benefit) ? 'text-green-400' : 'text-white'
+                  }`}>
+                    ${charity.pricing.total_price.toFixed(2)}
                   </div>
-                )}
 
-                {/* Final price */}
-                <div className={`text-2xl sm:text-3xl font-bold ${
-                  (charity.sponsorship || charity.company_benefit) ? 'text-green-400' : 'text-white'
-                }`}>
-                  ${charity.pricing.total_price.toFixed(2)}
-                </div>
+                  {/* Show savings badge if subsidies exist */}
+                  {charity.pricing.total_subsidy_amount > 0 && (
+                    <div className="mt-2 inline-flex items-center gap-1 bg-green-500/10 border border-green-500/30 px-2.5 py-1 rounded-full">
+                      <span className="text-xs font-bold text-green-400">
+                        Save ${charity.pricing.total_subsidy_amount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
 
-                {/* Show savings breakdown if subsidies exist */}
-                {(charity.pricing.charity_subsidy_amount > 0 || charity.pricing.company_subsidy_amount > 0) && (
-                  <div className="mt-1 text-xs space-y-0.5">
-                    {charity.pricing.charity_subsidy_amount > 0 && (
-                      <p className="text-blue-400 font-semibold">
-                        Charity saves you: ${charity.pricing.charity_subsidy_amount.toFixed(2)}
-                      </p>
-                    )}
-                    {charity.pricing.company_subsidy_amount > 0 && (
-                      <p className="text-green-400 font-semibold">
-                        Company saves you: ${charity.pricing.company_subsidy_amount.toFixed(2)}
-                      </p>
-                    )}
-                    {charity.pricing.total_subsidy_amount > 0 && (
-                      <p className="text-purple-400 font-bold">
-                        Total savings: ${charity.pricing.total_subsidy_amount.toFixed(2)}!
-                      </p>
-                    )}
+                  <div className="mt-2 text-xs text-gray-500">
+                    <p>Base price + optional tip</p>
                   </div>
-                )}
-
-                <div className="mt-2 text-xs text-gray-400">
-                  <p>Base price (tip optional)</p>
                 </div>
 
                 <button
                   onClick={() => onSelect(charity)}
-                  className="mt-3 sm:mt-4 bg-blue-600 text-white px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition w-full sm:w-auto"
+                  className="mt-4 sm:mt-0 bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
                 >
-                  Select - ${charity.pricing.total_price.toFixed(2)}
+                  Select
                 </button>
               </div>
             </div>

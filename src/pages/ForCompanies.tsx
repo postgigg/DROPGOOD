@@ -23,12 +23,9 @@ export default function ForCompanies() {
             >
               Home
             </button>
-            <button
-              onClick={() => navigate('/company-signup')}
-              className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition text-xs sm:text-sm"
-            >
-              Get Started
-            </button>
+            <div className="bg-gray-700 text-gray-400 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm cursor-not-allowed">
+              Coming Soon
+            </div>
           </div>
         </nav>
 
@@ -48,16 +45,12 @@ export default function ForCompanies() {
               <p>• 100% tax deductible. Set it and forget it.</p>
             </div>
 
-            <button
-              onClick={() => navigate('/company-signup')}
-              className="group bg-blue-600 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-blue-700 transition shadow-xl inline-flex items-center gap-3 w-full sm:w-auto justify-center"
-            >
-              Start free trial
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            <div className="bg-gray-700 text-gray-400 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold shadow-xl inline-flex items-center gap-3 w-full sm:w-auto justify-center cursor-not-allowed">
+              Coming Soon
+            </div>
 
             <p className="mt-4 sm:mt-6 text-gray-400 text-base sm:text-lg text-center sm:text-left">
-              No credit card required. Set up in 5 minutes.
+              B2B program launching soon. Contact us for early access.
             </p>
           </div>
 
@@ -286,12 +279,9 @@ export default function ForCompanies() {
                   </li>
                 </ul>
 
-                <button
-                  onClick={() => navigate('/company-signup')}
-                  className="bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-blue-700 transition w-full"
-                >
-                  Start for free
-                </button>
+                <div className="bg-gray-700 text-gray-400 px-8 py-4 rounded-xl text-lg font-bold w-full cursor-not-allowed text-center">
+                  Coming Soon
+                </div>
               </div>
             </div>
           </div>
@@ -304,15 +294,11 @@ export default function ForCompanies() {
               <p className="text-xl sm:text-2xl text-gray-300 mb-8">
                 Join companies already making decluttering easier for their teams.
               </p>
-              <button
-                onClick={() => navigate('/company-signup')}
-                className="group bg-blue-600 text-white px-10 sm:px-12 py-5 sm:py-6 rounded-xl text-xl sm:text-2xl font-black hover:bg-blue-700 transition shadow-xl inline-flex items-center gap-3 sm:gap-4"
-              >
-                Start free trial
-                <ArrowRight className="group-hover:translate-x-1 transition-transform w-6 h-6 sm:w-7 sm:h-7" />
-              </button>
+              <div className="bg-gray-700 text-gray-400 px-10 sm:px-12 py-5 sm:py-6 rounded-xl text-xl sm:text-2xl font-black shadow-xl inline-flex items-center gap-3 sm:gap-4 cursor-not-allowed">
+                Coming Soon
+              </div>
               <p className="mt-6 text-gray-400 text-sm sm:text-base">
-                No credit card. 5 minute setup. Cancel anytime.
+                B2B program launching soon. Join the waitlist.
               </p>
             </div>
           </div>

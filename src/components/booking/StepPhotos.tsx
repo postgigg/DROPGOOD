@@ -153,7 +153,7 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
 
       <div className="space-y-6">
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
               <Package className="h-6 w-6 text-blue-400" />
               <div>
@@ -161,22 +161,24 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
                 <p className="text-sm text-gray-400">Cardboard boxes with items</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 justify-center md:justify-end">
               <button
                 type="button"
                 onClick={() => setBoxesCount(Math.max(0, boxesCount - 1))}
-                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold hover:bg-gray-600 transition border border-gray-600"
+                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold text-xl hover:bg-gray-600 transition border border-gray-600 flex items-center justify-center"
               >
                 -
               </button>
-              <span className="text-3xl font-bold w-16 text-center text-white">
-                {boxesCount}
-              </span>
+              <div className="w-20 h-12 bg-gray-900 border border-gray-600 rounded-lg flex items-center justify-center">
+                <span className="text-3xl font-bold text-white">
+                  {boxesCount}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setBoxesCount(boxesCount + 1)}
                 disabled={totalCount >= MAX_TOTAL_ITEMS}
-                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold hover:bg-gray-600 transition border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold text-xl hover:bg-gray-600 transition border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 +
               </button>
@@ -189,7 +191,7 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
               <ShoppingBag className="h-6 w-6 text-green-400" />
               <div>
@@ -197,22 +199,24 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
                 <p className="text-sm text-gray-400">Trash bags or shopping bags</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 justify-center md:justify-end">
               <button
                 type="button"
                 onClick={() => setBagsCount(Math.max(0, bagsCount - 1))}
-                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold hover:bg-gray-600 transition border border-gray-600"
+                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold text-xl hover:bg-gray-600 transition border border-gray-600 flex items-center justify-center"
               >
                 -
               </button>
-              <span className="text-3xl font-bold w-16 text-center text-white">
-                {bagsCount}
-              </span>
+              <div className="w-20 h-12 bg-gray-900 border border-gray-600 rounded-lg flex items-center justify-center">
+                <span className="text-3xl font-bold text-white">
+                  {bagsCount}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setBagsCount(bagsCount + 1)}
                 disabled={totalCount >= MAX_TOTAL_ITEMS}
-                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold hover:bg-gray-600 transition border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-12 h-12 bg-gray-700 text-white rounded-lg font-bold text-xl hover:bg-gray-600 transition border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 +
               </button>
@@ -292,7 +296,7 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
           disabled={totalCount > MAX_TOTAL_ITEMS || totalCount < 1}
           className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Find Charities & Get Pricing
+          Continue
         </button>
       </div>
     </form>

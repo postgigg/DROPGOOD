@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Users, DollarSign, Sparkles, Check, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -10,6 +10,11 @@ export default function CompanySignup() {
   const [step, setStep] = useState<'info' | 'subsidy'>('info');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Temporarily redirect to marketing page
+  useEffect(() => {
+    navigate('/for-companies');
+  }, [navigate]);
 
   // Form data
   const [companyName, setCompanyName] = useState('');

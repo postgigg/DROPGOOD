@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, X, Check, CheckCheck, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { chatNotifications, isPageVisible } from '../lib/chatNotifications';
 
 interface Message {
   id: string;
@@ -56,8 +57,19 @@ export default function BookingChat({ bookingId, senderType, senderName }: Booki
 
     const lastSeenInterval = setInterval(updateLastSeen, 30000);
 
+    // Listen for page visibility changes to stop notifications when user returns
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        chatNotifications.stopTitleNotification();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       clearInterval(lastSeenInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      chatNotifications.cleanup();
     };
   }, [bookingId]);
 
@@ -102,6 +114,11 @@ export default function BookingChat({ bookingId, senderType, senderName }: Booki
               const hasTempMsg = prev.some(msg => msg.id.toString().startsWith('temp-'));
               if (hasTempMsg && newMsg.sender_type === senderType) {
                 return prev;
+              }
+
+              // Notify if message is from the other party and page is not visible
+              if (newMsg.sender_type !== senderType && !isPageVisible()) {
+                chatNotifications.notifyNewMessage(newMsg.sender_name);
               }
 
               return [...prev, newMsg];

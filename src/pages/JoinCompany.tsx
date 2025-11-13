@@ -20,6 +20,11 @@ export default function JoinCompany() {
   const [companyInfo, setCompanyInfo] = useState<any>(null);
   const [checkingCode, setCheckingCode] = useState(false);
 
+  // Temporarily redirect to marketing page
+  useEffect(() => {
+    navigate('/for-companies');
+  }, [navigate]);
+
   // Auto-check code if provided in URL
   useEffect(() => {
     if (codeFromUrl) {
