@@ -173,7 +173,7 @@ export default function LandingPage() {
               <div
                 className="absolute inset-0 opacity-15"
                 style={{
-                  backgroundImage: `url('/drophgood_header.png')`,
+                  backgroundImage: `url('/dropgood_header.png')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   filter: 'blur(3px)',
