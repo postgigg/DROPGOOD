@@ -486,7 +486,6 @@ export default function LandingPage() {
                 <ul className="space-y-2 text-gray-400">
                   <li><button onClick={() => navigate('/about')} className="hover:text-white transition">About</button></li>
                   <li><button className="hover:text-white transition">Careers</button></li>
-                  <li><button onClick={() => navigate('/press')} className="hover:text-white transition">Press</button></li>
                 </ul>
               </div>
               <div>

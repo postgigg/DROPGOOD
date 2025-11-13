@@ -21,7 +21,6 @@ import ContactPage from './pages/ContactPage';
 import ServiceAreas from './pages/ServiceAreas';
 import PricingPage from './pages/PricingPage';
 import AboutPage from './pages/AboutPage';
-import PressPage from './pages/PressPage';
 import CompanySignup from './pages/CompanySignup';
 import JoinCompany from './pages/JoinCompany';
 import ForCompanies from './pages/ForCompanies';
@@ -48,7 +47,6 @@ function App() {
         <Route path="/service-areas" element={<ServiceAreas />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/press" element={<PressPage />} />
         <Route path="/donation-centers" element={<DonationCenterLanding />} />
         <Route path="/donation-center/auth" element={<DonationCenterAuth />} />
         <Route path="/donation-center/dashboard" element={<DonationCenterDashboard />} />
