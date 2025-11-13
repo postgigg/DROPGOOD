@@ -61,6 +61,9 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
   const [addingCharity, setAddingCharity] = useState(false);
   const [newCharityName, setNewCharityName] = useState('');
   const [newCharityAddress, setNewCharityAddress] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [selectedAddressResult, setSelectedAddressResult] = useState<any>(null);
   const [companyBenefit, setCompanyBenefit] = useState<{
     company_id: string;
     company_name: string;
@@ -330,6 +333,32 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
              c.street_address.toLowerCase().includes(query);
     });
 
+  async function handleAddressSearch(query: string) {
+    setNewCharityAddress(query);
+
+    if (query.length < 3) {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+      return;
+    }
+
+    try {
+      const results = await import('../../lib/mapboxSearch').then(m =>
+        m.searchAddress(query)
+      );
+      setAddressSuggestions(results);
+      setShowAddressSuggestions(results.length > 0);
+    } catch (error) {
+      console.error('Address search error:', error);
+    }
+  }
+
+  function selectAddress(result: any) {
+    setNewCharityAddress(result.address);
+    setSelectedAddressResult(result);
+    setShowAddressSuggestions(false);
+  }
+
   async function handleAddCharity() {
     if (!newCharityName.trim() || !newCharityAddress.trim()) {
       alert('Please enter both charity name and address');
@@ -338,18 +367,22 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
 
     setAddingCharity(true);
     try {
-      // Search for the address using Mapbox
-      const addressResults = await import('../../lib/mapboxSearch').then(m =>
-        m.searchAddress(newCharityAddress)
-      );
+      // Use selected address or search for it
+      let selectedLocation = selectedAddressResult;
 
-      if (addressResults.length === 0) {
-        alert('Could not find that address. Please try again.');
-        setAddingCharity(false);
-        return;
+      if (!selectedLocation) {
+        const addressResults = await import('../../lib/mapboxSearch').then(m =>
+          m.searchAddress(newCharityAddress)
+        );
+
+        if (addressResults.length === 0) {
+          alert('Could not find that address. Please try again.');
+          setAddingCharity(false);
+          return;
+        }
+
+        selectedLocation = addressResults[0];
       }
-
-      const selectedLocation = addressResults[0];
 
       // Create the donation center in database (inactive)
       const { data: newCenter, error: insertError } = await supabase
@@ -503,20 +536,40 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                 />
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Charity Address
                 </label>
                 <input
                   type="text"
                   value={newCharityAddress}
-                  onChange={(e) => setNewCharityAddress(e.target.value)}
+                  onChange={(e) => handleAddressSearch(e.target.value)}
+                  onFocus={() => addressSuggestions.length > 0 && setShowAddressSuggestions(true)}
                   placeholder="Enter full address..."
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   We'll verify this location before it goes live
                 </p>
+
+                {/* Address Suggestions Dropdown */}
+                {showAddressSuggestions && addressSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                    {addressSuggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => selectAddress(suggestion)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-700 transition text-white border-b border-gray-700 last:border-b-0"
+                      >
+                        <div className="font-medium">{suggestion.address}</div>
+                        <div className="text-sm text-gray-400">
+                          {suggestion.city}, {suggestion.state} {suggestion.zip}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
