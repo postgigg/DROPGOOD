@@ -57,6 +57,10 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
   const [sortBy, setSortBy] = useState<'price' | 'distance' | 'rating'>('price');
   const [searchQuery, setSearchQuery] = useState('');
   const [maxDistance, setMaxDistance] = useState(15);
+  const [showAddCharityForm, setShowAddCharityForm] = useState(false);
+  const [addingCharity, setAddingCharity] = useState(false);
+  const [newCharityName, setNewCharityName] = useState('');
+  const [newCharityAddress, setNewCharityAddress] = useState('');
   const [companyBenefit, setCompanyBenefit] = useState<{
     company_id: string;
     company_name: string;
@@ -326,6 +330,96 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
              c.street_address.toLowerCase().includes(query);
     });
 
+  async function handleAddCharity() {
+    if (!newCharityName.trim() || !newCharityAddress.trim()) {
+      alert('Please enter both charity name and address');
+      return;
+    }
+
+    setAddingCharity(true);
+    try {
+      // Search for the address using Mapbox
+      const addressResults = await import('../../lib/mapboxSearch').then(m =>
+        m.searchAddress(newCharityAddress)
+      );
+
+      if (addressResults.length === 0) {
+        alert('Could not find that address. Please try again.');
+        setAddingCharity(false);
+        return;
+      }
+
+      const selectedLocation = addressResults[0];
+
+      // Create the donation center in database (inactive)
+      const { data: newCenter, error: insertError } = await supabase
+        .from('donation_centers')
+        .insert({
+          name: newCharityName.trim(),
+          address: selectedLocation.address,
+          city: selectedLocation.city,
+          state: selectedLocation.state,
+          zip: selectedLocation.zip,
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          is_active: false, // Pending admin review
+          rating: 0,
+          total_donations: 0
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Send email notification to admin
+      await supabase.functions.invoke('send-notification', {
+        body: {
+          type: 'new_charity_submission',
+          recipient_email: 'exontract@gmail.com',
+          recipient_name: 'DropGood Admin',
+          send_email: true,
+          send_sms: false,
+          data: {
+            charity_name: newCharityName,
+            address: selectedLocation.address,
+            city: selectedLocation.city,
+            state: selectedLocation.state,
+            submitted_by_user: true
+          }
+        }
+      });
+
+      // Calculate distance and mock pricing for display
+      const distance = calculateDistance(
+        pickupAddress.latitude,
+        pickupAddress.longitude,
+        selectedLocation.latitude,
+        selectedLocation.longitude
+      );
+
+      const mockPricing = calculateManualModePricing(distance, itemsCount);
+
+      // Add to the charities list so user can continue
+      const newCharityWithPricing: CharityWithSponsorship = {
+        ...newCenter,
+        distance_miles: distance,
+        duration_minutes: Math.round(distance * 3),
+        pricing: mockPricing,
+        sponsorship: null,
+        company_benefit: null
+      };
+
+      setCharities([newCharityWithPricing]);
+      setShowAddCharityForm(false);
+      alert('Charity added! You can continue with your booking.');
+    } catch (error: any) {
+      console.error('Error adding charity:', error);
+      alert('Failed to add charity. Please try again.');
+    } finally {
+      setAddingCharity(false);
+    }
+  }
+
   const sortedCharities = [...filteredCharities].sort((a, b) => {
     if (a.sponsorship && !b.sponsorship) return -1;
     if (!a.sponsorship && b.sponsorship) return 1;
@@ -368,52 +462,79 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
 
   if (charities.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-8 sm:py-12 px-4">
+      <div className="max-w-2xl mx-auto py-8 sm:py-12 px-4">
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 sm:p-10 space-y-6">
-          <div className="space-y-3">
-            <h3 className="text-2xl sm:text-3xl font-bold text-white">No Donation Centers Available</h3>
+          <div className="text-center space-y-3">
+            <h3 className="text-2xl sm:text-3xl font-bold text-white">Can't find your charity?</h3>
             <p className="text-base sm:text-lg text-gray-300">
-              There are currently no donation centers in our database near{' '}
-              <span className="text-blue-400 font-semibold">{pickupAddress.city}, {pickupAddress.state}</span>
+              No worries! Add it yourself and we'll get it approved within 24 hours.
             </p>
           </div>
 
-          <div className="bg-blue-900/20 border border-blue-700 rounded-xl p-6 sm:p-8 text-left space-y-4">
-            <h4 className="text-lg sm:text-xl font-semibold text-blue-300">How to Add Donation Centers:</h4>
-            <ol className="space-y-3 sm:space-y-4">
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Go to the <strong className="text-white">Donation Center Dashboard</strong></span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Sign up or log in with your center's information</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Add your center's location, hours, and accepted items</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
-                <span className="text-sm sm:text-base text-gray-300 pt-0.5">Your center will appear here for donors to book pickups</span>
-              </li>
-            </ol>
-          </div>
+          {!showAddCharityForm ? (
+            <div className="flex flex-col gap-4 pt-4">
+              <button
+                onClick={() => setShowAddCharityForm(true)}
+                className="bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Add Your Charity
+              </button>
+              <button
+                onClick={onBack}
+                className="bg-gray-700 text-gray-200 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-600 transition"
+              >
+                Try Different Address
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Charity Name
+                </label>
+                <input
+                  type="text"
+                  value={newCharityName}
+                  onChange={(e) => setNewCharityName(e.target.value)}
+                  placeholder="e.g., Goodwill, Salvation Army..."
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-            <a
-              href="/donation-center"
-              className="bg-blue-600 text-white px-8 py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Add Your Donation Center
-            </a>
-            <button
-              onClick={onBack}
-              className="bg-gray-700 text-gray-200 px-8 py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-gray-600 transition"
-            >
-              Try Different Address
-            </button>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Charity Address
+                </label>
+                <input
+                  type="text"
+                  value={newCharityAddress}
+                  onChange={(e) => setNewCharityAddress(e.target.value)}
+                  placeholder="Enter full address..."
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  We'll verify this location before it goes live
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                  onClick={handleAddCharity}
+                  disabled={addingCharity}
+                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {addingCharity ? 'Adding...' : 'Continue'}
+                </button>
+                <button
+                  onClick={() => setShowAddCharityForm(false)}
+                  disabled={addingCharity}
+                  className="flex-1 bg-gray-700 text-gray-200 px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

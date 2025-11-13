@@ -478,3 +478,52 @@ export function deliveryCanceledEmail(data: {
     html: emailWrapper(content),
   };
 }
+
+export function newCharitySubmissionEmail(data: {
+  charity_name: string;
+  address: string;
+  city: string;
+  state: string;
+  submitted_by_user: boolean;
+}): { subject: string; html: string } {
+  const content = `
+    <div class="content">
+      <h1>🏢 New Charity Submission</h1>
+
+      <p>A user has submitted a new charity to the platform that needs review and activation.</p>
+
+      <div class="info-box">
+        <p><strong>Charity Name:</strong> ${data.charity_name}</p>
+        <p><strong>Address:</strong> ${data.address}</p>
+        <p><strong>City:</strong> ${data.city}, ${data.state}</p>
+        <p><strong>Source:</strong> ${data.submitted_by_user ? 'User-submitted' : 'System'}</p>
+      </div>
+
+      <div style="background-color: #FEF3C7; border-left: 4px solid #F59E0B; padding: 16px; border-radius: 8px; margin: 24px 0; color: #92400E;">
+        <p style="margin: 0;">
+          <strong>⚠️ Action Required:</strong> This charity is currently set to <strong>inactive</strong> and needs admin approval before it appears in live searches.
+        </p>
+      </div>
+
+      <h2>Next Steps:</h2>
+      <ol>
+        <li>Verify the charity exists at this location</li>
+        <li>Confirm they accept donations</li>
+        <li>Activate the charity in the admin dashboard</li>
+      </ol>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://dropgood.com/admin/charities" class="button">Go to Admin Dashboard</a>
+      </div>
+
+      <p style="margin-top: 32px;">
+        <strong>The DropGood System</strong>
+      </p>
+    </div>
+  `;
+
+  return {
+    subject: `🏢 New Charity: ${data.charity_name}`,
+    html: emailWrapper(content),
+  };
+}
