@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Lock, Building2 } from 'lucide-react';
 import { supabase, type DonationCenter } from '../../lib/supabase';
 import { loadStripe } from '@stripe/stripe-js';
@@ -32,6 +32,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [paymentReady, setPaymentReady] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const manualMode = import.meta.env.VITE_MANUAL_MODE === 'true';
   const stripeEnabled = !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
@@ -1043,6 +1044,40 @@ function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProc
         </div>
       )}
 
+      {/* Terms Agreement */}
+      <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            className="mt-1 w-5 h-5 rounded border-gray-600 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 focus:ring-offset-gray-800 cursor-pointer"
+          />
+          <span className="text-sm text-gray-300 group-hover:text-white transition">
+            I agree to the{' '}
+            <Link
+              to="/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link
+              to="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Privacy Policy
+            </Link>
+          </span>
+        </label>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <button
           type="button"
@@ -1054,7 +1089,7 @@ function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProc
         </button>
         <button
           type="submit"
-          disabled={!stripe || processing}
+          disabled={!stripe || processing || !agreedToTerms}
           className="sm:flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center text-base shadow-lg shadow-blue-900/30"
         >
           {processing ? (

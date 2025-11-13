@@ -29,6 +29,8 @@ import CompanyDashboard from './pages/CompanyDashboard';
 import CompanyBilling from './pages/CompanyBilling';
 import CompanyReports from './pages/CompanyReports';
 import CompanyEmployees from './pages/CompanyEmployees';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import SupportChat from './components/SupportChat';
 
 function App() {
@@ -66,6 +68,9 @@ function App() {
         <Route path="/company/billing" element={<CompanyBilling />} />
         <Route path="/company/reports" element={<CompanyReports />} />
         <Route path="/company/employees" element={<CompanyEmployees />} />
+        {/* Legal Pages */}
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
 
       {/* Global Support Chat Widget */}
