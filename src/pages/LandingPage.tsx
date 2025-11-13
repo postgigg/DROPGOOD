@@ -173,7 +173,7 @@ export default function LandingPage() {
               <div
                 className="absolute inset-0 opacity-15"
                 style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1920&q=80')`,
+                  backgroundImage: `url('/drophgood_header.jpg')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   filter: 'blur(3px)',
