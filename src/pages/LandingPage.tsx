@@ -30,19 +30,19 @@ export default function LandingPage() {
 
   const stats: Stat[] = [
     {
+      value: '<10 min',
+      label: 'Pickup time',
+      icon: <Clock className="h-5 w-5" />,
+    },
+    {
       value: '10,000+',
-      label: 'Donations completed',
-      icon: <TrendingUp className="h-5 w-5" />,
-    },
-    {
-      value: '4.9★',
-      label: 'Average rating',
-      icon: <Star className="h-5 w-5 fill-current" />,
-    },
-    {
-      value: '500+',
       label: 'Cities nationwide',
       icon: <MapPin className="h-5 w-5" />,
+    },
+    {
+      value: '24/7',
+      label: 'Available anytime',
+      icon: <Clock className="h-5 w-5" />,
     },
   ];
 

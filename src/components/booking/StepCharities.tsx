@@ -422,7 +422,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-white">Select Donation Center</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-white">Pick your favorite local charity</h2>
         <p className="text-sm sm:text-base text-gray-400">
           Showing {sortedCharities.length} of {charities.length} centers near {pickupAddress.city}
         </p>

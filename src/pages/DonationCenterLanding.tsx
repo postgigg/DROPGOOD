@@ -216,12 +216,9 @@ export default function DonationCenterLanding() {
 
           <div className="mt-16 sm:mt-24 md:mt-32 bg-gray-800 border border-gray-700 text-white rounded-2xl sm:rounded-3xl p-8 sm:p-12 md:p-16">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-8">
                 Ready to grow your donation volume?
               </h2>
-              <p className="text-xl sm:text-2xl text-gray-300 mb-8">
-                Join donation centers already using DropGood to reach more donors.
-              </p>
               <div className="bg-gray-700 text-gray-400 px-10 sm:px-12 py-5 sm:py-6 rounded-xl text-xl sm:text-2xl font-black cursor-not-allowed inline-flex items-center gap-3 sm:gap-4">
                 Coming Soon
               </div>
