@@ -455,6 +455,8 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
           is_active: false, // Pending admin review
+          is_partner: false,
+          can_auto_issue_receipts: false,
           rating: 0,
           total_ratings: 0,
           total_donations_received: 0
