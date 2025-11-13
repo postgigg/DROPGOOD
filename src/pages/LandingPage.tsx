@@ -173,7 +173,7 @@ export default function LandingPage() {
                 </h1>
 
                 <p className="text-xl sm:text-2xl md:text-3xl text-white/90 mb-8 sm:mb-12 font-medium leading-relaxed">
-                  We pick up. We deliver. You get the tax write-off.
+                  We pick up. We deliver. You support local charities.
                 </p>
 
                 {/* Address Input Form */}
