@@ -4,39 +4,9 @@ import { Newspaper, Download, Mail, Calendar, TrendingUp, Award, Users, MapPin }
 
 const pressReleases = [
   {
-    date: '2025-01-15',
-    title: 'DropGood Partners with Dolly Group to Expand Large Item Donation Services',
-    excerpt: 'Strategic partnership enables handling of oversized donations including furniture and appliances, making charitable giving even more accessible.',
-    category: 'Partnership'
-  },
-  {
-    date: '2024-11-10',
-    title: 'DropGood Reaches 10,000 Successful Donation Pickups Nationwide',
-    excerpt: 'Milestone reflects growing demand for convenient donation services as platform expands across all 50 states.',
-    category: 'Milestone'
-  },
-  {
-    date: '2024-09-01',
-    title: 'DropGood Launches Nationwide Service, Now Available in All 50 States',
-    excerpt: 'Donation pickup platform completes coast-to-coast expansion, connecting donors with local charities across America.',
-    category: 'Expansion'
-  },
-  {
-    date: '2024-06-15',
-    title: 'DropGood Secures Partnerships with 500+ Charities Nationwide',
-    excerpt: 'Growing network of verified donation centers gives donors unprecedented choice in where their items go.',
-    category: 'Partnership'
-  },
-  {
-    date: '2024-03-20',
-    title: 'DropGood Expands Beyond Virginia, Launches in 25 New States',
-    excerpt: 'Rapid growth driven by demand for convenient, tech-enabled donation services.',
-    category: 'Expansion'
-  },
-  {
-    date: '2023-11-01',
-    title: 'DropGood Launches in Richmond, Virginia',
-    excerpt: 'New platform aims to make charitable donations as easy as ordering a ride, starting in the heart of Virginia.',
+    date: '2024-11-13',
+    title: 'DropGood Launches in Virginia and Texas with 164 Donation Centers',
+    excerpt: 'New startup brings convenient donation pickup service to Richmond, VA and expanding across Virginia and Texas. Platform makes donating as easy as ordering a ride.',
     category: 'Launch'
   }
 ];
@@ -75,27 +45,27 @@ const mediaKit = [
 const stats = [
   {
     icon: MapPin,
-    number: '50',
-    label: 'States Served',
-    detail: 'Coast-to-coast coverage'
+    number: 'VA + TX',
+    label: 'States Launching',
+    detail: 'Starting in Virginia & Texas'
   },
   {
     icon: TrendingUp,
-    number: '10K+',
-    label: 'Pickups Completed',
-    detail: 'Growing every day'
+    number: '164',
+    label: 'Donation Centers',
+    detail: 'Mapped and ready'
   },
   {
     icon: Users,
-    number: '500+',
-    label: 'Partner Charities',
-    detail: 'Verified organizations'
+    number: '2024',
+    label: 'Founded',
+    detail: 'Brand new startup'
   },
   {
     icon: Award,
-    number: '98%',
-    label: 'Customer Satisfaction',
-    detail: 'Based on reviews'
+    number: '100%',
+    label: 'Mission Driven',
+    detail: 'Bringing the good'
   }
 ];
 
@@ -151,7 +121,7 @@ export default function PressPage() {
                 Latest News
               </h2>
               <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-                Stay up to date with DropGood's journey, milestones, and impact on communities nationwide
+                Follow our startup journey as we build a better way to donate in Virginia and Texas
               </p>
             </div>
           </div>
@@ -268,34 +238,34 @@ export default function PressPage() {
 
               <div className="space-y-6 text-slate-300 leading-relaxed">
                 <p>
-                  <strong className="text-white">DropGood</strong> is a nationwide donation pickup service that connects
-                  generous donors with local charities through convenient, technology-enabled logistics.
+                  <strong className="text-white">DropGood</strong> is a new startup launching donation pickup services in
+                  Virginia and Texas, connecting donors with local donation centers through convenient, technology-enabled logistics.
                 </p>
 
                 <p>
-                  Founded in Richmond, Virginia in 2023, DropGood has rapidly expanded to serve all 50 states,
-                  completing over 10,000 successful donation pickups and partnering with more than 500 verified
-                  charitable organizations.
+                  Founded in 2024 and launching in Richmond, Virginia, DropGood is building a platform to make donating
+                  as simple as ordering a ride. We've mapped 164 donation centers across Virginia and Texas and are
+                  working with our first customers to refine the service.
                 </p>
 
                 <p>
-                  The platform makes donating as simple as ordering a ride: users enter their address, select a
-                  charity, choose a pickup time, and DropGood handles the rest. All drivers are background-checked,
-                  and customers receive real-time updates throughout the pickup process.
+                  The platform makes donating simple: users enter their address, select a donation center from our network,
+                  choose a pickup time, and we handle the rest. We're focused on transparent pricing, real-time updates,
+                  and building trust one pickup at a time.
                 </p>
 
                 <p>
-                  Through partnerships with organizations like Dolly Group, DropGood can accommodate donations of
-                  all sizes—from small boxes of clothes to full furniture sets—ensuring that no item is too big or
-                  too small to make a difference.
+                  We're a startup in the early stages, learning and improving with every booking. Our mission is genuine,
+                  our pricing is transparent, and we're committed to making charitable giving easier for everyone.
                 </p>
 
                 <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 mt-8">
                   <h4 className="text-xl font-bold text-white mb-4">Quick Facts</h4>
                   <ul className="space-y-2 text-slate-300">
-                    <li><strong className="text-white">Founded:</strong> 2023</li>
+                    <li><strong className="text-white">Founded:</strong> 2024</li>
                     <li><strong className="text-white">Headquarters:</strong> Richmond, Virginia</li>
-                    <li><strong className="text-white">Service Area:</strong> All 50 United States</li>
+                    <li><strong className="text-white">Service Area:</strong> Virginia & Texas (expanding)</li>
+                    <li><strong className="text-white">Stage:</strong> Early startup, just launching</li>
                     <li><strong className="text-white">Mission:</strong> Make charitable donation effortless and accessible for everyone</li>
                     <li><strong className="text-white">Website:</strong> <a href="https://dropgood.co" className="text-emerald-400 hover:text-emerald-300">dropgood.co</a></li>
                   </ul>
@@ -339,19 +309,17 @@ export default function PressPage() {
             </div>
           </div>
 
-          {/* Social Proof / Recognition (Placeholder) */}
+          {/* Honest Startup Message */}
           <div className="text-center">
             <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 sm:p-12">
-              <h3 className="text-2xl font-bold text-white mb-6">As Featured In</h3>
-              <p className="text-slate-400 mb-8">
-                Media coverage and recognition (coming soon)
+              <h3 className="text-2xl font-bold text-white mb-4">Building in Public</h3>
+              <p className="text-slate-300 mb-4 max-w-2xl mx-auto">
+                We're a brand new startup, and we believe in being transparent about where we are. No fake press releases,
+                no inflated numbers—just honest progress as we build something real.
               </p>
-              <div className="flex flex-wrap justify-center items-center gap-8 opacity-50">
-                <div className="text-slate-600 font-bold text-xl">TechCrunch</div>
-                <div className="text-slate-600 font-bold text-xl">Forbes</div>
-                <div className="text-slate-600 font-bold text-xl">Fast Company</div>
-                <div className="text-slate-600 font-bold text-xl">Business Insider</div>
-              </div>
+              <p className="text-slate-400">
+                Media coverage coming as we grow. For now, we're focused on serving our early customers and earning trust.
+              </p>
             </div>
           </div>
         </div>
