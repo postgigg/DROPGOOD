@@ -21,9 +21,11 @@ export interface PricingBreakdown {
 }
 
 const RUSH_FEE = 5.00;
+export const DEFAULT_SERVICE_FEE = 0.25; // 25%
+export const INACTIVE_CHARITY_SERVICE_FEE = 0.35; // 35% for unverified charities
 
-export function calculateFinalPrice(uberCost: number, isRushDelivery: boolean = false, driverTip: number = 0): PricingBreakdown {
-  const ourMarkup = uberCost * 0.25;
+export function calculateFinalPrice(uberCost: number, isRushDelivery: boolean = false, driverTip: number = 0, serviceFeePercentage: number = DEFAULT_SERVICE_FEE): PricingBreakdown {
+  const ourMarkup = uberCost * serviceFeePercentage;
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
   const subtotalBeforeTip = uberCost + ourMarkup + rushFee;
   const subtotal = subtotalBeforeTip + driverTip;
@@ -226,10 +228,11 @@ export function calculateFinalPriceWithSubsidies(
   isRushDelivery: boolean = false,
   driverTip: number = 0,
   charitySubsidyPercentage: number = 0,
-  companySubsidyPercentage: number = 0
+  companySubsidyPercentage: number = 0,
+  serviceFeePercentage: number = DEFAULT_SERVICE_FEE
 ): PricingBreakdown {
   // Calculate base pricing (before subsidies, before tip)
-  const ourMarkup = uberCost * 0.25;
+  const ourMarkup = uberCost * serviceFeePercentage;
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
   const subtotalWithoutTip = uberCost + ourMarkup + rushFee;
 

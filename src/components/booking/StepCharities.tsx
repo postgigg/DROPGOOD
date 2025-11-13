@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Star, Clock, Loader2, Sparkles, DollarSign, Search, Building2 } from 'lucide-react';
 import { supabase, type DonationCenter } from '../../lib/supabase';
-import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing } from '../../lib/pricing';
+import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE } from '../../lib/pricing';
 import { searchDonationCentersNearby } from '../../lib/mapboxSearch';
 
 interface Props {
@@ -397,14 +397,16 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         selectedLocation.longitude
       );
 
-      const mockPricing = calculateManualModePricing(distance, itemsCount);
+      // Use 35% service fee for inactive charity
+      const baseCost = calculateManualModePricing(distance);
+      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE);
 
       // Add to the charities list so user can continue
       const newCharityWithPricing: CharityWithSponsorship = {
         ...newCenter,
         distance_miles: distance,
         duration_minutes: Math.round(distance * 3),
-        pricing: mockPricing,
+        pricing: pricingWithHigherFee,
         sponsorship: null,
         company_benefit: null
       };
