@@ -168,14 +168,14 @@ export default function LandingPage() {
           <div className="bg-gray-900 py-20 sm:py-32 md:py-40 relative overflow-hidden">
             {/* Animated gradient background - only in hero */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-              {/* Space image */}
+              {/* Donation/charity image - people smiling with donations */}
               <div
-                className="absolute inset-0 opacity-20"
+                className="absolute inset-0 opacity-15"
                 style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=80')`,
+                  backgroundImage: `url('https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1920&q=80')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  filter: 'blur(2px)',
+                  filter: 'blur(3px)',
                   animation: 'slowZoom 60s ease-in-out infinite alternate',
                 }}
               />
