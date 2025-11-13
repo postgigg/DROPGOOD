@@ -409,24 +409,14 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       return;
     }
 
+    if (!selectedAddressResult) {
+      alert('Please select an address from the suggestions');
+      return;
+    }
+
     setAddingCharity(true);
     try {
-      // Use selected address or search for it
-      let selectedLocation = selectedAddressResult;
-
-      if (!selectedLocation) {
-        const addressResults = await import('../../lib/mapboxSearch').then(m =>
-          m.searchAddress(newCharityAddress)
-        );
-
-        if (addressResults.length === 0) {
-          alert('Could not find that address. Please try again.');
-          setAddingCharity(false);
-          return;
-        }
-
-        selectedLocation = addressResults[0];
-      }
+      const selectedLocation = selectedAddressResult;
 
       // Create the donation center in database (inactive)
       const { data: newCenter, error: insertError } = await supabase
