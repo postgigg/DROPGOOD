@@ -423,15 +423,16 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         .from('donation_centers')
         .insert({
           name: newCharityName.trim(),
-          address: selectedLocation.address,
+          street_address: selectedLocation.address,
           city: selectedLocation.city,
           state: selectedLocation.state,
-          zip: selectedLocation.zip,
+          zip_code: selectedLocation.zip,
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
           is_active: false, // Pending admin review
           rating: 0,
-          total_donations: 0
+          total_ratings: 0,
+          total_donations_received: 0
         })
         .select()
         .single();
