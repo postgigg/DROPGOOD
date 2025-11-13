@@ -171,23 +171,39 @@ export default function LandingPage() {
             <div className="absolute inset-0 z-0 pointer-events-none">
               {/* Family with donation boxes and driver - pickup scene */}
               <div
-                className="absolute inset-0 opacity-15"
+                className="absolute inset-0 opacity-25"
                 style={{
                   backgroundImage: `url('/dropgood_header.jpg')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  filter: 'blur(3px)',
+                  filter: 'blur(2px)',
                   animation: 'slowZoom 60s ease-in-out infinite alternate',
                 }}
               />
-              {/* Gradient overlays */}
+
+              {/* Dark to light gradient overlay - left to right fade */}
               <div
-                className="absolute inset-0 opacity-30"
+                className="absolute inset-0"
                 style={{
                   background: `
-                    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.3) 0%, transparent 50%),
-                    radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.2) 0%, transparent 50%)
+                    linear-gradient(to right,
+                      rgba(17, 24, 39, 0.95) 0%,
+                      rgba(17, 24, 39, 0.7) 40%,
+                      rgba(17, 24, 39, 0.3) 70%,
+                      rgba(17, 24, 39, 0.1) 100%
+                    )
+                  `,
+                }}
+              />
+
+              {/* Animated gradient overlays - darker */}
+              <div
+                className="absolute inset-0 opacity-40"
+                style={{
+                  background: `
+                    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.4) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.4) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.3) 0%, transparent 50%)
                   `,
                   animation: 'gradientShift 20s ease infinite',
                 }}
