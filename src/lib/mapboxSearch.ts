@@ -19,6 +19,7 @@ export interface AddressSearchResult {
   full_address: string;
   name: string;
   place_formatted: string;
+  mapbox_id: string;
   coordinates: {
     latitude: number;
     longitude: number;
@@ -51,30 +52,59 @@ export async function searchAddress(query: string): Promise<AddressSearchResult[
       return [];
     }
 
-    return data.suggestions.map((suggestion: any) => {
-      const coords = suggestion.geometry?.coordinates || suggestion.coordinates;
-      const lat = coords?.[1] || suggestion.latitude || 0;
-      const lng = coords?.[0] || suggestion.longitude || 0;
-
-      console.log('📍 Mapbox suggestion:', {
-        name: suggestion.name,
-        full_address: suggestion.full_address,
-        coordinates: { lat, lng }
-      });
-
-      return {
-        full_address: suggestion.full_address || suggestion.place_formatted || '',
-        name: suggestion.name || '',
-        place_formatted: suggestion.place_formatted || '',
-        coordinates: {
-          latitude: lat,
-          longitude: lng,
-        },
-      };
-    });
+    return data.suggestions.map((suggestion: any) => ({
+      full_address: suggestion.full_address || suggestion.place_formatted || '',
+      name: suggestion.name || '',
+      place_formatted: suggestion.place_formatted || '',
+      mapbox_id: suggestion.mapbox_id || '',
+      coordinates: {
+        latitude: 0, // Will be fetched via retrieve endpoint
+        longitude: 0,
+      },
+    }));
   } catch (error) {
     console.error('Error searching address:', error);
     return [];
+  }
+}
+
+export async function retrieveAddressDetails(mapbox_id: string): Promise<AddressSearchResult | null> {
+  if (!mapbox_id) return null;
+
+  try {
+    const url = `https://api.mapbox.com/search/searchbox/v1/retrieve/${mapbox_id}?` +
+      `session_token=${Date.now()}&` +
+      `access_token=${MAPBOX_TOKEN}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error('Mapbox retrieve failed:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log('📍 Mapbox retrieve response:', data);
+
+    const feature = data.features?.[0];
+    if (!feature) return null;
+
+    const coords = feature.geometry?.coordinates;
+    const lat = coords?.[1] || 0;
+    const lng = coords?.[0] || 0;
+
+    return {
+      full_address: feature.properties?.full_address || '',
+      name: feature.properties?.name || '',
+      place_formatted: feature.properties?.place_formatted || '',
+      mapbox_id: feature.properties?.mapbox_id || mapbox_id,
+      coordinates: {
+        latitude: lat,
+        longitude: lng,
+      },
+    };
+  } catch (error) {
+    console.error('Error retrieving address details:', error);
+    return null;
   }
 }
 

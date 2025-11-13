@@ -5,7 +5,7 @@ import SEO from '../components/SEO/SEO';
 import DropGoodLogo from '../components/DropGoodLogo';
 import { LocalBusinessSchema, ServiceSchema, FAQSchema, HowToSchema, OrganizationSchema } from '../components/SEO/StructuredData';
 import { seoPages } from '../components/SEO/seoConfig';
-import { searchAddress, type AddressSearchResult } from '../lib/mapboxSearch';
+import { searchAddress, retrieveAddressDetails, type AddressSearchResult } from '../lib/mapboxSearch';
 
 interface SavedBooking {
   id: string;
@@ -97,12 +97,22 @@ export default function LandingPage() {
     setAddress(suggestion.full_address);
     setShowSuggestions(false);
 
-    // Fetch full details from Mapbox to get structured address components
+    // Fetch full details using Mapbox retrieve endpoint
     try {
-      const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-      const { latitude, longitude } = suggestion.coordinates;
+      console.log('📍 Retrieving full details for:', suggestion.mapbox_id);
 
-      // Use reverse geocoding to get structured address
+      const fullDetails = await retrieveAddressDetails(suggestion.mapbox_id);
+
+      if (!fullDetails || fullDetails.coordinates.latitude === 0) {
+        throw new Error('Could not retrieve coordinates');
+      }
+
+      console.log('📍 Retrieved full details:', fullDetails);
+
+      // Now use reverse geocoding to get structured address components
+      const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+      const { latitude, longitude } = fullDetails.coordinates;
+
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}`
       );
@@ -125,7 +135,7 @@ export default function LandingPage() {
       const street = streetNumber ? `${streetNumber} ${streetName}` : streetName;
 
       const addressData = {
-        street: street || suggestion.full_address.split(',')[0],
+        street: street || fullDetails.full_address.split(',')[0],
         city: cityObj?.text || '',
         state: stateObj?.short_code?.replace('US-', '') || stateObj?.text || '',
         zip: zipObj?.text || '',
@@ -139,18 +149,7 @@ export default function LandingPage() {
       navigate('/book', { state: { address: addressData } });
     } catch (error) {
       console.error('Error fetching address details:', error);
-      // Fallback: use coordinates but try to parse address
-      const addressData = {
-        street: suggestion.full_address.split(',')[0] || '',
-        city: suggestion.full_address.split(',')[1]?.trim() || '',
-        state: '',
-        zip: '',
-        latitude: suggestion.coordinates.latitude,
-        longitude: suggestion.coordinates.longitude,
-      };
-
-      console.log('📍 Landing page fallback address:', addressData);
-      navigate('/book', { state: { address: addressData } });
+      alert('Could not get location details. Please try selecting the address again.');
     }
   };
 
