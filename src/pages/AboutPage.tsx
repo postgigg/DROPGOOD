@@ -27,7 +27,7 @@ const values = [
 
 const stats = [
   { number: 'VA + TX', label: 'States Launching' },
-  { number: '164', label: 'Partner Charities' },
+  { number: '164', label: 'Donation Centers' },
   { number: '2024', label: 'Founded' },
   { number: '100%', label: 'Mission Driven' }
 ];
@@ -36,7 +36,7 @@ const timeline = [
   {
     year: 'Now',
     title: 'Just Getting Started',
-    description: 'Launching in Virginia and Texas with 164 verified charity partners. Building the platform, testing the service, and learning from every pickup.'
+    description: 'Launching in Virginia and Texas with 164 donation centers mapped. Building the platform, testing the service, and learning from every pickup.'
   },
   {
     year: '2025',
@@ -177,7 +177,7 @@ export default function AboutPage() {
               </p>
               <p className="text-lg text-slate-300 leading-relaxed mb-6">
                 So we're building it. DropGood is a brand new startup launching in Richmond, Virginia and expanding across
-                Virginia and Texas. We've partnered with 164 verified charities and we're working with our first customers
+                Virginia and Texas. We've mapped 164 donation centers across these states and we're working with our first customers
                 to make donation pickup simple, transparent, and impactful.
               </p>
               <p className="text-lg text-emerald-400 leading-relaxed font-semibold">
@@ -300,7 +300,7 @@ export default function AboutPage() {
               thousands of pickups under our belt yet—but we're excited to bring the good to Virginia and Texas.
             </p>
             <p className="text-lg text-slate-300 mb-6 leading-relaxed">
-              Our 164 charity partners are real, verified, and ready to receive your donations. Our pricing is transparent.
+              Our 164 donation centers across Virginia and Texas are real locations ready to receive your donations. Our pricing is transparent.
               Our mission is genuine. And we're committed to earning your trust one pickup at a time.
             </p>
             <p className="text-slate-400">
