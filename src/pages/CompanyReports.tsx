@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, TrendingUp, Users, Package, DollarSign, Calendar, ArrowLeft, Download } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, DollarSign, Calendar, ArrowLeft, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Company {
   id: string;
@@ -161,7 +162,7 @@ export default function CompanyReports() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <Package className="h-8 w-8 text-blue-400" />
+              <DropGoodLogo size={32} />
             </div>
             <div className="text-3xl font-bold text-white mb-1">{company?.total_bookings_count}</div>
             <div className="text-sm text-gray-400">Total Pickups</div>

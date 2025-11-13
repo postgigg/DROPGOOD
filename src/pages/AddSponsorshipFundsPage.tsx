@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Package, DollarSign, CreditCard, Loader2, ArrowLeft } from 'lucide-react';
+import { DollarSign, CreditCard, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function AddSponsorshipFundsPage() {
   const navigate = useNavigate();
@@ -110,7 +111,7 @@ export default function AddSponsorshipFundsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button onClick={() => navigate('/donation-center/dashboard')} className="flex items-center hover:opacity-70">
-              <Package className="h-8 w-8 text-blue-500" />
+              <DropGoodLogo size={32} />
               <span className="ml-2 text-2xl font-bold text-white">DropGood</span>
             </button>
           </div>

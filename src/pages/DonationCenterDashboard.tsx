@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, MapPin, DollarSign, TrendingUp, Plus, LogOut, Settings } from 'lucide-react';
+import { MapPin, DollarSign, TrendingUp, Plus, LogOut, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface DonationCenter {
   id: string;
@@ -117,7 +118,7 @@ export default function DonationCenterDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              <Package className="h-8 w-8 text-blue-500" />
+              <DropGoodLogo size={32} />
               <div>
                 <span className="text-xl font-bold text-white">DropGood</span>
                 <span className="text-sm text-gray-400 ml-2">Donation Center Portal</span>
@@ -170,7 +171,7 @@ export default function DonationCenterDashboard() {
 
           <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <Package className="h-8 w-8 text-purple-500" />
+              <DropGoodLogo size={32} className="text-purple-500" />
               <TrendingUp className="h-5 w-5 text-green-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-1">{stats.totalDonations}</h3>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Package, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
 import { BreadcrumbSchema } from '../components/SEO/StructuredData';
 import { seoPages } from '../components/SEO/seoConfig';
@@ -10,6 +10,7 @@ import StepCharities from '../components/booking/StepCharities';
 import StepSchedule from '../components/booking/StepSchedule';
 import StepPayment from '../components/booking/StepPayment';
 import type { DonationCenter } from '../lib/supabase';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Address {
   street: string;
@@ -65,7 +66,7 @@ export default function BookingFlow() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <button onClick={() => navigate('/')} className="flex items-center hover:opacity-70">
-              <Package className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
+              <DropGoodLogo size={32} />
               <span className="ml-2 text-xl sm:text-2xl font-bold text-white">DropGood</span>
             </button>
           </div>

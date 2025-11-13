@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
   DollarSign, TrendingUp, TrendingDown, Users,
-  Package, Calendar, Download, ArrowLeft, Loader2
+  Calendar, Download, ArrowLeft, Loader2
 } from 'lucide-react';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface FinancialStats {
   totalRevenue: number;
@@ -280,7 +281,7 @@ export default function AdminFinancialDashboard() {
               <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-medium text-slate-600">Avg Order Value</h3>
-                  <Package className="w-5 h-5 text-purple-500" />
+                  <DropGoodLogo size={20} />
                 </div>
                 <div className="text-3xl font-bold text-slate-900">${stats.avgOrderValue.toFixed(2)}</div>
                 <p className="text-sm text-slate-500 mt-1">Per completed booking</p>
@@ -291,7 +292,7 @@ export default function AdminFinancialDashboard() {
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <Package className="w-6 h-6 text-emerald-600" />
+                    <DropGoodLogo size={24} />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">Total Bookings</h3>
@@ -304,7 +305,7 @@ export default function AdminFinancialDashboard() {
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <Package className="w-6 h-6 text-green-600" />
+                    <DropGoodLogo size={24} />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">Completed</h3>
@@ -322,7 +323,7 @@ export default function AdminFinancialDashboard() {
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-                    <Package className="w-6 h-6 text-yellow-600" />
+                    <DropGoodLogo size={24} />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">Pending</h3>

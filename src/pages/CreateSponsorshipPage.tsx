@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, DollarSign, ArrowLeft, Save, Target, Percent } from 'lucide-react';
+import { DollarSign, ArrowLeft, Save, Target, Percent } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -264,7 +265,7 @@ export default function CreateSponsorshipPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center gap-3">
-                <Package className="h-8 w-8 text-blue-500" />
+                <DropGoodLogo size={32} />
                 <span className="text-xl font-bold text-white">DropGood</span>
               </div>
             </div>
@@ -294,7 +295,7 @@ export default function CreateSponsorshipPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              <Package className="h-8 w-8 text-blue-500" />
+              <DropGoodLogo size={32} />
               <span className="text-xl font-bold text-white">DropGood</span>
             </div>
             <button

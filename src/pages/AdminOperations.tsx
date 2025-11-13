@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LogOut, Package, Calendar, MapPin, Phone, Clock, AlertCircle, DollarSign, CheckCircle, MessageCircle } from 'lucide-react';
+import { LogOut, Calendar, MapPin, Phone, Clock, AlertCircle, DollarSign, CheckCircle, MessageCircle } from 'lucide-react';
 import AdminSupportChat from '../components/AdminSupportChat';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Booking {
   id: string;
@@ -196,7 +197,7 @@ export default function AdminOperations() {
             }`}
           >
             <div className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
+              <DropGoodLogo size={20} />
               Bookings
             </div>
           </button>
@@ -262,7 +263,7 @@ export default function AdminOperations() {
 
         {filteredBookings.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <Package className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+            <DropGoodLogo size={48} className="mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-900 mb-2">No bookings found</h3>
             <p className="text-slate-600">
               {filter === 'all' ? 'No bookings yet' : `No ${filter} bookings`}

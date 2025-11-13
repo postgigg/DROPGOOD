@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, ArrowRight, FileText, Clock, MessageCircle, X, MapPin, Star, CheckCircle, TrendingUp } from 'lucide-react';
+import { ArrowRight, FileText, Clock, MessageCircle, X, MapPin, Star, CheckCircle, TrendingUp } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
+import DropGoodLogo from '../components/DropGoodLogo';
 import { LocalBusinessSchema, ServiceSchema, FAQSchema, HowToSchema, OrganizationSchema } from '../components/SEO/StructuredData';
 import { seoPages } from '../components/SEO/seoConfig';
 import { searchAddress, type AddressSearchResult } from '../lib/mapboxSearch';
@@ -136,7 +137,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16 sm:h-20">
               <button onClick={() => navigate('/')} className="flex items-center gap-2 sm:gap-3 group">
-                <Package className="h-7 w-7 sm:h-8 sm:w-8 text-blue-500 group-hover:text-blue-400 transition" strokeWidth={2.5} />
+                <DropGoodLogo className="group-hover:opacity-90 transition" size={32} />
                 <span className="text-xl sm:text-2xl font-black text-white">DropGood</span>
               </button>
               <div className="flex items-center gap-3 sm:gap-6">
@@ -292,7 +293,7 @@ export default function LandingPage() {
         <div className="bg-blue-600 border-y border-blue-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left">
-              <Package className="h-6 w-6 sm:h-7 sm:w-7 text-white flex-shrink-0" />
+              <DropGoodLogo size={28} className="flex-shrink-0" />
               <div>
                 <p className="text-white font-bold text-base sm:text-lg">
                   Have bigger items?{' '}
@@ -570,7 +571,7 @@ export default function LandingPage() {
             <div className="pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex flex-col items-center sm:items-start gap-1">
                 <div className="flex items-center gap-2">
-                  <Package className="h-6 w-6 text-blue-500" />
+                  <DropGoodLogo size={24} />
                   <span className="text-white font-bold text-lg">DropGood</span>
                 </div>
                 <p className="text-gray-500 text-xs">(A Workbird LLC Company)</p>

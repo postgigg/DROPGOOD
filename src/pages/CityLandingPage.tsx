@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Package, ArrowRight, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { ArrowRight, MapPin, Clock, CheckCircle } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
 import { LocalBusinessSchema, BreadcrumbSchema } from '../components/SEO/StructuredData';
 import { getCitySEO, generateCitySEO, type CitySEOConfig } from '../components/SEO/seoConfig';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function CityLandingPage() {
   const { citySlug } = useParams<{ citySlug: string }>();
@@ -50,7 +51,7 @@ export default function CityLandingPage() {
           {/* Navigation */}
           <nav className="flex justify-between items-center mb-12 sm:mb-20">
             <button onClick={() => navigate('/')} className="flex items-center gap-2 sm:gap-3 hover:opacity-80">
-              <Package className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" strokeWidth={2.5} />
+              <DropGoodLogo size={40} className="sm:w-10 sm:h-10" />
               <span className="text-2xl sm:text-3xl font-black text-white">DropGood</span>
             </button>
             <button

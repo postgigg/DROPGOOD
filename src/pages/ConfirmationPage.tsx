@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Calendar, MapPin, Package, Receipt, FileText } from 'lucide-react';
+import { CheckCircle, Calendar, MapPin, Receipt, FileText } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
 import { seoPages } from '../components/SEO/seoConfig';
 import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function ConfirmationPage() {
   const { id } = useParams();
@@ -161,7 +162,7 @@ export default function ConfirmationPage() {
             onClick={() => navigate('/')}
             className="flex items-center text-white/90 hover:text-white mb-8 transition"
           >
-            <Package className="h-6 w-6 mr-2" />
+            <DropGoodLogo size={24} className="mr-2" />
             <span className="font-semibold text-lg">DropGood</span>
           </button>
 
@@ -346,7 +347,7 @@ export default function ConfirmationPage() {
               onClick={() => navigate(`/track/${booking.id}`)}
               className="w-full bg-white text-black py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-lg flex items-center justify-center gap-3"
             >
-              <Package className="h-6 w-6" />
+              <DropGoodLogo size={24} />
               Track Your Pickup
             </button>
             <p className="text-center text-gray-500 text-sm mt-4">

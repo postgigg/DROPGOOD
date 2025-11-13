@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Mail, Lock, User, Phone, Building2, Heart, Info } from 'lucide-react';
+import { Mail, Lock, User, Phone, Building2, Heart, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function DonationCenterAuth() {
   const navigate = useNavigate();
@@ -93,7 +94,7 @@ export default function DonationCenterAuth() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Package className="h-10 w-10 text-blue-500" />
+            <DropGoodLogo size={40} />
             <span className="text-3xl font-black text-white">DropGood</span>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">

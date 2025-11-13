@@ -3,11 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
   ArrowLeft, Send, Upload, Save, DollarSign,
-  User, Phone, Mail, MapPin, Calendar, Package,
+  User, Phone, Mail, MapPin, Calendar,
   Image as ImageIcon, Truck, Clock, CheckCircle, Copy, Check, MessageCircle
 } from 'lucide-react';
 import StatusWorkflow from '../components/booking/StatusWorkflow';
 import BookingChat from '../components/BookingChat';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Booking {
   id: string;
@@ -624,7 +625,7 @@ export default function AdminBookingDetail() {
 
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-emerald-500" />
+                <DropGoodLogo size={20} />
                 Items Description
               </h2>
               <p className="text-slate-700">{booking.items_description || 'No description provided'}</p>

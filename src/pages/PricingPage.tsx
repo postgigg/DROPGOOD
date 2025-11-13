@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { DollarSign, Check, X, MapPin, AlertCircle, Package } from 'lucide-react';
+import { DollarSign, Check, X, MapPin, AlertCircle } from 'lucide-react';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 const includedFeatures = [
   'Pickup from your location',
@@ -265,7 +266,7 @@ export default function PricingPage() {
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
                   <div className="bg-emerald-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                    <Package className="h-6 w-6 text-emerald-400" />
+                    <DropGoodLogo size={24} />
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3">
                     No Per-Item Charges

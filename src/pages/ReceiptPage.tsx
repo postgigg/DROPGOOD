@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Package, Download, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { Download, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
 import { seoPages } from '../components/SEO/seoConfig';
 import { supabase } from '../lib/supabase';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Receipt {
   id: string;
@@ -129,7 +130,7 @@ export default function ReceiptPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button onClick={() => navigate('/')} className="flex items-center hover:opacity-70">
-              <Package className="h-8 w-8 text-blue-500" />
+              <DropGoodLogo size={32} />
               <span className="ml-2 text-2xl font-bold text-white">DropGood</span>
             </button>
             <div className="flex gap-3">

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Package, Clock, User, Phone, CheckCircle, FileText, MessageCircle } from 'lucide-react';
+import { MapPin, Clock, User, Phone, CheckCircle, FileText, MessageCircle } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
 import { seoPages } from '../components/SEO/seoConfig';
 import { supabase } from '../lib/supabase';
 import BookingChat from '../components/BookingChat';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function TrackingPage() {
   const { id } = useParams();
@@ -156,7 +157,7 @@ export default function TrackingPage() {
             onClick={() => navigate('/')}
             className="flex items-center text-white/70 hover:text-white transition mb-4"
           >
-            <Package className="h-5 w-5 mr-2" />
+            <DropGoodLogo size={20} className="mr-2" />
             <span className="font-semibold">DropGood</span>
           </button>
           <div>

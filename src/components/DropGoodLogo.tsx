@@ -1,0 +1,43 @@
+interface LogoProps {
+  className?: string;
+  size?: number;
+}
+
+export default function DropGoodLogo({ className = "", size = 32 }: LogoProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Blue gradient background */}
+      <rect width="32" height="32" rx="6" fill="url(#gradient)"/>
+
+      {/* Unique DropGood mark: Box with heart and upward motion */}
+      {/* Box base with rounded corners */}
+      <rect x="10" y="14" width="12" height="10" rx="1.5" fill="white" opacity="0.9"/>
+
+      {/* Heart symbol inside box (charity/donation) */}
+      <path d="M16 20.5C16 20.5 13 18.5 13 17C13 15.8 13.8 15 14.5 15C15.2 15 16 15.5 16 15.5C16 15.5 16.8 15 17.5 15C18.2 15 19 15.8 19 17C19 18.5 16 20.5 16 20.5Z" fill="#3B82F6"/>
+
+      {/* Three upward rising dots (pickup & delivery motion) - unique element */}
+      <circle cx="12" cy="11" r="1.2" fill="white"/>
+      <circle cx="16" cy="8" r="1.2" fill="white"/>
+      <circle cx="20" cy="11" r="1.2" fill="white"/>
+
+      {/* Swoosh curve connecting to dots (motion trail) */}
+      <path d="M11 24 Q 16 4, 21 24" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.3"/>
+
+      {/* Gradient definition */}
+      <defs>
+        <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#3B82F6"/>
+          <stop offset="100%" stopColor="#2563EB"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}

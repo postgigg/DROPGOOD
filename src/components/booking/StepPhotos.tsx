@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { Camera, X, AlertCircle, Package, ShoppingBag, Upload } from 'lucide-react';
+import { Camera, X, AlertCircle, ShoppingBag, Upload } from 'lucide-react';
+import DropGoodLogo from '../DropGoodLogo';
 
 interface Props {
   onNext: (photos: string[], itemsTypes: string[], boxesCount: number, bagsCount: number, locationType: string, instructions: string) => void;
@@ -155,7 +156,7 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <Package className="h-6 w-6 text-blue-400" />
+              <DropGoodLogo size={24} />
               <div>
                 <h3 className="text-lg font-bold text-white">Number of Boxes</h3>
                 <p className="text-sm text-gray-400">Cardboard boxes with items</p>

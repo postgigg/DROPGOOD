@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Users, DollarSign, TrendingUp, Package, Copy, CheckCircle, AlertCircle } from 'lucide-react';
+import { Building2, Users, DollarSign, TrendingUp, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import SEO from '../components/SEO/SEO';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Company {
   id: string;
@@ -203,7 +204,7 @@ export default function CompanyDashboard() {
             {/* Total Bookings */}
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <Package className="h-8 w-8 text-purple-400" />
+                <DropGoodLogo size={32} />
                 <span className="text-sm text-gray-400">Bookings</span>
               </div>
               <div className="text-3xl font-bold text-white mb-1">

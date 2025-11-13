@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { Package, ArrowRight, MapPin, DollarSign, TrendingUp, Users, Target, Zap, CheckCircle } from 'lucide-react';
+import { ArrowRight, MapPin, DollarSign, TrendingUp, Users, Target, Zap, CheckCircle } from 'lucide-react';
 import SEO from '../components/SEO/SEO';
 import { seoPages } from '../components/SEO/seoConfig';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function DonationCenterLanding() {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function DonationCenterLanding() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <nav className="flex justify-between items-center mb-12 sm:mb-20">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Package className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" strokeWidth={2.5} />
+            <DropGoodLogo size={40} className="sm:w-10 sm:h-10" />
             <span className="text-2xl sm:text-3xl font-black text-white">DropGood</span>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
