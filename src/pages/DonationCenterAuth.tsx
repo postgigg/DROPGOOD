@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, User, Phone, Building2, Heart, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -8,6 +8,11 @@ export default function DonationCenterAuth() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Temporarily redirect to marketing page
+  useEffect(() => {
+    navigate('/donation-centers');
+  }, [navigate]);
 
   const [formData, setFormData] = useState({
     email: '',
