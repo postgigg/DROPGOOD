@@ -1,0 +1,19 @@
+# Robots.txt for DropGood - Nationwide Donation Pickup Service
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /donation-center/dashboard
+Disallow: /donation-center/auth
+Disallow: /track/*
+Disallow: /receipt/*
+Disallow: /confirmation/*
+
+# Allow search engines to crawl public pages
+Allow: /
+Allow: /book
+Allow: /donation-centers
+Allow: /donate/*
+
+# Sitemap location
+Sitemap: https://dropgood.com/sitemap.xml
