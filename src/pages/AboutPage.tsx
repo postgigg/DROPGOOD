@@ -26,32 +26,32 @@ const values = [
 ];
 
 const stats = [
-  { number: '50+', label: 'States Served' },
-  { number: '10K+', label: 'Pickups Completed' },
-  { number: '500+', label: 'Partner Charities' },
-  { number: '1M+', label: 'Items Donated' }
+  { number: 'VA + TX', label: 'States Launching' },
+  { number: '164', label: 'Partner Charities' },
+  { number: '2024', label: 'Founded' },
+  { number: '100%', label: 'Mission Driven' }
 ];
 
 const timeline = [
   {
-    year: '2023',
-    title: 'The Beginning',
-    description: 'Founded in Richmond, Virginia with a simple mission: make donating as easy as ordering a ride.'
-  },
-  {
-    year: '2024',
-    title: 'Rapid Growth',
-    description: 'Expanded to serve all 50 states, partnering with hundreds of local charities nationwide.'
+    year: 'Now',
+    title: 'Just Getting Started',
+    description: 'Launching in Virginia and Texas with 164 verified charity partners. Building the platform, testing the service, and learning from every pickup.'
   },
   {
     year: '2025',
-    title: 'Innovation',
-    description: 'Partnering with Dolly Group for large item handling and continuing to improve our service.'
+    title: 'Expanding Smart',
+    description: 'Growing our service areas based on demand and feedback. Adding more charities, refining our processes, and building trust one donation at a time.'
   },
   {
-    year: 'Future',
-    title: 'The Vision',
-    description: 'Becoming America\'s most trusted donation pickup service, connecting millions with causes they care about.'
+    year: 'Soon',
+    title: 'Building Features',
+    description: 'Rolling out company employee benefits, subscription plans, and innovative ways to make giving back even easier for our early adopters.'
+  },
+  {
+    year: 'Vision',
+    title: 'The Dream',
+    description: 'Becoming America\'s most trusted donation pickup service, connecting millions with causes they care about. We\'re taking it step by step.'
   }
 ];
 
@@ -175,10 +175,13 @@ export default function AboutPage() {
               <p className="text-lg text-slate-300 leading-relaxed mb-6">
                 We asked ourselves: <span className="text-emerald-400 font-semibold">What if donating was as easy as ordering a ride?</span>
               </p>
-              <p className="text-lg text-slate-300 leading-relaxed">
-                Starting in Richmond, Virginia in 2023, we built a platform that connects donors with verified drivers
-                and local charities. Now serving all 50 states, we've helped thousands of people declutter their homes,
-                support causes they care about, and make a real difference in their communities—all without leaving home.
+              <p className="text-lg text-slate-300 leading-relaxed mb-6">
+                So we're building it. DropGood is a brand new startup launching in Richmond, Virginia and expanding across
+                Virginia and Texas. We've partnered with 164 verified charities and we're working with our first customers
+                to make donation pickup simple, transparent, and impactful.
+              </p>
+              <p className="text-lg text-emerald-400 leading-relaxed font-semibold">
+                We're just getting started, and we'd love for you to be part of our journey.
               </p>
             </div>
 
@@ -288,17 +291,20 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Partnership Section */}
+        {/* Honest Startup Section */}
         <div className="bg-slate-800 border-y border-slate-700 py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h3 className="text-3xl font-bold text-white mb-4">Growing Together</h3>
-            <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-              We're proud to partner with the <span className="text-emerald-400 font-semibold">Dolly Group</span> for
-              handling larger items and specialty donations. This partnership ensures we can accommodate donations of
-              all sizes while maintaining our commitment to quality service.
+            <h3 className="text-3xl font-bold text-white mb-4">Honest About Where We Are</h3>
+            <p className="text-lg text-slate-300 mb-6 leading-relaxed">
+              We're a startup. That means we're building, learning, and improving every single day. We don't have
+              thousands of pickups under our belt yet—but we're excited to bring the good to Virginia and Texas.
+            </p>
+            <p className="text-lg text-slate-300 mb-6 leading-relaxed">
+              Our 164 charity partners are real, verified, and ready to receive your donations. Our pricing is transparent.
+              Our mission is genuine. And we're committed to earning your trust one pickup at a time.
             </p>
             <p className="text-slate-400">
-              Whether you're donating a few boxes or clearing out an entire home, we've got you covered.
+              Whether you're donating a few boxes or clearing out an entire home, we're here to make it easy.
             </p>
           </div>
         </div>
@@ -307,10 +313,11 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-12 text-center shadow-2xl">
             <h3 className="text-4xl font-bold text-white mb-4">
-              Join Us in Making a Difference
+              Be Part of Something New
             </h3>
             <p className="text-xl text-emerald-50 mb-8 max-w-2xl mx-auto">
-              Whether you're donating items or looking to partner with us, we'd love to hear from you.
+              Join us as an early supporter. Schedule a pickup, give us feedback, and help us build the best donation
+              service in America.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
