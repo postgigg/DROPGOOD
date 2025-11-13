@@ -92,29 +92,75 @@ export default function LandingPage() {
     };
   }, [address]);
 
-  const handleSuggestionClick = (suggestion: AddressSearchResult) => {
+  const handleSuggestionClick = async (suggestion: AddressSearchResult) => {
     setSelectedAddress(suggestion);
     setAddress(suggestion.full_address);
     setShowSuggestions(false);
+
+    // Fetch full details from Mapbox to get structured address components
+    try {
+      const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+      const { latitude, longitude } = suggestion.coordinates;
+
+      // Use reverse geocoding to get structured address
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}`
+      );
+
+      if (!response.ok) throw new Error('Failed to fetch address details');
+
+      const data = await response.json();
+      const feature = data.features?.[0];
+
+      if (!feature) throw new Error('No address details found');
+
+      // Extract address components from context
+      const cityObj = feature.context?.find((c: any) => c.id.startsWith('place'));
+      const stateObj = feature.context?.find((c: any) => c.id.startsWith('region'));
+      const zipObj = feature.context?.find((c: any) => c.id.startsWith('postcode'));
+
+      // Get street address from the feature
+      const streetNumber = feature.address || '';
+      const streetName = feature.text || '';
+      const street = streetNumber ? `${streetNumber} ${streetName}` : streetName;
+
+      const addressData = {
+        street: street || suggestion.full_address.split(',')[0],
+        city: cityObj?.text || '',
+        state: stateObj?.short_code?.replace('US-', '') || stateObj?.text || '',
+        zip: zipObj?.text || '',
+        latitude: latitude,
+        longitude: longitude,
+      };
+
+      console.log('📍 Landing page selected address:', addressData);
+
+      // Auto-navigate to booking with address data
+      navigate('/book', { state: { address: addressData } });
+    } catch (error) {
+      console.error('Error fetching address details:', error);
+      // Fallback: use coordinates but try to parse address
+      const addressData = {
+        street: suggestion.full_address.split(',')[0] || '',
+        city: suggestion.full_address.split(',')[1]?.trim() || '',
+        state: '',
+        zip: '',
+        latitude: suggestion.coordinates.latitude,
+        longitude: suggestion.coordinates.longitude,
+      };
+
+      console.log('📍 Landing page fallback address:', addressData);
+      navigate('/book', { state: { address: addressData } });
+    }
   };
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedAddress) {
-      // Parse address into components
-      const addressParts = selectedAddress.full_address.split(',').map(p => p.trim());
-      const addressData = {
-        street: addressParts[0] || '',
-        city: addressParts[1] || '',
-        state: addressParts[2]?.split(' ')[0] || '',
-        zip: addressParts[2]?.split(' ')[1] || '',
-        latitude: selectedAddress.coordinates.latitude,
-        longitude: selectedAddress.coordinates.longitude,
-      };
-
-      // Navigate to booking with address data - will skip to step 2
-      navigate('/book', { state: { address: addressData } });
+      // User hit enter after selecting - trigger the same logic
+      handleSuggestionClick(selectedAddress);
     } else if (address.trim()) {
+      // No address selected, just go to booking
       navigate('/book');
     }
   };
@@ -167,70 +213,27 @@ export default function LandingPage() {
         {/* Hero Section */}
         <div className="pt-16 sm:pt-20">
           <div className="bg-gray-900 py-20 sm:py-32 md:py-40 relative overflow-hidden">
-            {/* Animated gradient background - only in hero */}
+            {/* Simple dark background with photo */}
             <div className="absolute inset-0 z-0 pointer-events-none">
               {/* Family with donation boxes and driver - pickup scene */}
               <div
-                className="absolute inset-0 opacity-25"
+                className="absolute inset-0 opacity-20"
                 style={{
                   backgroundImage: `url('/dropgood_header.jpg')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   filter: 'blur(2px)',
-                  animation: 'slowZoom 60s ease-in-out infinite alternate',
                 }}
               />
 
-              {/* Dark to light gradient overlay - left to right fade */}
+              {/* Simple dark black overlay */}
               <div
                 className="absolute inset-0"
                 style={{
-                  background: `
-                    linear-gradient(to right,
-                      rgba(17, 24, 39, 0.95) 0%,
-                      rgba(17, 24, 39, 0.7) 40%,
-                      rgba(17, 24, 39, 0.3) 70%,
-                      rgba(17, 24, 39, 0.1) 100%
-                    )
-                  `,
-                }}
-              />
-
-              {/* Animated gradient overlays - darker */}
-              <div
-                className="absolute inset-0 opacity-40"
-                style={{
-                  background: `
-                    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.4) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.4) 0%, transparent 50%),
-                    radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.3) 0%, transparent 50%)
-                  `,
-                  animation: 'gradientShift 20s ease infinite',
+                  background: 'rgba(0, 0, 0, 0.6)',
                 }}
               />
             </div>
-
-            <style>{`
-              @keyframes gradientShift {
-                0%, 100% {
-                  opacity: 0.3;
-                  transform: scale(1) rotate(0deg);
-                }
-                50% {
-                  opacity: 0.4;
-                  transform: scale(1.1) rotate(5deg);
-                }
-              }
-
-              @keyframes slowZoom {
-                0% {
-                  transform: scale(1);
-                }
-                100% {
-                  transform: scale(1.1);
-                }
-              }
-            `}</style>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="max-w-3xl">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 sm:mb-8 leading-[1.1] tracking-tight">

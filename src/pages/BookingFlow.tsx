@@ -31,8 +31,15 @@ export default function BookingFlow() {
   useEffect(() => {
     const state = location.state as { address?: Address };
     if (state?.address) {
+      console.log('📦 BookingFlow received address from landing page:', state.address);
+      console.log('📦 Coordinates:', {
+        latitude: state.address.latitude,
+        longitude: state.address.longitude
+      });
       setPickupAddress(state.address);
       setStep(2); // Skip to step 2 (Photos/Details)
+    } else {
+      console.log('📦 BookingFlow: No address in state, starting at step 1');
     }
   }, [location.state]);
   const [photos, setPhotos] = useState<string[]>([]);

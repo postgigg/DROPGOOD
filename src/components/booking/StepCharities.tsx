@@ -127,12 +127,23 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       setLoading(true);
       setError(null);
 
+      console.log('🏪 StepCharities: Loading charities for address:', {
+        street: pickupAddress.street,
+        city: pickupAddress.city,
+        coordinates: {
+          latitude: pickupAddress.latitude,
+          longitude: pickupAddress.longitude
+        }
+      });
+
       const { data: centers, error: centersError } = await supabase
         .from('donation_centers')
         .select('*')
         .eq('is_active', true);
 
       if (centersError) throw centersError;
+
+      console.log('🏪 Found', centers?.length || 0, 'active donation centers in database');
 
       const { data: sponsorships, error: sponsorshipsError } = await supabase
         .from('sponsorships')
@@ -197,10 +208,16 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
           company_benefit: companyBenefit,
           is_sponsored: !!sponsorship || !!companyBenefit
         };
-      }).filter((c: CharityWithSponsorship) => c.distance_miles <= 15);
+      });
+
+      console.log('🏪 Before distance filter: Found', charitiesWithPricing.length, 'centers');
+
+      const filteredCharities = charitiesWithPricing.filter((c: CharityWithSponsorship) => c.distance_miles <= 15);
+
+      console.log('🏪 After 15-mile filter:', filteredCharities.length, 'centers remaining');
 
       // Sort: subsidized charities first, then by price
-      charitiesWithPricing.sort((a, b) => {
+      filteredCharities.sort((a, b) => {
         const aHasSubsidy = !!(a.sponsorship || a.company_benefit);
         const bHasSubsidy = !!(b.sponsorship || b.company_benefit);
 
@@ -209,16 +226,16 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         return a.pricing.total_price - b.pricing.total_price;
       });
 
-      if (charitiesWithPricing.length === 0) {
-        console.log('No database centers found, loading from Mapbox...');
+      if (filteredCharities.length === 0) {
+        console.log('❌ No database centers within 15 miles, loading from Mapbox...');
         const mapboxCharities = await loadMapboxDonationCenters();
-        console.log('Mapbox returned centers:', mapboxCharities.length);
+        console.log('🗺️  Mapbox returned centers:', mapboxCharities.length);
         if (mapboxCharities.length > 0) {
           setCharities(mapboxCharities);
         }
       } else {
-        console.log('Found database centers:', charitiesWithPricing.length);
-        setCharities(charitiesWithPricing);
+        console.log('✅ Setting', filteredCharities.length, 'database centers');
+        setCharities(filteredCharities);
       }
     } catch (err) {
       console.error('Error loading charities:', err);
