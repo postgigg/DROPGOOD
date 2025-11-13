@@ -39,25 +39,39 @@ export async function searchAddress(query: string): Promise<AddressSearchResult[
 
     const response = await fetch(url);
     if (!response.ok) {
-      console.error('Mapbox address search failed:', response.status);
+      console.error('Mapbox address search failed:', response.status, response.statusText);
       return [];
     }
 
     const data = await response.json();
+    console.log('📍 Mapbox Search Box API response:', data);
 
     if (!data.suggestions || data.suggestions.length === 0) {
+      console.warn('No suggestions returned from Mapbox');
       return [];
     }
 
-    return data.suggestions.map((suggestion: any) => ({
-      full_address: suggestion.full_address || suggestion.place_formatted || '',
-      name: suggestion.name || '',
-      place_formatted: suggestion.place_formatted || '',
-      coordinates: {
-        latitude: suggestion.geometry?.coordinates?.[1] || 0,
-        longitude: suggestion.geometry?.coordinates?.[0] || 0,
-      },
-    }));
+    return data.suggestions.map((suggestion: any) => {
+      const coords = suggestion.geometry?.coordinates || suggestion.coordinates;
+      const lat = coords?.[1] || suggestion.latitude || 0;
+      const lng = coords?.[0] || suggestion.longitude || 0;
+
+      console.log('📍 Mapbox suggestion:', {
+        name: suggestion.name,
+        full_address: suggestion.full_address,
+        coordinates: { lat, lng }
+      });
+
+      return {
+        full_address: suggestion.full_address || suggestion.place_formatted || '',
+        name: suggestion.name || '',
+        place_formatted: suggestion.place_formatted || '',
+        coordinates: {
+          latitude: lat,
+          longitude: lng,
+        },
+      };
+    });
   } catch (error) {
     console.error('Error searching address:', error);
     return [];
