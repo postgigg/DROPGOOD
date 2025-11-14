@@ -162,13 +162,54 @@ export default function TrackingPage() {
 
       // If eligible for refund and payment was made, process refund
       if (refundInfo.eligible && booking.stripe_payment_intent_id && booking.payment_status === 'completed') {
-        console.log('Processing refund for payment intent:', booking.stripe_payment_intent_id);
-        // TODO: Call Stripe refund API via Edge Function
-        // For now, just update payment status
-        await supabase
-          .from('bookings')
-          .update({ payment_status: 'refunded' })
-          .eq('id', id);
+        console.log('Processing automatic refund for payment intent:', booking.stripe_payment_intent_id);
+
+        try {
+          // Call Stripe refund API via Edge Function
+          const refundResponse = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/refund-payment`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                payment_intent_id: booking.stripe_payment_intent_id,
+                reason: 'requested_by_customer'
+              }),
+            }
+          );
+
+          const refundData = await refundResponse.json();
+
+          if (refundData.success) {
+            console.log('✅ Refund successful:', refundData.refund_id);
+
+            // Update booking with refund info
+            await supabase
+              .from('bookings')
+              .update({
+                payment_status: 'refunded',
+                stripe_refund_id: refundData.refund_id
+              })
+              .eq('id', id);
+          } else {
+            console.error('Refund failed:', refundData.error);
+            // Still mark as refund pending so admin can manually process
+            await supabase
+              .from('bookings')
+              .update({ payment_status: 'refund_pending' })
+              .eq('id', id);
+          }
+        } catch (refundError) {
+          console.error('Error processing refund:', refundError);
+          // Mark as refund pending so admin can manually process
+          await supabase
+            .from('bookings')
+            .update({ payment_status: 'refund_pending' })
+            .eq('id', id);
+        }
       }
 
       // Reload booking to show updated status
@@ -617,9 +658,9 @@ export default function TrackingPage() {
                           <div className="flex items-start gap-3">
                             <CheckCircle className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" />
                             <div>
-                              <p className="text-green-400 font-bold text-lg mb-1">Full Refund Available</p>
+                              <p className="text-green-400 font-bold text-lg mb-1">Automatic Full Refund</p>
                               <p className="text-green-300 text-sm">
-                                You're cancelling more than 2 hours before pickup. You'll receive a full refund of <strong>${booking.total_price?.toFixed(2)}</strong> within 5-7 business days.
+                                You're cancelling more than 2 hours before pickup. We'll automatically process a full refund of <strong>${booking.total_price?.toFixed(2)}</strong> to your original payment method within 5-7 business days.
                               </p>
                             </div>
                           </div>
