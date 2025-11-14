@@ -590,15 +590,26 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="flex flex-col items-center sm:items-start gap-1">
-                <div className="flex items-center gap-2">
-                  <DropGoodLogo size={24} />
-                  <span className="text-white font-bold text-lg">DropGood</span>
+            <div className="pt-8 border-t border-gray-800 space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex flex-col items-center sm:items-start gap-1">
+                  <div className="flex items-center gap-2">
+                    <DropGoodLogo size={24} />
+                    <span className="text-white font-bold text-lg">DropGood</span>
+                  </div>
+                  <p className="text-gray-500 text-xs">(A Workbird LLC Company)</p>
                 </div>
-                <p className="text-gray-500 text-xs">(A Workbird LLC Company)</p>
+                <div className="flex items-center gap-4 text-sm">
+                  <button onClick={() => navigate('/terms-of-service')} className="text-gray-400 hover:text-white transition">
+                    Terms of Service
+                  </button>
+                  <span className="text-gray-700">•</span>
+                  <button onClick={() => navigate('/privacy-policy')} className="text-gray-400 hover:text-white transition">
+                    Privacy Policy
+                  </button>
+                </div>
               </div>
-              <p className="text-gray-500 text-sm">&copy; 2025 DropGood. All rights reserved.</p>
+              <p className="text-gray-500 text-sm text-center">&copy; 2025 DropGood. All rights reserved.</p>
             </div>
           </div>
         </footer>
