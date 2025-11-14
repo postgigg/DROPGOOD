@@ -117,10 +117,10 @@ export default function ContactPage() {
                   Send us a detailed message
                 </p>
                 <a
-                  href="mailto:support@dropgood.com"
+                  href="mailto:support@dropgood.co"
                   className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
                 >
-                  support@dropgood.com
+                  support@dropgood.co
                 </a>
                 <p className="text-slate-500 text-sm mt-2">
                   We typically respond within 24 hours

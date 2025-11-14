@@ -223,7 +223,7 @@ export default function JoinCompany() {
             )}
 
             <p className="text-sm text-gray-500 mt-6">
-              Questions? Contact your HR department or email us at support@dropgood.com
+              Questions? Contact your HR department or email us at support@dropgood.co
             </p>
           </div>
         </div>

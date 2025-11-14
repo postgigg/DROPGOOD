@@ -636,7 +636,7 @@ export default function LandingPage() {
             </p>
             <div className="space-y-2">
               <a
-                href="mailto:support@dropgood.com"
+                href="mailto:support@dropgood.co"
                 className="block text-center bg-blue-600 text-white px-4 py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition"
               >
                 Email Support

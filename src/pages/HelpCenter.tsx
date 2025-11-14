@@ -129,7 +129,7 @@ const faqs: FAQItem[] = [
   {
     category: 'Account & Technical',
     question: 'How do I contact customer support?',
-    answer: 'You can reach us through our live chat support (click the chat icon in the bottom right), email us at support@dropgood.com, or visit our Contact page. We typically respond within a few hours during business hours.'
+    answer: 'You can reach us through our live chat support (click the chat icon in the bottom right), email us at support@dropgood.co, or visit our Contact page. We typically respond within a few hours during business hours.'
   },
   {
     category: 'Account & Technical',

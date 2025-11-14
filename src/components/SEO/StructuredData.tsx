@@ -15,7 +15,7 @@ export function LocalBusinessSchema({ cityName, stateName, latitude, longitude }
     description: 'Donation pickup and delivery service connecting donors with local charities',
     url: 'https://dropgood.com',
     telephone: '+1-888-DROP-GOOD',
-    email: 'support@dropgood.com',
+    email: 'support@dropgood.co',
     priceRange: '$10-$20',
     areaServed: cityName && stateName ? {
       '@type': 'City',
@@ -244,7 +244,7 @@ export function OrganizationSchema() {
     logo: 'https://dropgood.com/logo.png',
     foundingDate: '2025',
     description: 'Nationwide donation pickup service connecting donors with local charities',
-    email: 'support@dropgood.com',
+    email: 'support@dropgood.co',
     telephone: '+1-888-DROP-GOOD',
     areaServed: {
       '@type': 'Country',

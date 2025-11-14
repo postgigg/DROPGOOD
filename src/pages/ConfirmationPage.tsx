@@ -374,7 +374,7 @@ export default function ConfirmationPage() {
             Book Another Pickup
           </button>
           <p className="text-gray-500 text-sm">
-            Questions? <a href="mailto:support@dropgood.com" className="text-blue-400 hover:underline">support@dropgood.com</a>
+            Questions? <a href="mailto:support@dropgood.co" className="text-blue-400 hover:underline">support@dropgood.co</a>
           </p>
         </div>
       </div>
