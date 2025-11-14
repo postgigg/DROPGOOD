@@ -36,7 +36,7 @@ export default function LandingPage() {
       icon: <Clock className="h-5 w-5" />,
     },
     {
-      value: '10,000+',
+      value: '500+',
       label: 'Cities nationwide',
       icon: <MapPin className="h-5 w-5" />,
     },
