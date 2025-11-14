@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import BookingFlow from './pages/BookingFlow';
 import TrackingPage from './pages/TrackingPage';
@@ -34,6 +34,11 @@ import BrandKit from './pages/BrandKit';
 import SupportChat from './components/SupportChat';
 
 function App() {
+  const location = useLocation();
+
+  // Hide support chat on tracking page (has its own inline chat)
+  const hideChat = location.pathname.startsWith('/track/');
+
   return (
     <>
       <Routes>
@@ -74,8 +79,8 @@ function App() {
         <Route path="/brand-kit" element={<BrandKit />} />
       </Routes>
 
-      {/* Global Support Chat Widget */}
-      <SupportChat />
+      {/* Global Support Chat Widget - Hidden on tracking page */}
+      {!hideChat && <SupportChat />}
     </>
   );
 }

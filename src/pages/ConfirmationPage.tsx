@@ -17,6 +17,15 @@ export default function ConfirmationPage() {
   const [generatingReceipt, setGeneratingReceipt] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const formatTime = (militaryTime: string) => {
+    if (!militaryTime) return '';
+    const [hours, minutes] = militaryTime.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
   useEffect(() => {
     if (id) {
       loadBooking();
@@ -196,7 +205,7 @@ export default function ConfirmationPage() {
                 </div>
                 <div className="text-white">
                   <p className="text-2xl font-bold">{new Date(booking.scheduled_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                  <p className="text-lg text-gray-300">{booking.scheduled_time_start} - {booking.scheduled_time_end}</p>
+                  <p className="text-lg text-gray-300">{formatTime(booking.scheduled_time_start)} - {formatTime(booking.scheduled_time_end)}</p>
                 </div>
               </div>
 
@@ -307,7 +316,7 @@ export default function ConfirmationPage() {
                   step: 2,
                   title: "Pickup",
                   desc: "Items collected during your scheduled window",
-                  time: `${booking.scheduled_time_start} - ${booking.scheduled_time_end}`,
+                  time: `${formatTime(booking.scheduled_time_start)} - ${formatTime(booking.scheduled_time_end)}`,
                 },
                 {
                   step: 3,

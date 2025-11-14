@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Star, Clock, Loader2, Sparkles, DollarSign, Search, Building2, MapPin, X, Loader } from 'lucide-react';
+import { Star, Clock, Loader2, Sparkles, DollarSign, Search, Building2, MapPin, X, Loader, SlidersHorizontal, Navigation } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -756,63 +756,141 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         </div>
       )}
 
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+      {/* Search & Filters - Uber Style */}
+      <div className="space-y-4">
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative"
+        >
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, location, or address..."
-            className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-12 pr-4 py-4 bg-gray-800/80 backdrop-blur-sm border-2 border-gray-700 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-base"
           />
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <label className="block text-xs text-gray-400 mb-1">Max Distance</label>
-            <select
-              value={maxDistance}
-              onChange={(e) => setMaxDistance(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500"
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
             >
-              <option value={5}>Within 5 miles</option>
-              <option value={10}>Within 10 miles</option>
-              <option value={15}>Within 15 miles</option>
-              <option value={25}>Within 25 miles</option>
-            </select>
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </motion.div>
+
+        {/* Filters Row - Uber Style Chips */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex items-center gap-2 text-gray-400 flex-shrink-0">
+            <SlidersHorizontal className="h-5 w-5" />
+            <span className="text-sm font-medium hidden sm:inline">Filters:</span>
           </div>
 
-          <div className="flex-1">
-            <label className="block text-xs text-gray-400 mb-1">Sort By</label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSortBy('price')}
-                className={`flex-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap ${
-                  sortBy === 'price' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
+          {/* Distance Filter Chips */}
+          <div className="flex gap-2 flex-shrink-0">
+            {[5, 10, 15, 25].map((distance) => (
+              <motion.button
+                key={distance}
+                onClick={() => setMaxDistance(distance)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-4 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
+                  maxDistance === distance
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600'
                 }`}
               >
-                Price
-              </button>
-              <button
-                onClick={() => setSortBy('distance')}
-                className={`flex-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap ${
-                  sortBy === 'distance' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
-                }`}
-              >
-                Distance
-              </button>
-              <button
-                onClick={() => setSortBy('rating')}
-                className={`flex-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap ${
-                  sortBy === 'rating' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
-                }`}
-              >
-                Rating
-              </button>
-            </div>
+                <Navigation className={`h-4 w-4 ${maxDistance === distance ? 'text-white' : 'text-gray-400'}`} />
+                {distance} mi
+              </motion.button>
+            ))}
           </div>
         </div>
+
+        {/* Sort Controls - Icon Based */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-400 flex-shrink-0">Sort by:</span>
+          <div className="flex gap-2 w-full">
+            <motion.button
+              onClick={() => setSortBy('price')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                sortBy === 'price'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
+                  : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
+              }`}
+            >
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline">Price</span>
+              <span className="sm:hidden">$</span>
+            </motion.button>
+
+            <motion.button
+              onClick={() => setSortBy('distance')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                sortBy === 'distance'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
+                  : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
+              }`}
+            >
+              <MapPin className="h-4 w-4" />
+              <span className="hidden sm:inline">Distance</span>
+              <span className="sm:hidden">Mi</span>
+            </motion.button>
+
+            <motion.button
+              onClick={() => setSortBy('rating')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                sortBy === 'rating'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
+                  : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
+              }`}
+            >
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Rating</span>
+              <span className="sm:hidden">★</span>
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Active Filters Summary */}
+        {(searchQuery || maxDistance !== 15) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 text-sm text-gray-400 bg-gray-800/50 px-4 py-2 rounded-lg"
+          >
+            <span className="font-medium">Active:</span>
+            {searchQuery && (
+              <span className="bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md">
+                Search: "{searchQuery}"
+              </span>
+            )}
+            {maxDistance !== 15 && (
+              <span className="bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md">
+                Max: {maxDistance} miles
+              </span>
+            )}
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setMaxDistance(15);
+              }}
+              className="ml-auto text-blue-400 hover:text-blue-300 font-semibold"
+            >
+              Clear all
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {sortedCharities.length === 0 && charities.length > 0 && (
@@ -830,22 +908,29 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         </div>
       )}
 
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-4">
         {sortedCharities.map((charity, index) => (
           <motion.div
             key={charity.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.3 }}
-            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-            className={`relative border rounded-2xl p-5 sm:p-7 shadow-lg transition-all duration-200 ${
+            whileHover={{
+              scale: 1.015,
+              y: -4,
+              transition: { duration: 0.2, ease: 'easeOut' }
+            }}
+            className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 transition-all duration-300 cursor-pointer group ${
               charity.sponsorship || charity.company_benefit
-                ? 'border-2 border-blue-500 bg-gradient-to-br from-blue-900/10 to-purple-900/10'
-                : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                ? 'bg-gradient-to-br from-blue-900/20 via-purple-900/15 to-blue-900/20 border-2 border-blue-500/50 shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-400'
+                : 'bg-gray-800/60 backdrop-blur-sm border-2 border-gray-700/50 shadow-lg hover:shadow-xl hover:border-gray-600 hover:bg-gray-800/80'
             }`}
           >
+            {/* Hover Gradient Overlay for Premium Feel */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/5 to-purple-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
             {/* Subsidy badges */}
-            <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2 relative z-10">
               {(charity.sponsorship || charity.company_benefit) && (
                 <>
                   {charity.sponsorship && (
@@ -880,17 +965,29 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative z-10">
               <div className="flex-1">
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{charity.name}</h3>
-                {charity.rating > 0 ? (
-                  <div className="flex items-center gap-1.5 text-sm text-gray-300">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{charity.rating.toFixed(1)}</span>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-gray-400">Based on community donations</span>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors duration-200">{charity.name}</h3>
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  {charity.rating > 0 && (
+                    <>
+                      <div className="flex items-center gap-1.5 text-gray-300">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="font-semibold">{charity.rating.toFixed(1)}</span>
+                      </div>
+                      <span className="text-gray-600">•</span>
+                    </>
+                  )}
+                  <div className="flex items-center gap-1.5 text-gray-400">
+                    <MapPin className="h-4 w-4" />
+                    <span className="font-medium">{charity.distance_miles.toFixed(1)} miles away</span>
                   </div>
-                ) : null}
+                  <span className="text-gray-600">•</span>
+                  <div className="flex items-center gap-1.5 text-gray-400">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-medium">~{charity.duration_minutes} min</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex flex-col sm:items-end gap-3">
@@ -925,9 +1022,20 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                   onClick={() => onSelect(charity)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-bold hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl text-base font-bold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-2xl hover:shadow-blue-500/40 w-full sm:w-auto relative overflow-hidden group/btn"
                 >
-                  Select
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    Select
+                    <motion.span
+                      className="inline-block"
+                      initial={{ x: 0 }}
+                      whileHover={{ x: 4 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      →
+                    </motion.span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
                 </motion.button>
               </div>
             </div>
