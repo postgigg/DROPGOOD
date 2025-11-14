@@ -30,6 +30,8 @@ import CompanyReports from './pages/CompanyReports';
 import CompanyEmployees from './pages/CompanyEmployees';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import CharityTerms from './pages/CharityTerms';
+import CompanyTerms from './pages/CompanyTerms';
 import BrandKit from './pages/BrandKit';
 import SupportChat from './components/SupportChat';
 
@@ -75,6 +77,8 @@ function App() {
         {/* Legal Pages */}
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/charity-terms" element={<CharityTerms />} />
+        <Route path="/company-terms" element={<CompanyTerms />} />
         {/* Brand Kit */}
         <Route path="/brand-kit" element={<BrandKit />} />
       </Routes>
