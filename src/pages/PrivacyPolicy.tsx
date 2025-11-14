@@ -1,21 +1,34 @@
 import { Link } from 'react-router-dom';
 import { Shield, ArrowLeft } from 'lucide-react';
+import DropGoodLogo from '../components/DropGoodLogo';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen bg-black">
+      {/* Navigation */}
+      <nav className="bg-black border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-70">
+              <DropGoodLogo size={32} />
+              <span className="text-xl font-bold text-white">DropGood</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="h-8 w-8 text-blue-400" />
+            <Shield className="h-8 w-8 text-white" />
             <h1 className="text-3xl font-bold text-white">Privacy Policy</h1>
           </div>
 
@@ -311,6 +324,18 @@ export default function PrivacyPolicy() {
             </section>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-12 pt-8 border-t border-gray-800">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2">
+              <DropGoodLogo size={24} />
+              <span className="text-white font-bold">DropGood</span>
+            </div>
+            <p className="text-gray-500 text-sm">(A Workbird LLC Company)</p>
+            <p className="text-gray-500 text-sm">&copy; 2025 DropGood. All rights reserved.</p>
+          </div>
+        </footer>
       </div>
     </div>
   );
