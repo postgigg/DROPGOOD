@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
             </p>
 
             <p>
-              DropGood Inc. ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our donation pickup service.
+              DropGood (A Workbird LLC Company) ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our donation pickup service.
             </p>
 
             <section>
@@ -298,7 +298,7 @@ export default function PrivacyPolicy() {
               <ul className="list-none space-y-2 mt-4">
                 <li><strong>Email:</strong> <a href="mailto:privacy@dropgood.com" className="text-blue-400 hover:text-blue-300 underline">privacy@dropgood.com</a></li>
                 <li><strong>Phone:</strong> (804) 555-DROP</li>
-                <li><strong>Mail:</strong> DropGood Inc., Privacy Team, Richmond, VA</li>
+                <li><strong>Mail:</strong> DropGood (A Workbird LLC Company), Privacy Team, Richmond, VA</li>
               </ul>
             </section>
 

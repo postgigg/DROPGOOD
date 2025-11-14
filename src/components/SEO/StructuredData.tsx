@@ -239,7 +239,7 @@ export function OrganizationSchema() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'DropGood',
-    legalName: 'DropGood Inc.',
+    legalName: 'DropGood (A Workbird LLC Company)',
     url: 'https://dropgood.com',
     logo: 'https://dropgood.com/logo.png',
     foundingDate: '2025',

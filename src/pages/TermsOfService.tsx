@@ -254,7 +254,7 @@ export default function TermsOfService() {
               <ul className="list-none space-y-2">
                 <li><strong>Email:</strong> legal@dropgood.com</li>
                 <li><strong>Phone:</strong> (804) 555-DROP</li>
-                <li><strong>Address:</strong> DropGood Inc., Richmond, VA</li>
+                <li><strong>Address:</strong> DropGood (A Workbird LLC Company), Richmond, VA</li>
               </ul>
             </section>
 
