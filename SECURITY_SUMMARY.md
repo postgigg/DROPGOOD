@@ -167,8 +167,8 @@ psql "postgresql://postgres:py3lESQ67tuNsFpr@db.uhtkemafphcegmabyfyj.supabase.co
 ### 2. Set Environment Variables
 ```bash
 # Required
-ALLOWED_ORIGINS=http://localhost:5173,https://yourdomain.com
-PRODUCTION_DOMAIN=yourdomain.com
+ALLOWED_ORIGINS=http://localhost:5173,https://dropgood.co
+PRODUCTION_DOMAIN=dropgood.co
 
 # Recommended for Production
 UPSTASH_REDIS_REST_URL=https://xxx.upstash.io

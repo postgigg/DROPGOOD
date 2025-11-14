@@ -73,7 +73,7 @@ return secureResponse(
   {
     enableCSP: true,
     enableHSTS: true,
-    allowedOrigins: ['https://yourdomain.com'],
+    allowedOrigins: ['https://dropgood.co'],
   }
 );
 ```
@@ -318,8 +318,8 @@ const result = await callStripeWithBreaker(async () => {
 **Configuration:**
 ```bash
 # Set allowed origins in environment
-ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
-PRODUCTION_DOMAIN=yourdomain.com
+ALLOWED_ORIGINS=https://dropgood.co,https://www.dropgood.co
+PRODUCTION_DOMAIN=dropgood.co
 ```
 
 ## Database Security
@@ -372,8 +372,8 @@ UBER_WEBHOOK_SECRET=xxx
 # Optional (Production Recommended)
 UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
 UPSTASH_REDIS_REST_TOKEN=xxx
-ALLOWED_ORIGINS=https://yourdomain.com
-PRODUCTION_DOMAIN=yourdomain.com
+ALLOWED_ORIGINS=https://dropgood.co
+PRODUCTION_DOMAIN=dropgood.co
 
 # Optional (Bot Protection)
 CAPTCHA_SECRET_KEY=xxx

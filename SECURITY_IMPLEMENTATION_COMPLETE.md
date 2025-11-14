@@ -78,8 +78,8 @@ Add these to your Supabase Edge Functions secrets:
 **Required:**
 ```bash
 UBER_WEBHOOK_SECRET=<your_uber_webhook_secret>
-ALLOWED_ORIGINS=http://localhost:5173,https://yourdomain.com
-PRODUCTION_DOMAIN=yourdomain.com
+ALLOWED_ORIGINS=http://localhost:5173,https://dropgood.co
+PRODUCTION_DOMAIN=dropgood.co
 ```
 
 **Recommended for Production:**

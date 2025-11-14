@@ -30,8 +30,8 @@ UBER_CLIENT_SECRET=xxx
 
 # Add new ones
 UBER_WEBHOOK_SECRET=xxx  # Get from Uber Direct dashboard
-ALLOWED_ORIGINS=http://localhost:5173,https://yourdomain.com
-PRODUCTION_DOMAIN=yourdomain.com
+ALLOWED_ORIGINS=http://localhost:5173,https://dropgood.co
+PRODUCTION_DOMAIN=dropgood.co
 
 # Optional but recommended for production
 UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
