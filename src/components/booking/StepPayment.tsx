@@ -1057,15 +1057,7 @@ function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProc
 
   return (
     <form onSubmit={handlePaymentSubmit} className="space-y-6">
-      {/* Apple Pay / Google Pay / Link - Express Checkout */}
-      {/* Note: Apple Pay and Google Pay require HTTPS. Deploy to production to enable. */}
-      <div className="mb-6">
-        <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4 text-sm text-blue-200">
-          💡 <strong>Apple Pay & Google Pay available on production</strong> - Currently on localhost (HTTP). Deploy to HTTPS domain to enable express checkout options.
-        </div>
-      </div>
-
-      {/* Regular Card Payment */}
+      {/* Card Payment */}
       <PaymentElement />
 
       {paymentError && (
