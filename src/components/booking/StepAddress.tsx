@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { MapPin, Loader, X } from 'lucide-react';
+import { MapPin, Loader, X, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -42,6 +43,7 @@ export default function StepAddress({ onNext, initialData }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [useManualEntry, setUseManualEntry] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
@@ -112,13 +114,17 @@ export default function StepAddress({ onNext, initialData }: Props) {
     setShowSuggestions(false);
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!coordinates) {
       alert('Please select an address from the suggestions or enter a valid address');
       return;
     }
+
+    setIsSubmitting(true);
+    // Simulate brief delay for smoother transition
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     onNext({
       street,
@@ -170,31 +176,49 @@ export default function StepAddress({ onNext, initialData }: Props) {
             )}
           </div>
 
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion.id}
-                  type="button"
-                  onClick={() => selectSuggestion(suggestion)}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white border-b border-gray-700 last:border-b-0 flex items-start gap-2"
-                >
-                  <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-medium">{suggestion.text}</div>
-                    <div className="text-sm text-gray-400">{suggestion.place_name}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+          <AnimatePresence>
+            {showSuggestions && suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                {suggestions.map((suggestion, index) => (
+                  <motion.button
+                    key={suggestion.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    type="button"
+                    onClick={() => selectSuggestion(suggestion)}
+                    className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white border-b border-gray-700 last:border-b-0 flex items-start gap-2 transition-colors"
+                  >
+                    <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">{suggestion.text}</div>
+                      <div className="text-sm text-gray-400">{suggestion.place_name}</div>
+                    </div>
+                  </motion.button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {coordinates && (
-            <div className="mt-2 flex items-center gap-2 text-green-400 text-sm">
-              <MapPin className="h-4 w-4" />
-              <span>Address verified: {street}, {city}, {state} {zip}</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {coordinates && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-2 flex items-center gap-2 text-green-400 text-sm overflow-hidden"
+              >
+                <CheckCircle className="h-4 w-4" />
+                <span>Address verified: {street}, {city}, {state} {zip}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <button
             type="button"
@@ -276,13 +300,22 @@ export default function StepAddress({ onNext, initialData }: Props) {
         </>
       )}
 
-      <button
+      <motion.button
         type="submit"
-        disabled={!coordinates && !useManualEntry}
-        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={(!coordinates && !useManualEntry) || isSubmitting}
+        whileHover={{ scale: (!coordinates && !useManualEntry) || isSubmitting ? 1 : 1.02 }}
+        whileTap={{ scale: (!coordinates && !useManualEntry) || isSubmitting ? 1 : 0.98 }}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        Continue
-      </button>
+        {isSubmitting ? (
+          <>
+            <Loader className="h-5 w-5 animate-spin" />
+            <span>Processing...</span>
+          </>
+        ) : (
+          'Continue'
+        )}
+      </motion.button>
     </form>
   );
 }

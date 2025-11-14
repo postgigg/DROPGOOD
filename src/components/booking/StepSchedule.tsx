@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Loader } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { DonationCenter } from '../../lib/supabase';
 import { calculateFinalPrice } from '../../lib/pricing';
 
@@ -24,6 +25,7 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
     }
     return '14:00-16:00';
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isToday = selectedDate === today.toISOString().split('T')[0];
 
@@ -73,8 +75,11 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
     { value: '17:00-19:00', label: 'Evening (5pm - 7pm)' }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    // Simulate brief delay for smoother transition
+    await new Promise(resolve => setTimeout(resolve, 300));
     const [timeStart, timeEnd] = selectedTime.split('-');
     onNext({ date: selectedDate, timeStart, timeEnd, pricing: updatedPricing });
   };
@@ -105,10 +110,12 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
             const dateInfo = formatDate(date);
 
             return (
-              <button
+              <motion.button
                 key={dateStr}
                 type="button"
                 onClick={() => setSelectedDate(dateStr)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className={`relative p-3 border-2 rounded-lg transition text-center ${
                   selectedDate === dateStr
                     ? 'border-blue-500 bg-blue-600 text-white'
@@ -119,11 +126,15 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
                 <div className="text-2xl font-bold">{dateInfo.dayNumber}</div>
                 <div className="text-xs mt-1">{dateInfo.monthName}</div>
                 {isSelectedToday && (
-                  <div className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full"
+                  >
                     +$5
-                  </div>
+                  </motion.div>
                 )}
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -139,10 +150,12 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {timeSlots.map(slot => (
-            <button
+            <motion.button
               key={slot.value}
               type="button"
               onClick={() => setSelectedTime(slot.value)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               className={`p-4 border-2 rounded-lg transition text-center ${
                 selectedTime === slot.value
                   ? 'border-blue-500 bg-blue-600 text-white'
@@ -152,7 +165,7 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
               <Clock className={`h-6 w-6 mx-auto mb-2 ${selectedTime === slot.value ? 'text-white' : 'text-gray-400'}`} />
               <div className="font-semibold">{slot.label.split('(')[0].trim()}</div>
               <div className="text-sm mt-1 opacity-80">{slot.label.match(/\(([^)]+)\)/)?.[1]}</div>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -167,19 +180,32 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
       </div>
 
       <div className="flex space-x-4">
-        <button
+        <motion.button
           type="button"
           onClick={onBack}
-          className="flex-1 bg-gray-700 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-600 transition"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          disabled={isSubmitting}
+          className="flex-1 bg-gray-700 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-600 transition disabled:opacity-50"
         >
           Back
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           type="submit"
-          className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+          whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+          disabled={isSubmitting}
+          className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          Continue to Payment
-        </button>
+          {isSubmitting ? (
+            <>
+              <Loader className="h-5 w-5 animate-spin" />
+              <span>Processing...</span>
+            </>
+          ) : (
+            'Continue to Payment'
+          )}
+        </motion.button>
       </div>
     </form>
   );

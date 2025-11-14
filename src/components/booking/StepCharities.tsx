@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Star, Clock, Loader2, Sparkles, DollarSign, Search, Building2, MapPin, X, Loader } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { supabase, type DonationCenter } from '../../lib/supabase';
 import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE } from '../../lib/pricing';
 import { searchDonationCentersNearby } from '../../lib/mapboxSearch';
@@ -436,31 +439,30 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       const selectedLocation = selectedAddressResult;
 
       // Create the donation center in database (inactive)
-      console.log('🏪 Attempting to insert charity:', {
+      const insertPayload = {
         name: newCharityName.trim(),
-        address: selectedLocation.address,
+        street_address: selectedLocation.address,
         city: selectedLocation.city,
         state: selectedLocation.state,
-        is_active: false
-      });
+        zip_code: selectedLocation.zip,
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+        is_active: false, // Pending admin review
+        is_partner: false,
+        can_auto_issue_receipts: false,
+        rating: 0,
+        total_ratings: 0,
+        total_donations_received: 0
+      };
+
+      console.log('🏪 FULL INSERT PAYLOAD:', insertPayload);
+      console.log('🏪 is_partner value:', insertPayload.is_partner);
+      console.log('🏪 can_auto_issue_receipts value:', insertPayload.can_auto_issue_receipts);
+      console.log('🏪 is_active value:', insertPayload.is_active);
 
       const { data: newCenter, error: insertError } = await supabase
         .from('donation_centers')
-        .insert({
-          name: newCharityName.trim(),
-          street_address: selectedLocation.address,
-          city: selectedLocation.city,
-          state: selectedLocation.state,
-          zip_code: selectedLocation.zip,
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-          is_active: false, // Pending admin review
-          is_partner: false,
-          can_auto_issue_receipts: false,
-          rating: 0,
-          total_ratings: 0,
-          total_donations_received: 0
-        })
+        .insert(insertPayload)
         .select()
         .single();
 
@@ -545,10 +547,35 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-        <p className="text-gray-300">Finding donation centers near you...</p>
-        <p className="text-sm text-gray-500">Checking for special offers</p>
+      <div className="space-y-4">
+        <div>
+          <Skeleton height={32} width={300} baseColor="#1f2937" highlightColor="#374151" />
+          <Skeleton height={20} width={200} baseColor="#1f2937" highlightColor="#374151" className="mt-2" />
+        </div>
+        {[1, 2, 3].map((i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="border border-gray-700 bg-gray-800/50 rounded-2xl p-7"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex-1">
+                <Skeleton height={28} width="60%" baseColor="#1f2937" highlightColor="#374151" />
+                <Skeleton height={16} width="40%" baseColor="#1f2937" highlightColor="#374151" className="mt-2" />
+              </div>
+              <div className="flex flex-col sm:items-end gap-3">
+                <Skeleton height={48} width={120} baseColor="#1f2937" highlightColor="#374151" />
+                <Skeleton height={44} width={140} baseColor="#1f2937" highlightColor="#374151" />
+              </div>
+            </div>
+          </motion.div>
+        ))}
+        <div className="flex items-center justify-center gap-2 py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+          <p className="text-gray-300">Finding donation centers near you...</p>
+        </div>
       </div>
     );
   }
@@ -804,10 +831,14 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       )}
 
       <div className="space-y-3 sm:space-y-4">
-        {sortedCharities.map((charity) => (
-          <div
+        {sortedCharities.map((charity, index) => (
+          <motion.div
             key={charity.id}
-            className={`relative border rounded-2xl p-5 sm:p-7 hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 ${
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+            className={`relative border rounded-2xl p-5 sm:p-7 shadow-lg transition-all duration-200 ${
               charity.sponsorship || charity.company_benefit
                 ? 'border-2 border-blue-500 bg-gradient-to-br from-blue-900/10 to-purple-900/10'
                 : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
@@ -890,15 +921,17 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                   <p>Base price + optional tip</p>
                 </div>
 
-                <button
+                <motion.button
                   onClick={() => onSelect(charity)}
-                  className="bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-bold hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
                 >
                   Select
-                </button>
+                </motion.button>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 

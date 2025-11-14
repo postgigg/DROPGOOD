@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { CreditCard, Lock, Building2 } from 'lucide-react';
+import { CreditCard, Lock, Building2, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { supabase, type DonationCenter } from '../../lib/supabase';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, ExpressCheckoutElement, LinkAuthenticationElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -340,6 +342,16 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       } catch (err) {
         console.error('Failed to notify admin:', err);
       }
+
+      // Trigger success confetti
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      // Small delay to show confetti before navigation
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       console.log('🚀 Navigating to confirmation page:', `/confirmation/${completedBookingId}`);
       navigate(`/confirmation/${completedBookingId}`);
@@ -897,11 +909,29 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
           </Elements>
         ) : processing ? (
           /* Loading Payment Form */
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-            <p className="text-white font-semibold mb-2">Setting up secure payment...</p>
-            <p className="text-gray-400 text-sm">Please wait while we prepare your payment form</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-12"
+          >
+            <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-white font-semibold mb-2"
+            >
+              Setting up secure payment...
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-gray-400 text-sm"
+            >
+              Please wait while we prepare your payment form
+            </motion.p>
+          </motion.div>
         ) : (
           /* Waiting for contact info */
           <div className="flex flex-col items-center justify-center py-12">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO/SEO';
 import { BreadcrumbSchema } from '../components/SEO/StructuredData';
 import { seoPages } from '../components/SEO/seoConfig';
@@ -85,16 +86,41 @@ export default function BookingFlow() {
           <div className="hidden md:flex justify-between items-center mb-4">
             {steps.map((s, idx) => (
               <div key={s.number} className="flex items-center flex-1">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold ${
-                  step >= s.number ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'
-                }`}>
-                  {s.number}
-                </div>
+                <motion.div
+                  initial={false}
+                  animate={{
+                    scale: step === s.number ? [1, 1.1, 1] : 1,
+                    backgroundColor: step >= s.number ? 'rgb(37, 99, 235)' : 'rgb(55, 65, 81)',
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold ${
+                    step >= s.number ? 'text-white' : 'text-gray-400'
+                  }`}
+                >
+                  {step > s.number ? (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    >
+                      <Check className="h-5 w-5" />
+                    </motion.div>
+                  ) : (
+                    s.number
+                  )}
+                </motion.div>
                 <span className={`ml-2 text-sm font-medium ${step >= s.number ? 'text-blue-500' : 'text-gray-500'}`}>
                   {s.name}
                 </span>
                 {idx < steps.length - 1 && (
-                  <div className={`flex-1 h-1 mx-4 ${step > s.number ? 'bg-blue-600' : 'bg-gray-700'}`} />
+                  <div className="flex-1 h-1 mx-4 bg-gray-700 rounded-full overflow-hidden relative">
+                    <motion.div
+                      initial={{ width: '0%' }}
+                      animate={{ width: step > s.number ? '100%' : '0%' }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                      className="h-full bg-blue-600 absolute top-0 left-0"
+                    />
+                  </div>
                 )}
               </div>
             ))}
@@ -107,78 +133,128 @@ export default function BookingFlow() {
             <div className="text-sm font-semibold text-blue-500">
               {steps[step - 1].name}
             </div>
+            <div className="w-full bg-gray-700 h-1 rounded-full overflow-hidden mt-2">
+              <motion.div
+                initial={{ width: '0%' }}
+                animate={{ width: `${(step / steps.length) * 100}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="h-full bg-blue-600"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-md p-4 sm:p-6 md:p-8">
-          {step === 1 && (
-            <StepAddress
-              onNext={(address) => {
-                setPickupAddress(address);
-                setStep(2);
-              }}
-              initialData={pickupAddress}
-            />
-          )}
+        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-md p-4 sm:p-6 md:p-8 overflow-hidden">
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <StepAddress
+                  onNext={(address) => {
+                    setPickupAddress(address);
+                    setStep(2);
+                  }}
+                  initialData={pickupAddress}
+                />
+              </motion.div>
+            )}
 
-          {step === 2 && (
-            <StepPhotos
-              onNext={(photoUrls, types, boxes, bags, location, inst) => {
-                setPhotos(photoUrls);
-                setItemsTypes(types);
-                setItemsCount(boxes + bags);
-                setLocationType(location);
-                setInstructions(inst);
-                setStep(3);
-              }}
-              onBack={() => setStep(1)}
-              initialPhotos={photos}
-              initialTypes={itemsTypes}
-              initialCount={itemsCount}
-              initialLocationType={locationType}
-              initialInstructions={instructions}
-            />
-          )}
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <StepPhotos
+                  onNext={(photoUrls, types, boxes, bags, location, inst) => {
+                    setPhotos(photoUrls);
+                    setItemsTypes(types);
+                    setItemsCount(boxes + bags);
+                    setLocationType(location);
+                    setInstructions(inst);
+                    setStep(3);
+                  }}
+                  onBack={() => setStep(1)}
+                  initialPhotos={photos}
+                  initialTypes={itemsTypes}
+                  initialCount={itemsCount}
+                  initialLocationType={locationType}
+                  initialInstructions={instructions}
+                />
+              </motion.div>
+            )}
 
-          {step === 3 && pickupAddress && (
-            <StepCharities
-              pickupAddress={pickupAddress}
-              itemsTypes={itemsTypes}
-              itemsCount={itemsCount}
-              onSelect={(charity) => {
-                setSelectedCharity(charity);
-                setStep(4);
-              }}
-              onBack={() => setStep(2)}
-            />
-          )}
+            {step === 3 && pickupAddress && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <StepCharities
+                  pickupAddress={pickupAddress}
+                  itemsTypes={itemsTypes}
+                  itemsCount={itemsCount}
+                  onSelect={(charity) => {
+                    setSelectedCharity(charity);
+                    setStep(4);
+                  }}
+                  onBack={() => setStep(2)}
+                />
+              </motion.div>
+            )}
 
-          {step === 4 && selectedCharity && (
-            <StepSchedule
-              charity={selectedCharity}
-              onNext={(scheduleData) => {
-                setSchedule(scheduleData);
-                setSelectedCharity({ ...selectedCharity, pricing: scheduleData.pricing });
-                setStep(5);
-              }}
-              onBack={() => setStep(3)}
-              initialSchedule={schedule}
-            />
-          )}
+            {step === 4 && selectedCharity && (
+              <motion.div
+                key="step4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <StepSchedule
+                  charity={selectedCharity}
+                  onNext={(scheduleData) => {
+                    setSchedule(scheduleData);
+                    setSelectedCharity({ ...selectedCharity, pricing: scheduleData.pricing });
+                    setStep(5);
+                  }}
+                  onBack={() => setStep(3)}
+                  initialSchedule={schedule}
+                />
+              </motion.div>
+            )}
 
-          {step === 5 && pickupAddress && selectedCharity && schedule && (
-            <StepPayment
-              pickupAddress={pickupAddress}
-              charity={selectedCharity}
-              schedule={schedule}
-              itemsTypes={itemsTypes}
-              itemsCount={itemsCount}
-              photos={photos}
-              locationType={locationType}
-              instructions={instructions}
-              onBack={() => setStep(4)}
-            />
-          )}
+            {step === 5 && pickupAddress && selectedCharity && schedule && (
+              <motion.div
+                key="step5"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <StepPayment
+                  pickupAddress={pickupAddress}
+                  charity={selectedCharity}
+                  schedule={schedule}
+                  itemsTypes={itemsTypes}
+                  itemsCount={itemsCount}
+                  photos={photos}
+                  locationType={locationType}
+                  instructions={instructions}
+                  onBack={() => setStep(4)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
