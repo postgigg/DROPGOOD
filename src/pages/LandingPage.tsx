@@ -304,7 +304,7 @@ export default function LandingPage() {
                 </form>
 
                 <p className="text-white/70 text-base sm:text-lg">
-                  Typically $6-15 · 2-minute booking · Available in 500+ cities
+                  Typically $10-20 · 2-minute booking · Available in 500+ cities
                 </p>
               </div>
             </div>

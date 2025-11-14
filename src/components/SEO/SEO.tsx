@@ -7,7 +7,7 @@ interface SEOProps extends Partial<SEOConfig> {
 
 export default function SEO({
   title = 'DropGood - Nationwide Donation Pickup Service | USA',
-  description = 'Hassle-free donation pickup service across the USA. Schedule charity pickup in 500+ cities. Tax-deductible receipts. $6-15 pricing.',
+  description = 'Hassle-free donation pickup service across the USA. Schedule charity pickup in 500+ cities. Tax-deductible receipts. $10-20 pricing.',
   keywords = 'donation pickup service, charity pickup usa, nationwide donation service',
   canonical,
   ogImage = '/og-images/home.jpg',

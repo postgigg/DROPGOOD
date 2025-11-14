@@ -16,7 +16,7 @@ export function LocalBusinessSchema({ cityName, stateName, latitude, longitude }
     url: 'https://dropgood.com',
     telephone: '+1-888-DROP-GOOD',
     email: 'support@dropgood.com',
-    priceRange: '$6-$15',
+    priceRange: '$10-$20',
     areaServed: cityName && stateName ? {
       '@type': 'City',
       name: `${cityName}, ${stateName}`,
@@ -91,7 +91,7 @@ export function ServiceSchema() {
     },
     offers: {
       '@type': 'Offer',
-      priceRange: '$6-$15',
+      priceRange: '$10-$20',
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
     },
@@ -169,7 +169,7 @@ export function HowToSchema() {
     estimatedCost: {
       '@type': 'MonetaryAmount',
       currency: 'USD',
-      value: '6-15',
+      value: '10-20',
     },
     step: [
       {

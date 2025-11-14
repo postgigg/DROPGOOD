@@ -88,7 +88,7 @@ export default function CityLandingPage() {
               </button>
 
               <p className="mt-4 sm:mt-6 text-gray-400 text-base sm:text-lg text-center sm:text-left">
-                Typical cost: $6-15. Available across {cityName} metro area.
+                Typical cost: $10-20. Available across {cityName} metro area.
               </p>
             </div>
 
