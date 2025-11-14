@@ -905,6 +905,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               setProcessing={setProcessing}
               paymentError={paymentError}
               setPaymentError={setPaymentError}
+              agreedToTerms={agreedToTerms}
+              setAgreedToTerms={setAgreedToTerms}
             />
           </Elements>
         ) : processing ? (
@@ -976,9 +978,11 @@ interface PaymentFormProps {
   setProcessing: (processing: boolean) => void;
   paymentError: string | null;
   setPaymentError: (error: string | null) => void;
+  agreedToTerms: boolean;
+  setAgreedToTerms: (agreed: boolean) => void;
 }
 
-function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProcessing, paymentError, setPaymentError }: PaymentFormProps) {
+function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProcessing, paymentError, setPaymentError, agreedToTerms, setAgreedToTerms }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
