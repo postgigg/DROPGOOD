@@ -41,8 +41,8 @@ export default function LandingPage() {
       icon: <MapPin className="h-5 w-5" />,
     },
     {
-      value: '24/7',
-      label: 'Available anytime',
+      value: 'Same-day',
+      label: 'Or schedule ahead',
       icon: <Clock className="h-5 w-5" />,
     },
   ];
@@ -537,7 +537,7 @@ export default function LandingPage() {
                   onClick={() => navigate('/book')}
                   className="group bg-blue-600 text-white px-10 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-blue-700 transition shadow-xl inline-flex items-center gap-3"
                 >
-                  Get started
+                  See my price
                   <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <p className="mt-6 text-gray-500 text-sm">
