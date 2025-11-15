@@ -115,7 +115,6 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
           <p className="font-semibold text-white">Selected charity: {charity.name}</p>
           <p className="text-sm text-gray-400">
             Final price: ${updatedPricing.total_price.toFixed(2)}
-            {isToday && <span className="ml-2 text-yellow-400">(includes $5 rush fee)</span>}
           </p>
           <p className="text-sm text-gray-400">Distance: {charity.distance_miles} miles</p>
         </div>
@@ -148,22 +147,10 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
                 <div className="text-xs font-medium mb-1">{dateInfo.dayName}</div>
                 <div className="text-2xl font-bold">{dateInfo.dayNumber}</div>
                 <div className="text-xs mt-1">{dateInfo.monthName}</div>
-                {isSelectedToday && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full"
-                  >
-                    +$5
-                  </motion.div>
-                )}
               </motion.button>
             );
           })}
         </div>
-        {selectedDate === today.toISOString().split('T')[0] && (
-          <p className="text-xs text-yellow-400 mt-2">* Same-day pickup includes a $5 rush fee</p>
-        )}
       </div>
 
       <div>
