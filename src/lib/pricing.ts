@@ -29,7 +29,7 @@ export interface PricingBreakdown {
   subsidized?: boolean;
 }
 
-const RUSH_FEE = 5.00;
+const RUSH_FEE = 0.00; // No rush fee
 export const DEFAULT_SERVICE_FEE = 0.25; // 25%
 export const INACTIVE_CHARITY_SERVICE_FEE = 0.40; // 40% for unverified charities
 export const GUARANTEED_DRIVER_TIP = 10.00; // $10 guaranteed tip for every delivery
