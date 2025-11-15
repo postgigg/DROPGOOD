@@ -44,10 +44,13 @@ export function shouldApplyStateFee(state: string): boolean {
 export function calculateFinalPrice(
   uberCost: number,
   isRushDelivery: boolean = false,
-  driverTip: number = GUARANTEED_DRIVER_TIP, // Always $10 guaranteed tip
+  driverTip: number = GUARANTEED_DRIVER_TIP, // Minimum $10 guaranteed tip
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
   pickupState?: string
 ): PricingBreakdown {
+  // Enforce minimum tip of $10, maximum $100
+  const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
+
   // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee)
   const deliveryMarkup = uberCost * DELIVERY_MARKUP;
   const stateFee = (pickupState && shouldApplyStateFee(pickupState))
@@ -60,7 +63,7 @@ export function calculateFinalPrice(
 
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
   const subtotalBeforeTip = deliveryFee + serviceFee + rushFee;
-  const subtotal = subtotalBeforeTip + GUARANTEED_DRIVER_TIP; // Always include $10 tip
+  const subtotal = subtotalBeforeTip + finalTip;
 
   const totalPrice = (subtotal + 0.30) / 0.971;
   const stripeFee = totalPrice - subtotal;
@@ -70,7 +73,7 @@ export function calculateFinalPrice(
     delivery_fee: parseFloat(deliveryFee.toFixed(2)),
     service_fee: parseFloat(serviceFee.toFixed(2)),
     our_markup: parseFloat((deliveryMarkup + stateFee + serviceFee).toFixed(2)), // For compatibility
-    driver_tip: GUARANTEED_DRIVER_TIP, // Always $10
+    driver_tip: parseFloat(finalTip.toFixed(2)),
     rush_fee: rushFee,
     subtotal: parseFloat(subtotal.toFixed(2)),
     stripe_fee: parseFloat(stripeFee.toFixed(2)),
@@ -260,12 +263,15 @@ export function calculateStackedSubsidies(
 export function calculateFinalPriceWithSubsidies(
   uberCost: number,
   isRushDelivery: boolean = false,
-  driverTip: number = GUARANTEED_DRIVER_TIP, // Always $10 guaranteed tip
+  driverTip: number = GUARANTEED_DRIVER_TIP, // Minimum $10 guaranteed tip
   charitySubsidyPercentage: number = 0,
   companySubsidyPercentage: number = 0,
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
   pickupState?: string
 ): PricingBreakdown {
+  // Enforce minimum tip of $10, maximum $100
+  const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
+
   // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee)
   const deliveryMarkup = uberCost * DELIVERY_MARKUP;
   const stateFee = (pickupState && shouldApplyStateFee(pickupState))
@@ -291,13 +297,13 @@ export function calculateFinalPriceWithSubsidies(
     companySubsidyPercentage
   );
 
-  // Calculate tip with its own Stripe fee - always $10 guaranteed
-  const tipWithStripeFee = (GUARANTEED_DRIVER_TIP + 0.30) / 0.971;
-  const stripeFeeOnTip = tipWithStripeFee - GUARANTEED_DRIVER_TIP;
+  // Calculate tip with its own Stripe fee
+  const tipWithStripeFee = (finalTip + 0.30) / 0.971;
+  const stripeFeeOnTip = tipWithStripeFee - finalTip;
 
   // Final calculations
   const totalStripeFee = stripeFeeWithoutTip + stripeFeeOnTip;
-  const subtotalWithTip = subtotalWithoutTip + GUARANTEED_DRIVER_TIP;
+  const subtotalWithTip = subtotalWithoutTip + finalTip;
   const finalPrice = subsidies.customer_pays_amount + tipWithStripeFee;
 
   const hasSubsidies = charitySubsidyPercentage > 0 || companySubsidyPercentage > 0;
@@ -307,7 +313,7 @@ export function calculateFinalPriceWithSubsidies(
     delivery_fee: parseFloat(deliveryFee.toFixed(2)),
     service_fee: parseFloat(serviceFee.toFixed(2)),
     our_markup: parseFloat((deliveryMarkup + stateFee + serviceFee).toFixed(2)), // For compatibility
-    driver_tip: GUARANTEED_DRIVER_TIP, // Always $10
+    driver_tip: parseFloat(finalTip.toFixed(2)),
     rush_fee: rushFee,
     subtotal: parseFloat(subtotalWithTip.toFixed(2)),
     stripe_fee: parseFloat(totalStripeFee.toFixed(2)),
