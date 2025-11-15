@@ -55,15 +55,13 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     if (phone) localStorage.setItem('dropgood_last_phone', phone);
   }, [email, phone]);
 
-  // Auto-initialize payment when component mounts and contact info is provided
+  // Auto-initialize payment when component mounts
   useEffect(() => {
     const shouldInitialize = stripeEnabled &&
                             !bookingId &&
                             !processing &&
                             !paymentError &&
-                            !clientSecret &&
-                            phone &&
-                            (contactMethod === 'phone' || (contactMethod === 'both' && email));
+                            !clientSecret;
 
     if (shouldInitialize) {
       // Small delay to ensure state is settled
@@ -72,7 +70,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [phone, email, contactMethod]);
+  }, []); // Only run once on mount
 
   const recalculatedPricing = (() => {
     // Use the new stacked subsidy pricing function
@@ -98,12 +96,6 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
 
   // Create booking and payment intent
   const initializePayment = async () => {
-    // Validate required fields
-    if (!firstName || !lastName || !phone || (contactMethod === 'both' && !email)) {
-      setPaymentError('Please provide all required contact information');
-      return;
-    }
-
     setProcessing(true);
     setPaymentError(null);
 
@@ -156,10 +148,10 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         status: 'payment_pending',
         payment_status: 'pending',
         manual_mode: manualMode,
-        customer_first_name: firstName,
-        customer_last_name: lastName,
-        customer_phone: phone,
-        customer_email: contactMethod === 'both' ? email : null,
+        customer_first_name: firstName || '',
+        customer_last_name: lastName || '',
+        customer_phone: phone || '',
+        customer_email: contactMethod === 'both' ? (email || '') : null,
         // Charity subsidy fields
         sponsorship_id: charity.sponsorship?.id || null,
         charity_subsidy_amount: recalculatedPricing.charity_subsidy_amount || 0,
@@ -895,6 +887,11 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               setPaymentError={setPaymentError}
               agreedToTerms={agreedToTerms}
               setAgreedToTerms={setAgreedToTerms}
+              firstName={firstName}
+              lastName={lastName}
+              phone={phone}
+              email={email}
+              contactMethod={contactMethod}
             />
           </Elements>
         ) : processing ? (
@@ -968,15 +965,27 @@ interface PaymentFormProps {
   setPaymentError: (error: string | null) => void;
   agreedToTerms: boolean;
   setAgreedToTerms: (agreed: boolean) => void;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  contactMethod: 'both' | 'phone';
 }
 
-function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProcessing, paymentError, setPaymentError, agreedToTerms, setAgreedToTerms }: PaymentFormProps) {
+function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProcessing, paymentError, setPaymentError, agreedToTerms, setAgreedToTerms, firstName, lastName, phone, email, contactMethod }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate contact info before processing payment
+    if (!firstName || !lastName || !phone || (contactMethod === 'both' && !email)) {
+      setPaymentError('Please provide all required contact information');
+      setProcessing(false);
+      return;
+    }
 
     if (!stripe || !elements) {
       console.error('Stripe not loaded');
@@ -988,6 +997,22 @@ function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProc
     setPaymentError(null);
 
     try {
+      // Update booking with contact info before payment
+      const { error: updateContactError } = await supabase
+        .from('bookings')
+        .update({
+          customer_first_name: firstName,
+          customer_last_name: lastName,
+          customer_phone: phone,
+          customer_email: contactMethod === 'both' ? email : null,
+        })
+        .eq('id', bookingId);
+
+      if (updateContactError) {
+        console.error('Failed to update contact info:', updateContactError);
+        throw new Error('Failed to update contact information');
+      }
+
       console.log('Confirming payment with Stripe...');
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
