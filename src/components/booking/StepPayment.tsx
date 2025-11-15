@@ -809,65 +809,6 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         </div>
       </div>
 
-      {/* Error Display */}
-      {paymentError && (
-        <div className="bg-red-900/20 border-2 border-red-700 rounded-xl p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-              <span className="text-red-400 text-xl">⚠️</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-red-400 mb-2">Payment Error</h3>
-              <p className="text-sm text-gray-300 mb-3">{paymentError}</p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPaymentError(null);
-                    setBookingId(null);
-                    setClientSecret(null);
-                    setPaymentReady(false);
-                    setProcessing(false);
-                  }}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition"
-                >
-                  Try Again
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Payment Error Display */}
-      {paymentError && (
-        <div className="bg-red-900/20 border border-red-700 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5">
-              <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-red-400 font-semibold">Payment Error</h3>
-              <p className="text-red-300 text-sm mt-1">{paymentError}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setPaymentError(null);
-                  setBookingId(null);
-                  setClientSecret(null);
-                  setPaymentReady(false);
-                }}
-                className="mt-3 text-sm text-red-400 hover:text-red-300 font-medium"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Payment Section - ALWAYS SHOW CARD INPUT */}
       <div className="bg-gray-900 border border-gray-700 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-6">
@@ -1106,13 +1047,6 @@ function PaymentForm({ amount, bookingId, onBack, onSuccess, processing, setProc
     <form onSubmit={handlePaymentSubmit} className="space-y-6">
       {/* Card Payment */}
       <PaymentElement />
-
-      {paymentError && (
-        <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
-          <p className="text-red-400 font-semibold">Payment Failed</p>
-          <p className="text-red-300 text-sm mt-1">{paymentError}</p>
-        </div>
-      )}
 
       {/* Terms Agreement */}
       <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
