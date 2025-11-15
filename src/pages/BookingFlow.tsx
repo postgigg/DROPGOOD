@@ -46,6 +46,8 @@ export default function BookingFlow() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [itemsTypes, setItemsTypes] = useState<string[]>([]);
   const [itemsCount, setItemsCount] = useState(3);
+  const [bagsCount, setBagsCount] = useState(2);
+  const [boxesCount, setBoxesCount] = useState(1);
   const [locationType, setLocationType] = useState('front_door');
   const [instructions, setInstructions] = useState('');
   const [selectedCharity, setSelectedCharity] = useState<DonationCenter | null>(null);
@@ -176,6 +178,8 @@ export default function BookingFlow() {
                   onNext={(photoUrls, types, boxes, bags, location, inst) => {
                     setPhotos(photoUrls);
                     setItemsTypes(types);
+                    setBoxesCount(boxes);
+                    setBagsCount(bags);
                     setItemsCount(boxes + bags);
                     setLocationType(location);
                     setInstructions(inst);
@@ -203,6 +207,8 @@ export default function BookingFlow() {
                   pickupAddress={pickupAddress}
                   itemsTypes={itemsTypes}
                   itemsCount={itemsCount}
+                  bagsCount={bagsCount}
+                  boxesCount={boxesCount}
                   onSelect={(charity) => {
                     setSelectedCharity(charity);
                     setStep(4);
@@ -223,6 +229,8 @@ export default function BookingFlow() {
                 <StepSchedule
                   charity={selectedCharity}
                   pickupAddress={pickupAddress}
+                  bagsCount={bagsCount}
+                  boxesCount={boxesCount}
                   onNext={(scheduleData) => {
                     setSchedule(scheduleData);
                     setSelectedCharity({ ...selectedCharity, pricing: scheduleData.pricing });
@@ -248,6 +256,8 @@ export default function BookingFlow() {
                   schedule={schedule}
                   itemsTypes={itemsTypes}
                   itemsCount={itemsCount}
+                  bagsCount={bagsCount}
+                  boxesCount={boxesCount}
                   photos={photos}
                   locationType={locationType}
                   instructions={instructions}

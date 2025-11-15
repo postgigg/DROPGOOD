@@ -18,6 +18,8 @@ interface Props {
   };
   itemsTypes: string[];
   itemsCount: number;
+  bagsCount?: number;
+  boxesCount?: number;
   onSelect: (charity: DonationCenter & { pricing: any }) => void;
   onBack: () => void;
 }
@@ -50,7 +52,7 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
-export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, onSelect, onBack }: Props) {
+export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, bagsCount = 0, boxesCount = 0, onSelect, onBack }: Props) {
   const [charities, setCharities] = useState<CharityWithSponsorship[]>([]);
   const [allMapboxResults, setAllMapboxResults] = useState<CharityWithSponsorship[]>([]);
   const [displayCount, setDisplayCount] = useState(10);

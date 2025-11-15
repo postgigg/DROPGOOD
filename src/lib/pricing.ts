@@ -1,6 +1,6 @@
 export interface PricingBreakdown {
   uber_cost: number;
-  delivery_fee: number; // Uber + 15% + optional 3.5% state fee
+  delivery_fee: number; // Uber + 15% + optional 3.5% state fee + bag/box fees
   service_fee: number; // 10% shown separately (or higher for inactive charities)
   our_markup?: number; // Deprecated - kept for compatibility
   driver_tip: number;
@@ -8,6 +8,13 @@ export interface PricingBreakdown {
   subtotal: number;
   stripe_fee: number;
   total_price: number;
+  // Bag/Box fees
+  bag_count?: number;
+  box_count?: number;
+  bag_fee?: number;
+  box_fee?: number;
+  bag_box_driver_tip?: number; // What driver gets from bags/boxes
+  total_driver_tip?: number; // $10 base + bag/box tips + customer extra
   // Charity subsidy fields
   charity_subsidy_amount?: number;
   charity_subsidy_percentage?: number;
@@ -26,6 +33,12 @@ const RUSH_FEE = 5.00;
 export const DEFAULT_SERVICE_FEE = 0.25; // 25%
 export const INACTIVE_CHARITY_SERVICE_FEE = 0.40; // 40% for unverified charities
 export const GUARANTEED_DRIVER_TIP = 10.00; // $10 guaranteed tip for every delivery
+
+// Bag/Box fees - driver tips built into delivery fee
+export const BAG_FEE = 1.50; // Per bag - 100% to driver as tip
+export const BOX_FEE = 2.00; // Per box - $1.50 to driver as tip, $0.50 to DropGood
+export const BOX_TIP_AMOUNT = 1.50; // What driver gets per box
+export const BOX_REVENUE = 0.50; // What DropGood keeps per box
 
 // New fee structure
 export const STATE_FEE = 0.035; // 3.5% additional for certain states
@@ -46,17 +59,28 @@ export function calculateFinalPrice(
   isRushDelivery: boolean = false,
   driverTip: number = GUARANTEED_DRIVER_TIP, // Minimum $10 guaranteed tip
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
-  pickupState?: string
+  pickupState?: string,
+  bagsCount: number = 0,
+  boxesCount: number = 0
 ): PricingBreakdown {
   // Enforce minimum tip of $10, maximum $100
   const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
 
-  // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee)
+  // Calculate bag/box fees
+  const bagFee = bagsCount * BAG_FEE;
+  const boxFee = boxesCount * BOX_FEE;
+  const bagBoxTotal = bagFee + boxFee;
+
+  // Calculate driver tip from bags/boxes
+  const bagBoxDriverTip = (bagsCount * BAG_FEE) + (boxesCount * BOX_TIP_AMOUNT);
+  const totalDriverTip = finalTip + bagBoxDriverTip;
+
+  // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee + bag/box fees)
   const deliveryMarkup = uberCost * DELIVERY_MARKUP;
   const stateFee = (pickupState && shouldApplyStateFee(pickupState))
     ? uberCost * STATE_FEE
     : 0;
-  const deliveryFee = uberCost + deliveryMarkup + stateFee;
+  const deliveryFee = uberCost + deliveryMarkup + stateFee + bagBoxTotal;
 
   // Calculate service fee (10% of Uber cost for display)
   const serviceFee = uberCost * SERVICE_FEE_DISPLAY;
@@ -77,7 +101,13 @@ export function calculateFinalPrice(
     rush_fee: rushFee,
     subtotal: parseFloat(subtotal.toFixed(2)),
     stripe_fee: parseFloat(stripeFee.toFixed(2)),
-    total_price: parseFloat(totalPrice.toFixed(2))
+    total_price: parseFloat(totalPrice.toFixed(2)),
+    bag_count: bagsCount,
+    box_count: boxesCount,
+    bag_fee: parseFloat(bagFee.toFixed(2)),
+    box_fee: parseFloat(boxFee.toFixed(2)),
+    bag_box_driver_tip: parseFloat(bagBoxDriverTip.toFixed(2)),
+    total_driver_tip: parseFloat(totalDriverTip.toFixed(2))
   };
 }
 
@@ -267,17 +297,28 @@ export function calculateFinalPriceWithSubsidies(
   charitySubsidyPercentage: number = 0,
   companySubsidyPercentage: number = 0,
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
-  pickupState?: string
+  pickupState?: string,
+  bagsCount: number = 0,
+  boxesCount: number = 0
 ): PricingBreakdown {
   // Enforce minimum tip of $10, maximum $100
   const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
 
-  // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee)
+  // Calculate bag/box fees
+  const bagFee = bagsCount * BAG_FEE;
+  const boxFee = boxesCount * BOX_FEE;
+  const bagBoxTotal = bagFee + boxFee;
+
+  // Calculate driver tip from bags/boxes
+  const bagBoxDriverTip = (bagsCount * BAG_FEE) + (boxesCount * BOX_TIP_AMOUNT);
+  const totalDriverTip = finalTip + bagBoxDriverTip;
+
+  // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee + bag/box fees)
   const deliveryMarkup = uberCost * DELIVERY_MARKUP;
   const stateFee = (pickupState && shouldApplyStateFee(pickupState))
     ? uberCost * STATE_FEE
     : 0;
-  const deliveryFee = uberCost + deliveryMarkup + stateFee;
+  const deliveryFee = uberCost + deliveryMarkup + stateFee + bagBoxTotal;
 
   // Calculate service fee (10% of Uber cost for display)
   const serviceFee = uberCost * SERVICE_FEE_DISPLAY;
@@ -318,6 +359,13 @@ export function calculateFinalPriceWithSubsidies(
     subtotal: parseFloat(subtotalWithTip.toFixed(2)),
     stripe_fee: parseFloat(totalStripeFee.toFixed(2)),
     total_price: parseFloat(finalPrice.toFixed(2)),
+    // Bag/Box fees
+    bag_count: bagsCount,
+    box_count: boxesCount,
+    bag_fee: parseFloat(bagFee.toFixed(2)),
+    box_fee: parseFloat(boxFee.toFixed(2)),
+    bag_box_driver_tip: parseFloat(bagBoxDriverTip.toFixed(2)),
+    total_driver_tip: parseFloat(totalDriverTip.toFixed(2)),
     // Subsidy details
     charity_subsidy_amount: subsidies.charity_subsidy_amount,
     charity_subsidy_percentage: charitySubsidyPercentage,
