@@ -367,239 +367,113 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-2xl mx-auto">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-2">Review Your Pickup</h2>
-        <p className="text-gray-400 text-sm">Please verify all details before completing your booking</p>
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-white mb-2">Review Your Pickup</h2>
+        <p className="text-gray-400">Confirm details before booking</p>
       </div>
 
-      {/* Desktop: 2 Column Layout, Mobile/Tablet: Single Column */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT COLUMN - Journey & Details */}
-        <div className="space-y-6">
-          {/* Point-to-Point Journey Card */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+      {/* Trip Summary - Single Clean Card */}
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
         {/* Pickup Location */}
-        <div className="p-5 border-b border-gray-700">
-          <div className="flex items-start gap-4">
-            <div className="flex flex-col items-center">
-              <div className="w-3 h-3 rounded-full bg-blue-500 mt-1"></div>
-              <div className="w-0.5 h-full bg-gray-600 min-h-[60px]"></div>
+        <div className="p-6 sm:p-8 border-b border-gray-700">
+          <div className="flex items-start gap-5">
+            <div className="flex flex-col items-center pt-1">
+              <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+              <div className="w-0.5 flex-1 bg-gray-600 min-h-[80px]"></div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-white text-sm">Pickup</h3>
-                <span className="text-xs text-gray-500">{schedule.date} • {schedule.timeStart}-{schedule.timeEnd}</span>
-              </div>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                {pickupAddress.street}<br/>
+              <p className="text-gray-400 text-sm mb-1">Pickup</p>
+              <p className="text-white font-semibold text-lg mb-2">
+                {pickupAddress.street}
+              </p>
+              <p className="text-gray-300 mb-3">
                 {pickupAddress.city}, {pickupAddress.state} {pickupAddress.zip}
               </p>
-              {instructions && (
-                <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
-                  <span>📍</span>
-                  <span>{instructions}</span>
-                </p>
-              )}
+              <p className="text-gray-400 text-sm">
+                {schedule.date} • {schedule.timeStart}-{schedule.timeEnd}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Items Being Donated */}
-        <div className="p-5 border-b border-gray-700 bg-gray-800/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg">📦</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-white text-sm mb-0.5">~{itemsCount} bags/boxes</h3>
-              <p className="text-gray-400 text-xs leading-relaxed">{itemsTypes.join(', ')}</p>
+        {/* Items */}
+        <div className="px-6 sm:px-8 py-4 border-b border-gray-700 bg-gray-800/30">
+          <div className="flex items-center gap-4">
+            <span className="text-2xl">📦</span>
+            <div>
+              <p className="text-white font-medium">~{itemsCount} bags/boxes</p>
+              <p className="text-gray-400 text-sm">{itemsTypes.join(', ')}</p>
             </div>
           </div>
         </div>
 
         {/* Dropoff Location */}
-        <div className="p-5">
-          <div className="flex items-start gap-4">
-            <div className="flex flex-col items-center">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        <div className="p-6 sm:p-8">
+          <div className="flex items-start gap-5">
+            <div className="pt-1">
+              <div className="w-4 h-4 rounded-full bg-green-500"></div>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-white text-sm mb-1">Dropoff</h3>
-              <p className="text-green-400 font-medium text-sm mb-1">{charity.name}</p>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-400 text-sm mb-1">Dropoff</p>
+              <p className="text-green-400 font-semibold text-lg mb-2">{charity.name}</p>
+              <p className="text-gray-300">
                 {charity.street_address}<br/>
                 {charity.city}, {charity.state}
               </p>
-              <p className="text-xs text-gray-500 mt-2">
-                📍 {charity.distance_miles?.toFixed(1)} miles from pickup
+              <p className="text-gray-400 text-sm mt-3">
+                {charity.distance_miles?.toFixed(1)} miles away
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tax Receipt Info */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
-        <h3 className="font-semibold text-white text-sm mb-3 flex items-center gap-2">
-          <span>📄</span>
-          Tax Receipt
-        </h3>
-        {charity.can_auto_issue_receipts ? (
-          <div className="bg-green-900/20 border border-green-700/40 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-green-400 text-lg">✓</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-green-400 font-semibold text-sm mb-1">Automatic Tax Receipt</p>
-                <p className="text-gray-400 text-xs leading-relaxed">
-                  You'll receive an IRS-compliant tax receipt via email automatically after your donation is delivered.
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-amber-900/20 border border-amber-700/40 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-amber-400 text-lg">📧</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-amber-400 font-semibold text-sm mb-1">Manual Tax Receipt</p>
-                <p className="text-gray-400 text-xs leading-relaxed mb-2">
-                  You'll receive a donation summary via email. Forward it to get your official tax receipt.
-                </p>
-                <div className="bg-gray-900/50 rounded px-3 py-2 border border-amber-700/30">
-                  <p className="text-xs text-gray-500">Forward summary to:</p>
-                  <p className="text-amber-300 font-medium text-sm">{charity.receipt_email || charity.email}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Price Total - Big and Simple */}
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
+        <div className="flex justify-between items-center mb-8">
+          <span className="text-gray-400 text-lg">Total</span>
+          <span className="text-white font-bold text-4xl">${recalculatedPricing.total_price.toFixed(2)}</span>
         </div>
 
-        {/* RIGHT COLUMN - Payment & Contact */}
-        <div className="space-y-6">
-      {/* Price Breakdown */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">💰</span>
-          <h3 className="font-semibold text-white text-sm">Price Breakdown</h3>
-        </div>
+        <details className="group">
+          <summary className="cursor-pointer text-blue-400 text-sm font-medium hover:text-blue-300 transition list-none flex items-center gap-2">
+            <span>View price breakdown</span>
+            <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
 
-        {manualMode && (
-          <div className="mb-4 p-3 bg-orange-900/20 border border-orange-700/40 rounded-lg">
-            <p className="text-xs text-orange-300">
-              📋 Estimated pricing - Final cost based on actual delivery
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">Delivery/Pickup fee</span>
-            <span className="text-white font-medium">${recalculatedPricing.delivery_fee.toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">Service fee</span>
-            <span className="text-white font-medium">${(recalculatedPricing.service_fee + recalculatedPricing.stripe_fee).toFixed(2)}</span>
-          </div>
-
-          {recalculatedPricing.rush_fee > 0 && (
-            <div className="flex justify-between items-center bg-yellow-900/20 border border-yellow-700/40 rounded-lg px-3 py-2 -mx-2">
-              <span className="text-yellow-400 font-medium">Rush fee (same-day)</span>
-              <span className="text-yellow-400 font-semibold">${recalculatedPricing.rush_fee.toFixed(2)}</span>
+          <div className="mt-6 space-y-3 text-sm pt-6 border-t border-gray-700">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Delivery fee</span>
+              <span className="text-white">${recalculatedPricing.delivery_fee.toFixed(2)}</span>
             </div>
-          )}
-
-          {/* Always show driver tip (min $10) */}
-          <div className="flex justify-between items-center bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 -mx-2">
-            <span className="text-green-400 font-medium">Driver Tip {driverTip > 10 ? '(+extra)' : '(min $10)'}</span>
-            <span className="text-green-400 font-semibold">${recalculatedPricing.driver_tip.toFixed(2)}</span>
-          </div>
-
-          {/* Subsidies Section */}
-          {(recalculatedPricing.charity_subsidy_amount > 0 || recalculatedPricing.company_subsidy_amount > 0) && (
-            <>
-              <div className="border-t border-gray-700 pt-3 mt-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Subtotal before subsidies</span>
-                  <span className="text-gray-300 font-medium">${recalculatedPricing.original_price.toFixed(2)}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Subsidies apply to delivery, not tips</p>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Service fee</span>
+              <span className="text-white">${(recalculatedPricing.service_fee + recalculatedPricing.stripe_fee).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Driver tip</span>
+              <span className="text-white">${recalculatedPricing.driver_tip.toFixed(2)}</span>
+            </div>
+            {recalculatedPricing.rush_fee > 0 && (
+              <div className="flex justify-between">
+                <span className="text-yellow-400">Rush fee</span>
+                <span className="text-yellow-400">${recalculatedPricing.rush_fee.toFixed(2)}</span>
               </div>
-
-              {/* Charity Subsidy */}
-              {recalculatedPricing.charity_subsidy_amount > 0 && (
-                <div className="bg-blue-900/20 border border-blue-700/40 rounded-lg px-4 py-3 -mx-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-blue-400 font-semibold">💙 Charity Sponsorship</span>
-                    <span className="text-blue-400 font-bold text-base">-${recalculatedPricing.charity_subsidy_amount.toFixed(2)}</span>
-                  </div>
-                  <p className="text-xs text-blue-300/70 leading-relaxed">
-                    {charity.name} covers {recalculatedPricing.charity_subsidy_percentage}% to make donating easier
-                  </p>
-                </div>
-              )}
-
-              {/* Company Subsidy */}
-              {recalculatedPricing.company_subsidy_amount > 0 && (
-                <div className="bg-green-900/20 border border-green-700/40 rounded-lg px-4 py-3 -mx-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400 font-semibold">Company Benefit</span>
-                    </div>
-                    <span className="text-green-400 font-bold text-base">-${recalculatedPricing.company_subsidy_amount.toFixed(2)}</span>
-                  </div>
-                  <p className="text-xs text-green-300/70 leading-relaxed">
-                    {charity.company_benefit?.company_name} covers {recalculatedPricing.company_subsidy_percentage}% as an employee wellness benefit
-                  </p>
-                </div>
-              )}
-
-              {/* Total Savings (if both subsidies) */}
-              {recalculatedPricing.charity_subsidy_amount > 0 && recalculatedPricing.company_subsidy_amount > 0 && (
-                <div className="bg-purple-900/20 border border-purple-700/40 rounded-lg px-4 py-3 -mx-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-purple-400 font-bold">⚡ Total Stacked Savings</span>
-                    <span className="text-purple-400 font-bold text-lg">-${recalculatedPricing.total_subsidy_amount.toFixed(2)}</span>
-                  </div>
-                  <p className="text-xs text-purple-300/70 mt-1">
-                    Combined discount = {((recalculatedPricing.total_subsidy_amount / recalculatedPricing.original_price) * 100).toFixed(0)}% off!
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-
-          <div className="border-t border-gray-700 pt-3 mt-2">
-            <div className="flex justify-between items-center">
-              <span className="text-white font-bold text-base">Total</span>
-              <span className="text-white font-bold text-xl">${recalculatedPricing.total_price.toFixed(2)}</span>
-            </div>
+            )}
           </div>
-        </div>
+        </details>
       </div>
 
-          {/* Driver Tip Section */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg">💵</span>
-          <h3 className="font-semibold text-white text-sm">Driver Tip</h3>
-        </div>
+      {/* Driver Tip Section */}
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
+        <h3 className="text-white font-semibold text-lg mb-2">Driver Tip</h3>
+        <p className="text-gray-400 text-sm mb-6">$10 minimum • 100% goes to driver</p>
 
-        <div className="bg-green-900/20 border border-green-700/40 rounded-lg p-3 mb-4">
-          <p className="text-green-400 text-xs font-medium mb-1">✓ $10 Guaranteed Minimum</p>
-          <p className="text-gray-400 text-xs">You can add more if you'd like. 100% goes to the driver.</p>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {[
             { value: 10, label: '$10' },
             { value: 15, label: '$15' },
@@ -610,7 +484,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               key={option.value}
               type="button"
               onClick={() => { setDriverTip(option.value); setCustomTip(''); }}
-              className={`px-3 py-2.5 rounded-lg font-medium text-sm transition ${
+              className={`py-4 rounded-xl font-semibold text-base transition ${
                 driverTip === option.value && !customTip
                   ? 'bg-blue-600 text-white ring-2 ring-blue-400'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -622,11 +496,11 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-2">
-            Custom amount ($10 - $100)
+          <label className="block text-sm font-medium text-gray-400 mb-3">
+            Custom amount
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">$</span>
             <input
               type="number"
               value={customTip}
@@ -641,104 +515,56 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                   setDriverTip(100);
                 }
               }}
-              className="w-full pl-8 pr-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full pl-12 pr-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               placeholder="10.00"
               step="1"
               min="10"
               max="100"
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1">Minimum $10, Maximum $100</p>
+          <p className="text-xs text-gray-500 mt-2">$10 - $100</p>
         </div>
       </div>
 
       {/* Contact Information */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">📱</span>
-          <h3 className="font-semibold text-white text-sm">Contact Information</h3>
-        </div>
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
+        <h3 className="text-white font-semibold text-lg mb-6">Contact Information</h3>
 
-        <div className="space-y-4">
-          {/* Receipt Delivery Method - FIRST */}
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-3">
-              Receipt delivery method
-            </label>
-            <div className="space-y-2">
-              <label className={`flex items-center p-3.5 border rounded-lg cursor-pointer transition ${
-                contactMethod === 'both'
-                  ? 'border-blue-500 bg-blue-900/20'
-                  : 'border-gray-700 hover:border-gray-600 hover:bg-gray-750'
-              }`}>
-                <input
-                  type="radio"
-                  name="contact-method"
-                  value="both"
-                  checked={contactMethod === 'both'}
-                  onChange={(e) => setContactMethod(e.target.value as 'both')}
-                  className="w-4 h-4 text-blue-600"
-                />
-                <div className="ml-3 flex-1">
-                  <div className="text-white text-sm font-medium">Email + SMS</div>
-                  <div className="text-xs text-gray-400 mt-0.5">Recommended - Receipt via email</div>
-                </div>
+        <div className="space-y-5">
+          {/* Name */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-3">
+                First name
               </label>
-              <label className={`flex items-center p-3.5 border rounded-lg cursor-pointer transition ${
-                contactMethod === 'phone'
-                  ? 'border-blue-500 bg-blue-900/20'
-                  : 'border-gray-700 hover:border-gray-600 hover:bg-gray-750'
-              }`}>
-                <input
-                  type="radio"
-                  name="contact-method"
-                  value="phone"
-                  checked={contactMethod === 'phone'}
-                  onChange={(e) => setContactMethod(e.target.value as 'phone')}
-                  className="w-4 h-4 text-blue-600"
-                />
-                <div className="ml-3 flex-1">
-                  <div className="text-white text-sm font-medium">SMS only</div>
-                  <div className="text-xs text-gray-400 mt-0.5">Tracking link with receipt</div>
-                </div>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value.trim())}
+                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                placeholder="John"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-3">
+                Last name
               </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value.trim())}
+                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                placeholder="Doe"
+                required
+              />
             </div>
           </div>
 
-          {/* First Name */}
+          {/* Phone */}
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
-              First name (required for tax receipts)
-            </label>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value.trim())}
-              className="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              placeholder="John"
-              required
-            />
-          </div>
-
-          {/* Last Name */}
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
-              Last name (required for tax receipts)
-            </label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value.trim())}
-              className="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              placeholder="Doe"
-              required
-            />
-          </div>
-
-          {/* Phone Number - Always visible */}
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
-              Phone number (required for SMS updates)
+            <label className="block text-sm font-medium text-gray-400 mb-3">
+              Phone number
             </label>
             <input
               type="tel"
@@ -756,57 +582,61 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                 }
                 setPhone(value);
               }}
-              onBlur={(e) => {
-                // Validate phone number format
-                const cleaned = phone.replace(/\D/g, '');
-                if (cleaned.length > 0 && cleaned.length !== 10) {
-                  e.target.setCustomValidity('Please enter a valid 10-digit phone number');
-                } else {
-                  e.target.setCustomValidity('');
-                }
-              }}
-              className="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               placeholder="(555) 123-4567"
               maxLength={14}
               required
             />
           </div>
 
-          {/* Email Input - Only shown if Email + SMS selected */}
+          {/* Email */}
           {contactMethod === 'both' && (
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2">
-                Email for receipt
+              <label className="block text-sm font-medium text-gray-400 mb-3">
+                Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
-                className="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                 placeholder="your@email.com"
                 required
               />
             </div>
           )}
-        </div>
-      </div>
 
-          {/* Security Notice */}
-          <div className="bg-blue-900/10 border border-blue-700/30 rounded-xl p-4">
-            <div className="flex items-center gap-2 text-blue-300 text-sm">
-              <Lock className="h-4 w-4 flex-shrink-0" />
-              <span>Secure payment processing. Your information is encrypted and safe.</span>
-            </div>
+          {/* Receipt method toggle */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setContactMethod('both')}
+              className={`py-4 rounded-xl font-medium text-sm transition ${
+                contactMethod === 'both'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Email + SMS
+            </button>
+            <button
+              type="button"
+              onClick={() => setContactMethod('phone')}
+              className={`py-4 rounded-xl font-medium text-sm transition ${
+                contactMethod === 'phone'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              SMS only
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Payment Section - ALWAYS SHOW CARD INPUT */}
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <CreditCard className="h-5 w-5 text-blue-400" />
-          <h3 className="font-semibold text-white">Payment Information</h3>
-        </div>
+      {/* Payment Section */}
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
+        <h3 className="text-white font-semibold text-lg mb-6">Payment</h3>
 
         {stripeEnabled && paymentReady && clientSecret && bookingId ? (
           <Elements
