@@ -16,13 +16,15 @@ interface Props {
   schedule: { date: string; timeStart: string; timeEnd: string };
   itemsTypes: string[];
   itemsCount: number;
+  bagsCount?: number;
+  boxesCount?: number;
   photos: string[];
   locationType: string;
   instructions: string;
   onBack: () => void;
 }
 
-export default function StepPayment({ pickupAddress, charity, schedule, itemsTypes, itemsCount, photos, locationType, instructions, onBack }: Props) {
+export default function StepPayment({ pickupAddress, charity, schedule, itemsTypes, itemsCount, bagsCount = 0, boxesCount = 0, photos, locationType, instructions, onBack }: Props) {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -90,7 +92,9 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       charitySubsidyPct,
       companySubsidyPct,
       serviceFee, // Use correct service fee based on charity status
-      pickupAddress.state // Pass state for state fee calculation
+      pickupAddress.state, // Pass state for state fee calculation
+      bagsCount, // Number of bags
+      boxesCount // Number of boxes
     );
   })();
 
@@ -450,14 +454,41 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               <span className="text-gray-400">Delivery fee</span>
               <span className="text-white">${recalculatedPricing.delivery_fee.toFixed(2)}</span>
             </div>
+            {(recalculatedPricing.bag_fee && recalculatedPricing.bag_fee > 0) || (recalculatedPricing.box_fee && recalculatedPricing.box_fee > 0) ? (
+              <div className="ml-4 space-y-2 text-xs">
+                {recalculatedPricing.bag_count && recalculatedPricing.bag_count > 0 && (
+                  <div className="flex justify-between text-gray-500">
+                    <span>• {recalculatedPricing.bag_count} {recalculatedPricing.bag_count === 1 ? 'bag' : 'bags'} ($1.50 ea)</span>
+                    <span>${recalculatedPricing.bag_fee?.toFixed(2)}</span>
+                  </div>
+                )}
+                {recalculatedPricing.box_count && recalculatedPricing.box_count > 0 && (
+                  <div className="flex justify-between text-gray-500">
+                    <span>• {recalculatedPricing.box_count} {recalculatedPricing.box_count === 1 ? 'box' : 'boxes'} ($2.00 ea)</span>
+                    <span>${recalculatedPricing.box_fee?.toFixed(2)}</span>
+                  </div>
+                )}
+                {recalculatedPricing.bag_box_driver_tip && recalculatedPricing.bag_box_driver_tip > 0 && (
+                  <div className="flex justify-between text-green-500">
+                    <span>→ Includes ${recalculatedPricing.bag_box_driver_tip.toFixed(2)} driver tip</span>
+                  </div>
+                )}
+              </div>
+            ) : null}
             <div className="flex justify-between">
               <span className="text-gray-400">Service fee</span>
               <span className="text-white">${(recalculatedPricing.service_fee + recalculatedPricing.stripe_fee).toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Driver tip</span>
+              <span className="text-gray-400">Driver tip (base)</span>
               <span className="text-white">${recalculatedPricing.driver_tip.toFixed(2)}</span>
             </div>
+            {recalculatedPricing.total_driver_tip && recalculatedPricing.total_driver_tip > recalculatedPricing.driver_tip && (
+              <div className="flex justify-between text-green-500 text-xs ml-4">
+                <span>Total driver receives:</span>
+                <span className="font-semibold">${recalculatedPricing.total_driver_tip.toFixed(2)}</span>
+              </div>
+            )}
             {recalculatedPricing.rush_fee > 0 && (
               <div className="flex justify-between">
                 <span className="text-yellow-400">Rush fee</span>

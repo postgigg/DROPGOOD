@@ -14,12 +14,14 @@ interface Props {
     latitude: number;
     longitude: number;
   };
+  bagsCount?: number;
+  boxesCount?: number;
   onNext: (schedule: { date: string; timeStart: string; timeEnd: string; pricing: any }) => void;
   onBack: () => void;
   initialSchedule: { date: string; timeStart: string; timeEnd: string } | null;
 }
 
-export default function StepSchedule({ charity, pickupAddress, onNext, onBack, initialSchedule }: Props) {
+export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, boxesCount = 0, onNext, onBack, initialSchedule }: Props) {
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -48,7 +50,9 @@ export default function StepSchedule({ charity, pickupAddress, onNext, onBack, i
       isToday,
       10, // $10 guaranteed driver tip
       serviceFee, // Use correct service fee based on charity status
-      pickupAddress.state // Pass state for state fee calculation
+      pickupAddress.state, // Pass state for state fee calculation
+      bagsCount, // Number of bags
+      boxesCount // Number of boxes
     );
 
     if (charity.pricing.subsidized && charity.pricing.subsidy_amount) {
