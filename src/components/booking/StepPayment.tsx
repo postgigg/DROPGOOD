@@ -29,8 +29,6 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [contactMethod, setContactMethod] = useState<'both' | 'phone'>('both');
-  const [driverTip, setDriverTip] = useState(4.00);
-  const [customTip, setCustomTip] = useState('');
   const [processing, setProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -88,7 +86,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     return calculateFinalPriceWithSubsidies(
       charity.pricing.uber_cost,
       isRushDelivery,
-      driverTip,
+      10, // $10 guaranteed tip (not used, defaults to GUARANTEED_DRIVER_TIP)
       charitySubsidyPct,
       companySubsidyPct,
       serviceFee, // Use correct service fee based on charity status
@@ -525,12 +523,11 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
             </div>
           )}
 
-          {driverTip > 0 && (
-            <div className="flex justify-between items-center bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 -mx-2">
-              <span className="text-green-400 font-medium">Driver tip</span>
-              <span className="text-green-400 font-semibold">${recalculatedPricing.driver_tip.toFixed(2)}</span>
-            </div>
-          )}
+          {/* Always show guaranteed $10 tip */}
+          <div className="flex justify-between items-center bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 -mx-2">
+            <span className="text-green-400 font-medium">Driver Tip (Guaranteed)</span>
+            <span className="text-green-400 font-semibold">${recalculatedPricing.driver_tip.toFixed(2)}</span>
+          </div>
 
           {/* Subsidies Section */}
           {(recalculatedPricing.charity_subsidy_amount > 0 || recalculatedPricing.company_subsidy_amount > 0) && (
@@ -596,57 +593,20 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         </div>
       </div>
 
-          {/* Driver Tip Section */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg">💵</span>
-          <h3 className="font-semibold text-white text-sm">Add a Tip for Your Driver</h3>
-        </div>
-        <p className="text-xs text-gray-400 mb-4">100% goes directly to the driver</p>
-
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          {[
-            { value: 0, label: 'No Tip' },
-            { value: 2, label: '$2' },
-            { value: 4, label: '$4' },
-            { value: 6, label: '$6' }
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => { setDriverTip(option.value); setCustomTip(''); }}
-              className={`px-3 py-2.5 rounded-lg font-medium text-sm transition ${
-                driverTip === option.value
-                  ? 'bg-blue-600 text-white ring-2 ring-blue-400'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-400 mb-2">
-            Custom amount
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-            <input
-              type="number"
-              value={customTip}
-              onChange={(e) => {
-                setCustomTip(e.target.value);
-                const amount = parseFloat(e.target.value);
-                if (!isNaN(amount) && amount >= 0) {
-                  setDriverTip(amount);
-                }
-              }}
-              className="w-full pl-8 pr-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-            />
+          {/* Guaranteed Driver Tip - Informational Banner */}
+      <div className="bg-green-900/20 border-2 border-green-700/40 rounded-xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-green-400 text-xl">✓</span>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-green-400 text-sm mb-1.5">$10 Driver Tip Included</h3>
+            <p className="text-gray-300 text-xs leading-relaxed mb-2">
+              Every booking includes a guaranteed $10 tip for your driver to ensure prompt pickup and delivery.
+            </p>
+            <p className="text-gray-400 text-xs">
+              💯 100% goes directly to the driver
+            </p>
           </div>
         </div>
       </div>

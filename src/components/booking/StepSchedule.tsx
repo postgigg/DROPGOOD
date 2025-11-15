@@ -46,7 +46,7 @@ export default function StepSchedule({ charity, pickupAddress, onNext, onBack, i
     const basePricing = calculateFinalPrice(
       charity.pricing.uber_cost,
       isToday,
-      0, // driver tip added in payment step
+      10, // $10 guaranteed driver tip
       serviceFee, // Use correct service fee based on charity status
       pickupAddress.state // Pass state for state fee calculation
     );

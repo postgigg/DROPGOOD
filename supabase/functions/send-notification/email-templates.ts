@@ -631,6 +631,14 @@ export function driverJobAvailableEmail(data: {
         ` : ''}
       </div>
 
+      <div style="background-color: rgba(34, 197, 94, 0.15); border: 2px solid rgba(34, 197, 94, 0.4); padding: 20px; border-radius: 12px; margin: 24px 0; text-align: center;">
+        <div style="font-size: 32px; margin-bottom: 8px;">💰</div>
+        <h3 style="margin: 0 0 8px 0; color: #22c55e; font-size: 20px; font-weight: bold;">$10.00 Guaranteed Tip</h3>
+        <p style="margin: 0; color: ${BRAND_COLORS.textSecondary}; font-size: 14px;">
+          This delivery includes a pre-paid $10 tip. 100% goes to you!
+        </p>
+      </div>
+
       <h2>How to Accept This Job</h2>
 
       <div class="timeline-item">

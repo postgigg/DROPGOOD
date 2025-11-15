@@ -89,7 +89,7 @@ export default function ForDrivers() {
   const stats = [
     { value: '30-60 min', label: 'Average time', icon: <Clock className="h-5 w-5" /> },
     { value: '5-15 mi', label: 'Local routes', icon: <MapPin className="h-5 w-5" /> },
-    { value: '100%', label: 'Tips to you', icon: <TrendingUp className="h-5 w-5" /> },
+    { value: '$10 tip', label: 'Guaranteed', icon: <DollarSign className="h-5 w-5" /> },
   ];
 
   return (
@@ -254,13 +254,24 @@ export default function ForDrivers() {
             </p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+              {/* Guaranteed Tips - FEATURED */}
+              <div className="bg-gradient-to-br from-green-900/40 to-blue-900/40 rounded-3xl p-8 border-2 border-green-600/50 shadow-xl">
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-green-500/30 rounded-2xl mb-6 border border-green-500/50">
+                  <DollarSign className="h-7 w-7 text-green-400" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-green-400 mb-4">$10 Guaranteed Tip</h3>
+                <p className="text-gray-300 leading-relaxed font-medium">
+                  Every delivery includes a $10 tip already paid by the customer. You know exactly what you'll earn before accepting.
+                </p>
+              </div>
+
               <div className="bg-gray-900 rounded-3xl p-8 border border-gray-800">
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600/20 rounded-2xl mb-6 border border-blue-600/30">
-                  <DollarSign className="h-7 w-7 text-blue-500" />
+                  <MapPin className="h-7 w-7 text-blue-500" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Competitive pay</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Short distances</h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Earn through Uber Direct rates. Most jobs are short-distance, maximizing your hourly rate.
+                  Most jobs are 5-15 miles. Local routes mean more deliveries per hour.
                 </p>
               </div>
 
@@ -451,6 +462,13 @@ export default function ForDrivers() {
                 <h3 className="text-xl font-bold text-white mb-3">Can I do this part-time?</h3>
                 <p className="text-gray-400 leading-relaxed">
                   Yes. Accept jobs when you want, decline when you don't. Zero minimums or requirements.
+                </p>
+              </div>
+
+              <div className="bg-gray-900 rounded-3xl p-8 border border-gray-800">
+                <h3 className="text-xl font-bold text-white mb-3">When do I get the $10 tip?</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  The $10 guaranteed tip is paid out after successful delivery and photo confirmation, just like your regular Uber Direct earnings. It's automatically included in your payout - you don't need to do anything special.
                 </p>
               </div>
             </div>
