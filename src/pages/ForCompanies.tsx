@@ -392,7 +392,7 @@ export default function ForCompanies() {
           </div>
 
           <div className="mt-12 sm:mt-16 text-center text-gray-500 text-sm">
-            <p>Questions? Email us at <a href="mailto:sales@dropgood.com" className="text-blue-400 hover:underline">sales@dropgood.com</a></p>
+            <p>Questions? Email us at <a href="mailto:sales@dropgood.co" className="text-blue-400 hover:underline">sales@dropgood.co</a></p>
           </div>
         </main>
       </div>

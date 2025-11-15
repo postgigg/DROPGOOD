@@ -64,8 +64,8 @@ export default function BookingFlow() {
       <SEO {...seoPages.booking} />
       <BreadcrumbSchema
         items={[
-          { name: 'Home', url: 'https://dropgood.com' },
-          { name: 'Book Pickup', url: 'https://dropgood.com/book' },
+          { name: 'Home', url: 'https://dropgood.co' },
+          { name: 'Book Pickup', url: 'https://dropgood.co/book' },
         ]}
       />
 
@@ -144,7 +144,7 @@ export default function BookingFlow() {
           </div>
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-md p-4 sm:p-6 md:p-8 overflow-hidden">
+        <div className="p-0 sm:p-2 md:p-4 overflow-hidden">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -222,6 +222,7 @@ export default function BookingFlow() {
               >
                 <StepSchedule
                   charity={selectedCharity}
+                  pickupAddress={pickupAddress}
                   onNext={(scheduleData) => {
                     setSchedule(scheduleData);
                     setSelectedCharity({ ...selectedCharity, pricing: scheduleData.pricing });

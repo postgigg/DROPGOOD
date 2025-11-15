@@ -6,7 +6,7 @@ import { UserPlus, Truck, CheckCircle, AlertCircle } from 'lucide-react';
 // Generate random credentials
 const generateRandomEmail = () => {
   const randomString = Math.random().toString(36).substring(2, 10);
-  return `admin_${randomString}@dropgood.com`;
+  return `admin_${randomString}@dropgood.co`;
 };
 
 const generateRandomPassword = () => {
@@ -108,7 +108,7 @@ export default function AdminSetup() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        placeholder="admin@dropgood.com"
+                        placeholder="admin@dropgood.co"
                       />
                     </div>
                     <div>

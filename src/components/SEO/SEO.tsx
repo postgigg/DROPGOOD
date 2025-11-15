@@ -14,7 +14,7 @@ export default function SEO({
   ogType = 'website',
   children,
 }: SEOProps) {
-  const siteUrl = 'https://dropgood.com';
+  const siteUrl = 'https://dropgood.co';
   const fullCanonical = canonical || siteUrl;
   const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 

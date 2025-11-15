@@ -1,6 +1,8 @@
 export interface PricingBreakdown {
   uber_cost: number;
-  our_markup: number;
+  delivery_fee: number; // Uber + 15% + optional 3.5% state fee
+  service_fee: number; // 10% shown separately (or higher for inactive charities)
+  our_markup?: number; // Deprecated - kept for compatibility
   driver_tip: number;
   rush_fee: number;
   subtotal: number;
@@ -22,12 +24,41 @@ export interface PricingBreakdown {
 
 const RUSH_FEE = 5.00;
 export const DEFAULT_SERVICE_FEE = 0.25; // 25%
-export const INACTIVE_CHARITY_SERVICE_FEE = 0.35; // 35% for unverified charities
+export const INACTIVE_CHARITY_SERVICE_FEE = 0.40; // 40% for unverified charities
 
-export function calculateFinalPrice(uberCost: number, isRushDelivery: boolean = false, driverTip: number = 0, serviceFeePercentage: number = DEFAULT_SERVICE_FEE): PricingBreakdown {
-  const ourMarkup = uberCost * serviceFeePercentage;
+// New fee structure
+export const STATE_FEE = 0.035; // 3.5% additional for certain states
+export const DELIVERY_MARKUP = 0.15; // 15% included in delivery fee
+export const SERVICE_FEE_DISPLAY = 0.10; // 10% shown separately
+
+export const STATES_WITH_FEE = [
+  'CA', 'CO', 'TX', 'FL', 'GA', 'MS', 'OH', // Standard states
+  'KS', 'NC', 'LA', 'AZ', 'UT', 'NV', 'WY', 'MI', 'SC' // Additional states
+];
+
+export function shouldApplyStateFee(state: string): boolean {
+  return STATES_WITH_FEE.includes(state.toUpperCase());
+}
+
+export function calculateFinalPrice(
+  uberCost: number,
+  isRushDelivery: boolean = false,
+  driverTip: number = 0,
+  serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
+  pickupState?: string
+): PricingBreakdown {
+  // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee)
+  const deliveryMarkup = uberCost * DELIVERY_MARKUP;
+  const stateFee = (pickupState && shouldApplyStateFee(pickupState))
+    ? uberCost * STATE_FEE
+    : 0;
+  const deliveryFee = uberCost + deliveryMarkup + stateFee;
+
+  // Calculate service fee (10% of Uber cost for display)
+  const serviceFee = uberCost * SERVICE_FEE_DISPLAY;
+
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
-  const subtotalBeforeTip = uberCost + ourMarkup + rushFee;
+  const subtotalBeforeTip = deliveryFee + serviceFee + rushFee;
   const subtotal = subtotalBeforeTip + driverTip;
 
   const totalPrice = (subtotal + 0.30) / 0.971;
@@ -35,7 +66,9 @@ export function calculateFinalPrice(uberCost: number, isRushDelivery: boolean = 
 
   return {
     uber_cost: parseFloat(uberCost.toFixed(2)),
-    our_markup: parseFloat(ourMarkup.toFixed(2)),
+    delivery_fee: parseFloat(deliveryFee.toFixed(2)),
+    service_fee: parseFloat(serviceFee.toFixed(2)),
+    our_markup: parseFloat((deliveryMarkup + stateFee + serviceFee).toFixed(2)), // For compatibility
     driver_tip: parseFloat(driverTip.toFixed(2)),
     rush_fee: rushFee,
     subtotal: parseFloat(subtotal.toFixed(2)),
@@ -229,12 +262,21 @@ export function calculateFinalPriceWithSubsidies(
   driverTip: number = 0,
   charitySubsidyPercentage: number = 0,
   companySubsidyPercentage: number = 0,
-  serviceFeePercentage: number = DEFAULT_SERVICE_FEE
+  serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
+  pickupState?: string
 ): PricingBreakdown {
-  // Calculate base pricing (before subsidies, before tip)
-  const ourMarkup = uberCost * serviceFeePercentage;
+  // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee)
+  const deliveryMarkup = uberCost * DELIVERY_MARKUP;
+  const stateFee = (pickupState && shouldApplyStateFee(pickupState))
+    ? uberCost * STATE_FEE
+    : 0;
+  const deliveryFee = uberCost + deliveryMarkup + stateFee;
+
+  // Calculate service fee (10% of Uber cost for display)
+  const serviceFee = uberCost * SERVICE_FEE_DISPLAY;
+
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
-  const subtotalWithoutTip = uberCost + ourMarkup + rushFee;
+  const subtotalWithoutTip = deliveryFee + serviceFee + rushFee;
 
   // Calculate total price WITHOUT tip and WITHOUT subsidies
   // (subsidies don't apply to tips)
@@ -261,7 +303,9 @@ export function calculateFinalPriceWithSubsidies(
 
   return {
     uber_cost: parseFloat(uberCost.toFixed(2)),
-    our_markup: parseFloat(ourMarkup.toFixed(2)),
+    delivery_fee: parseFloat(deliveryFee.toFixed(2)),
+    service_fee: parseFloat(serviceFee.toFixed(2)),
+    our_markup: parseFloat((deliveryMarkup + stateFee + serviceFee).toFixed(2)), // For compatibility
     driver_tip: parseFloat(driverTip.toFixed(2)),
     rush_fee: rushFee,
     subtotal: parseFloat(subtotalWithTip.toFixed(2)),

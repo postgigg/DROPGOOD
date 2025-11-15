@@ -148,6 +148,13 @@ export default function ReceiptPage() {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white text-gray-900 rounded-lg shadow-xl p-8 sm:p-12">
+          {/* DropGood Logo */}
+          <div className="text-center mb-6 pb-6 border-b border-gray-200">
+            <DropGoodLogo size={48} className="mx-auto mb-2" />
+            <h2 className="text-xl font-bold text-gray-900">DropGood</h2>
+            <p className="text-sm text-gray-500">A Workbird LLC Company</p>
+          </div>
+
           <div className="text-center mb-8 pb-8 border-b-2 border-gray-300">
             {receipt.receipt_type === 'tax_receipt' ? (
               <>

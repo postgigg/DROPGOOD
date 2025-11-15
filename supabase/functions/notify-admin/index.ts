@@ -66,7 +66,7 @@ ${Deno.env.get("SUPABASE_URL")}/admin/bookings/${data.booking_id}
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "DropGood <notifications@dropgood.com>",
+            from: "DropGood <notifications@dropgood.co>",
             to: [adminEmail],
             subject: emailSubject,
             text: emailBody,

@@ -252,7 +252,7 @@ export default function TermsOfService() {
                 For questions about these Terms of Service, please contact us:
               </p>
               <ul className="list-none space-y-2">
-                <li><strong>Email:</strong> legal@dropgood.com</li>
+                <li><strong>Email:</strong> legal@dropgood.co</li>
                 <li><strong>Phone:</strong> (804) 555-DROP</li>
                 <li><strong>Address:</strong> DropGood (A Workbird LLC Company), Richmond, VA</li>
               </ul>

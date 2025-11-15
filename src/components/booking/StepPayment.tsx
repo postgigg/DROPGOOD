@@ -6,7 +6,7 @@ import confetti from 'canvas-confetti';
 import { supabase, type DonationCenter } from '../../lib/supabase';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, ExpressCheckoutElement, LinkAuthenticationElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { calculateFinalPriceWithSubsidies } from '../../lib/pricing';
+import { calculateFinalPriceWithSubsidies, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -24,6 +24,8 @@ interface Props {
 
 export default function StepPayment({ pickupAddress, charity, schedule, itemsTypes, itemsCount, photos, locationType, instructions, onBack }: Props) {
   const navigate = useNavigate();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [contactMethod, setContactMethod] = useState<'both' | 'phone'>('both');
@@ -78,20 +80,27 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     const companySubsidyPct = charity.pricing.company_subsidy_percentage || 0;
     const isRushDelivery = (charity.pricing.rush_fee || 0) > 0;
 
+    // Check if charity is inactive/non-verified (use 40% fee) or active (use 25% fee)
+    const serviceFee = charity.is_active === false
+      ? INACTIVE_CHARITY_SERVICE_FEE  // 40% for non-verified charities
+      : DEFAULT_SERVICE_FEE;           // 25% for verified/active charities
+
     return calculateFinalPriceWithSubsidies(
       charity.pricing.uber_cost,
       isRushDelivery,
       driverTip,
       charitySubsidyPct,
-      companySubsidyPct
+      companySubsidyPct,
+      serviceFee, // Use correct service fee based on charity status
+      pickupAddress.state // Pass state for state fee calculation
     );
   })();
 
   // Create booking and payment intent
   const initializePayment = async () => {
     // Validate required fields
-    if (!phone || (contactMethod === 'both' && !email)) {
-      setPaymentError('Please provide contact information');
+    if (!firstName || !lastName || !phone || (contactMethod === 'both' && !email)) {
+      setPaymentError('Please provide all required contact information');
       return;
     }
 
@@ -138,7 +147,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         items_types: itemsTypes && itemsTypes.length > 0 ? itemsTypes : ['General Donation'],
         photo_urls: photos || [],
         uber_cost: recalculatedPricing.uber_cost,
-        our_markup: recalculatedPricing.our_markup,
+        our_markup: recalculatedPricing.our_markup || 0,
         driver_tip: recalculatedPricing.driver_tip || 0,
         rush_fee: recalculatedPricing.rush_fee || 0,
         subtotal: recalculatedPricing.subtotal,
@@ -147,6 +156,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         status: 'payment_pending',
         payment_status: 'pending',
         manual_mode: manualMode,
+        customer_first_name: firstName,
+        customer_last_name: lastName,
         customer_phone: phone,
         customer_email: contactMethod === 'both' ? email : null,
         // Charity subsidy fields
@@ -498,16 +509,13 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
 
         <div className="space-y-3 text-sm">
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">{manualMode ? 'Pickup & Delivery' : 'Uber Direct delivery'}</span>
-            <span className="text-white font-medium">${recalculatedPricing.uber_cost.toFixed(2)}</span>
+            <span className="text-gray-400">Delivery/Pickup fee</span>
+            <span className="text-white font-medium">${recalculatedPricing.delivery_fee.toFixed(2)}</span>
           </div>
 
-          <div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-400">Service fee</span>
-              <span className="text-white font-medium">${(recalculatedPricing.our_markup + recalculatedPricing.stripe_fee).toFixed(2)}</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-0.5">Platform operations, support & payment processing</p>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Service fee</span>
+            <span className="text-white font-medium">${(recalculatedPricing.service_fee + recalculatedPricing.stripe_fee).toFixed(2)}</span>
           </div>
 
           {recalculatedPricing.rush_fee > 0 && (
@@ -696,6 +704,36 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
             </div>
           </div>
 
+          {/* First Name */}
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-2">
+              First name (required for tax receipts)
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value.trim())}
+              className="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              placeholder="John"
+              required
+            />
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-2">
+              Last name (required for tax receipts)
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value.trim())}
+              className="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              placeholder="Doe"
+              required
+            />
+          </div>
+
           {/* Phone Number - Always visible */}
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-2">
@@ -837,25 +875,25 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                 theme: 'night',
                 variables: {
                   colorPrimary: '#3b82f6',
-                  colorBackground: '#111827',
+                  colorBackground: '#374151', // bg-gray-700
                   colorText: '#ffffff',
                   colorDanger: '#ef4444',
                   fontFamily: 'system-ui, sans-serif',
                   spacingUnit: '4px',
-                  borderRadius: '12px',
-                  fontSizeBase: '18px',
+                  borderRadius: '8px', // rounded-lg
+                  fontSizeBase: '14px',
                 },
                 rules: {
                   '.Input': {
-                    border: '2px solid #4b5563',
+                    border: '1px solid #4b5563', // border-gray-600
                     boxShadow: 'none !important',
-                    backgroundColor: '#111827',
-                    padding: '16px 20px',
-                    fontSize: '18px',
+                    backgroundColor: '#374151', // bg-gray-700
+                    padding: '10px 16px', // py-2.5 px-4
+                    fontSize: '14px',
                   },
                   '.Input:focus': {
-                    border: '2px solid #3b82f6',
-                    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.2) !important',
+                    border: '1px solid transparent',
+                    boxShadow: '0 0 0 2px #3b82f6 !important', // focus:ring-2 focus:ring-blue-500
                     outline: 'none',
                   },
                   '.Input:hover': {
@@ -878,10 +916,10 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                     boxShadow: 'none !important',
                   },
                   '.Label': {
-                    color: '#d1d5db',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    marginBottom: '10px',
+                    color: '#9ca3af', // text-gray-400
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    marginBottom: '8px',
                   },
                   '.Block': {
                     boxShadow: 'none !important',

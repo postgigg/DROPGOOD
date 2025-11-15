@@ -33,6 +33,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import CharityTerms from './pages/CharityTerms';
 import CompanyTerms from './pages/CompanyTerms';
 import BrandKit from './pages/BrandKit';
+import DriverBoard from './pages/DriverBoard';
+import ForDrivers from './pages/ForDrivers';
 import SupportChat from './components/SupportChat';
 
 function App() {
@@ -74,6 +76,9 @@ function App() {
         <Route path="/company/billing" element={<CompanyBilling />} />
         <Route path="/company/reports" element={<CompanyReports />} />
         <Route path="/company/employees" element={<CompanyEmployees />} />
+        {/* Driver Board */}
+        <Route path="/driver-board" element={<DriverBoard />} />
+        <Route path="/for-drivers" element={<ForDrivers />} />
         {/* Legal Pages */}
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

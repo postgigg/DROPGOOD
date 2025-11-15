@@ -493,8 +493,8 @@ export default function CompanySignup() {
         <div className="mt-12 text-center text-gray-400 text-sm">
           <p>
             Questions? Contact us at{' '}
-            <a href="mailto:sales@dropgood.com" className="text-blue-400 hover:underline">
-              sales@dropgood.com
+            <a href="mailto:sales@dropgood.co" className="text-blue-400 hover:underline">
+              sales@dropgood.co
             </a>
           </p>
         </div>

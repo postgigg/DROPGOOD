@@ -226,7 +226,7 @@ export default function PrivacyPolicy() {
               </p>
 
               <p className="mt-4">
-                To exercise these rights, email us at <a href="mailto:privacy@dropgood.com" className="text-blue-400 hover:text-blue-300 underline">privacy@dropgood.com</a>
+                To exercise these rights, email us at <a href="mailto:privacy@dropgood.co" className="text-blue-400 hover:text-blue-300 underline">privacy@dropgood.co</a>
               </p>
             </section>
 
@@ -296,7 +296,7 @@ export default function PrivacyPolicy() {
                 For questions or concerns about this Privacy Policy or our data practices, contact us:
               </p>
               <ul className="list-none space-y-2 mt-4">
-                <li><strong>Email:</strong> <a href="mailto:privacy@dropgood.com" className="text-blue-400 hover:text-blue-300 underline">privacy@dropgood.com</a></li>
+                <li><strong>Email:</strong> <a href="mailto:privacy@dropgood.co" className="text-blue-400 hover:text-blue-300 underline">privacy@dropgood.co</a></li>
                 <li><strong>Phone:</strong> (804) 555-DROP</li>
                 <li><strong>Mail:</strong> DropGood (A Workbird LLC Company), Privacy Team, Richmond, VA</li>
               </ul>

@@ -41,8 +41,8 @@ export default function CityLandingPage() {
       <LocalBusinessSchema cityName={cityName} stateName={stateName} />
       <BreadcrumbSchema
         items={[
-          { name: 'Home', url: 'https://dropgood.com' },
-          { name: `${cityName}, ${stateCode}`, url: `https://dropgood.com/donate/${citySlug}` },
+          { name: 'Home', url: 'https://dropgood.co' },
+          { name: `${cityName}, ${stateCode}`, url: `https://dropgood.co/donate/${citySlug}` },
         ]}
       />
 

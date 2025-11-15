@@ -191,6 +191,12 @@ export default function LandingPage() {
               </button>
               <div className="flex items-center gap-3 sm:gap-6">
                 <button
+                  onClick={() => navigate('/for-drivers')}
+                  className="text-sm sm:text-base text-gray-300 hover:text-white transition font-medium hidden sm:block"
+                >
+                  For Drivers
+                </button>
+                <button
                   onClick={() => navigate('/donation-centers')}
                   className="text-sm sm:text-base text-gray-300 hover:text-white transition font-medium hidden sm:block"
                 >
@@ -572,6 +578,13 @@ export default function LandingPage() {
                 <ul className="space-y-2 text-gray-400">
                   <li><button onClick={() => navigate('/donation-centers')} className="hover:text-white transition">Get Listed</button></li>
                   <li><button onClick={() => navigate('/donation-centers')} className="hover:text-white transition">Sponsorships</button></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-white font-bold mb-4">For Drivers</h3>
+                <ul className="space-y-2 text-gray-400">
+                  <li><button onClick={() => navigate('/for-drivers')} className="hover:text-white transition">Earn Money</button></li>
+                  <li><button onClick={() => navigate('/for-drivers')} className="hover:text-white transition">Sign Up</button></li>
                 </ul>
               </div>
               <div>

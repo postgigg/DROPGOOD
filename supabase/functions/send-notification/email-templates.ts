@@ -168,7 +168,21 @@ function emailWrapper(content: string): string {
   <div class="container">
     <div class="header">
       <div class="logo-container">
-        <span style="font-size: 24px;">📦</span>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="6" fill="url(#gradient)"/>
+          <rect x="10" y="14" width="12" height="10" rx="1.5" fill="white" opacity="0.9"/>
+          <path d="M16 20.5C16 20.5 13 18.5 13 17C13 15.8 13.8 15 14.5 15C15.2 15 16 15.5 16 15.5C16 15.5 16.8 15 17.5 15C18.2 15 19 15.8 19 17C19 18.5 16 20.5 16 20.5Z" fill="#3B82F6"/>
+          <circle cx="12" cy="11" r="1.2" fill="white"/>
+          <circle cx="16" cy="8" r="1.2" fill="white"/>
+          <circle cx="20" cy="11" r="1.2" fill="white"/>
+          <path d="M11 24 Q 16 4, 21 24" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.3"/>
+          <defs>
+            <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#3B82F6"/>
+              <stop offset="100%" stop-color="#2563EB"/>
+            </linearGradient>
+          </defs>
+        </svg>
         <span class="brand-name">DropGood</span>
       </div>
     </div>
@@ -176,7 +190,7 @@ function emailWrapper(content: string): string {
     <div class="footer">
       <p style="color: ${BRAND_COLORS.textSecondary};"><strong>Questions?</strong> We're here to help</p>
       <div class="footer-links">
-        <a href="mailto:support@dropgood.com" class="footer-link">Email Support</a>
+        <a href="mailto:support@dropgood.co" class="footer-link">Email Support</a>
         <span style="color: ${BRAND_COLORS.border};">•</span>
         <a href="tel:+15555551234" class="footer-link">Call Us</a>
       </div>
@@ -419,7 +433,7 @@ export function deliveryCompletedEmail(data: {
       <p>We'd love to hear your feedback to help us improve.</p>
 
       <div style="text-align: center;">
-        <a href="mailto:feedback@dropgood.com?subject=Feedback" class="button">Share Feedback</a>
+        <a href="mailto:feedback@dropgood.co?subject=Feedback" class="button">Share Feedback</a>
       </div>
 
       <p style="margin-top: 32px;">Thanks for using DropGood!</p>
@@ -465,7 +479,7 @@ export function deliveryCanceledEmail(data: {
       <p>You can book a new pickup anytime that works for you.</p>
 
       <div style="text-align: center;">
-        <a href="https://dropgood.com/book" class="button">Book New Pickup</a>
+        <a href="https://dropgood.co/book" class="button">Book New Pickup</a>
       </div>
 
       <p style="margin-top: 32px;">Questions? We're here to help!</p>
@@ -513,7 +527,7 @@ export function newCharitySubmissionEmail(data: {
       </ol>
 
       <div style="text-align: center; margin-top: 24px;">
-        <a href="https://dropgood.com/admin/charities" class="button">Go to Admin Dashboard</a>
+        <a href="https://dropgood.co/admin/operations" class="button">Go to Admin Dashboard</a>
       </div>
 
       <p style="margin-top: 32px;">
@@ -555,7 +569,7 @@ export function newChatMessageEmail(data: {
       </div>
 
       <div style="text-align: center; margin-top: 24px;">
-        <a href="https://dropgood.com/admin/operations" class="button">View in Admin Dashboard</a>
+        <a href="https://dropgood.co/admin/operations" class="button">View in Admin Dashboard</a>
       </div>
 
       <p style="margin-top: 32px;">
@@ -566,6 +580,245 @@ export function newChatMessageEmail(data: {
 
   return {
     subject: `💬 New Chat Message from ${data.visitor_name}`,
+    html: emailWrapper(content),
+  };
+}
+
+export function driverJobAvailableEmail(data: {
+  driver_name: string;
+  job_id: string;
+  pickup_city: string;
+  pickup_state: string;
+  distance_miles: number;
+  items_count: number;
+  scheduled_date?: string;
+  scheduled_time?: string;
+}): { subject: string; html: string } {
+  const content = `
+    <div class="content">
+      <div class="success-badge">
+        <div style="font-size: 40px; margin-bottom: 8px;">🚚</div>
+        <h1 style="margin: 0; color: white; font-size: 24px;">New Delivery Job Available!</h1>
+        <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">A pickup job near you is ready</p>
+      </div>
+
+      <p>Hi <strong>${data.driver_name}</strong>,</p>
+
+      <p>Great news! There's a new delivery opportunity available in your area.</p>
+
+      <div class="card">
+        <div class="info-row">
+          <span class="info-label">Job ID</span>
+          <span class="info-value">#${data.job_id.substring(0, 8).toUpperCase()}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Location</span>
+          <span class="info-value">${data.pickup_city}, ${data.pickup_state}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Distance</span>
+          <span class="info-value">${data.distance_miles.toFixed(1)} miles</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Items to Deliver</span>
+          <span class="info-value">${data.items_count} ${data.items_count === 1 ? 'bag/box' : 'bags/boxes'}</span>
+        </div>
+        ${data.scheduled_date && data.scheduled_time ? `
+        <div class="info-row">
+          <span class="info-label">Pickup Time</span>
+          <span class="info-value">${data.scheduled_date} at ${data.scheduled_time}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <h2>How to Accept This Job</h2>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div>
+          <strong style="color: ${BRAND_COLORS.textPrimary};">1. Open Your Uber Driver App</strong>
+          <p style="margin: 4px 0 0 0;">Make sure you have the latest version installed</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div>
+          <strong style="color: ${BRAND_COLORS.textPrimary};">2. Enable Uber Direct</strong>
+          <p style="margin: 4px 0 0 0;">Go to Settings → Preferences → Turn on "Uber Direct" or "Package Delivery"</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div>
+          <strong style="color: ${BRAND_COLORS.textPrimary};">3. Accept the Request</strong>
+          <p style="margin: 4px 0 0 0;">The job will appear in your app. Accept it to start earning!</p>
+        </div>
+      </div>
+
+      <div style="background-color: ${BRAND_COLORS.card}; border-left: 4px solid ${BRAND_COLORS.accent}; padding: 16px; border-radius: 8px; margin: 24px 0;">
+        <p style="margin: 0; color: ${BRAND_COLORS.textSecondary};">
+          <strong>💡 Important:</strong> You must have Uber Direct delivery mode enabled in your Uber Driver app
+          to see and accept these delivery requests. These jobs help people donate to local charities!
+        </p>
+      </div>
+
+      <p style="margin-top: 32px;">Happy delivering!</p>
+      <p><strong>The DropGood Team</strong></p>
+
+      <p style="margin-top: 32px; font-size: 12px; color: ${BRAND_COLORS.textMuted};">
+        You're receiving this email because you signed up for job notifications at DropGood.
+        <a href="https://dropgood.co/driver-board/unsubscribe" style="color: ${BRAND_COLORS.textSecondary};">Unsubscribe</a>
+      </p>
+    </div>
+  `;
+
+  return {
+    subject: `🚚 New Job Available in ${data.pickup_city} - ${data.items_count} ${data.items_count === 1 ? 'item' : 'items'}`,
+    html: emailWrapper(content),
+  };
+}
+
+export function taxReceiptEmail(data: {
+  customer_name: string;
+  receipt_number: string;
+  donation_date: string;
+  charity_name: string;
+  charity_ein: string;
+  charity_address: string;
+  items_description: string;
+  estimated_value: number;
+  receipt_url: string;
+}): { subject: string; html: string } {
+  const content = `
+    <div class="content">
+      <div class="success-badge">
+        <div style="font-size: 40px; margin-bottom: 8px;">📄</div>
+        <h1 style="margin: 0; color: white; font-size: 24px;">Your Tax Receipt is Ready</h1>
+        <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Official donation receipt for tax purposes</p>
+      </div>
+
+      <p>Hi <strong>${data.customer_name}</strong>,</p>
+
+      <p>Thank you for your generous donation! Your official tax receipt is now available.</p>
+
+      <div class="card">
+        <div class="info-row">
+          <span class="info-label">Receipt Number</span>
+          <span class="info-value">${data.receipt_number}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Donation Date</span>
+          <span class="info-value">${data.donation_date}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Charity</span>
+          <span class="info-value">${data.charity_name}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">EIN</span>
+          <span class="info-value">${data.charity_ein}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Items Donated</span>
+          <span class="info-value">${data.items_description}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estimated Value</span>
+          <span class="price" style="color: ${BRAND_COLORS.accent};">$${data.estimated_value.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${data.receipt_url}" class="button">Download Receipt</a>
+      </div>
+
+      <div style="background-color: ${BRAND_COLORS.card}; border-left: 4px solid ${BRAND_COLORS.accent}; padding: 16px; border-radius: 8px; margin: 24px 0;">
+        <p style="margin: 0; color: ${BRAND_COLORS.textSecondary};">
+          <strong>💡 For Your Records:</strong> This receipt is provided by ${data.charity_name} (EIN: ${data.charity_ein}),
+          a 501(c)(3) tax-exempt organization. Save this receipt for your tax filings.
+        </p>
+      </div>
+
+      <p style="margin-top: 32px;">Thank you for making a difference in your community!</p>
+      <p><strong>The DropGood Team</strong></p>
+    </div>
+  `;
+
+  return {
+    subject: `📄 Your Tax Receipt - ${data.charity_name}`,
+    html: emailWrapper(content),
+  };
+}
+
+export function donationSummaryEmail(data: {
+  customer_name: string;
+  receipt_number: string;
+  donation_date: string;
+  charity_name: string;
+  charity_address: string;
+  items_description: string;
+  estimated_value: number;
+  receipt_url: string;
+}): { subject: string; html: string } {
+  const content = `
+    <div class="content">
+      <div class="success-badge">
+        <div style="font-size: 40px; margin-bottom: 8px;">📋</div>
+        <h1 style="margin: 0; color: white; font-size: 24px;">Donation Summary</h1>
+        <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Record of your generous donation</p>
+      </div>
+
+      <p>Hi <strong>${data.customer_name}</strong>,</p>
+
+      <p>Thank you for your donation! Here's a summary of your contribution to ${data.charity_name}.</p>
+
+      <div class="card">
+        <div class="info-row">
+          <span class="info-label">Reference Number</span>
+          <span class="info-value">${data.receipt_number}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Donation Date</span>
+          <span class="info-value">${data.donation_date}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Charity</span>
+          <span class="info-value">${data.charity_name}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Location</span>
+          <span class="info-value">${data.charity_address}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Items Donated</span>
+          <span class="info-value">${data.items_description}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estimated Value</span>
+          <span class="info-value">$${data.estimated_value.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${data.receipt_url}" class="button">View Summary</a>
+      </div>
+
+      <div style="background-color: ${BRAND_COLORS.card}; border-left: 4px solid ${BRAND_COLORS.accent}; padding: 16px; border-radius: 8px; margin: 24px 0;">
+        <p style="margin: 0; color: ${BRAND_COLORS.textSecondary};">
+          <strong>📝 Note:</strong> This is a donation summary for your records. For an official tax receipt,
+          please contact ${data.charity_name} directly. They may be able to provide a receipt for your donation.
+        </p>
+      </div>
+
+      <p style="margin-top: 32px;">Thank you for making a difference!</p>
+      <p><strong>The DropGood Team</strong></p>
+    </div>
+  `;
+
+  return {
+    subject: `📋 Donation Summary - ${data.charity_name}`,
     html: emailWrapper(content),
   };
 }

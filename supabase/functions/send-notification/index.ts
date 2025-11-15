@@ -5,7 +5,7 @@ import * as EmailTemplates from './email-templates.ts';
 import * as SMSTemplates from './sms-templates.ts';
 
 interface NotificationRequest {
-  type: 'booking_confirmation' | 'pickup_reminder' | 'driver_assigned' | 'driver_enroute' | 'driver_arrived' | 'pickup_completed' | 'delivery_completed' | 'delivery_canceled' | 'new_charity_submission' | 'new_chat_message';
+  type: 'booking_confirmation' | 'pickup_reminder' | 'driver_assigned' | 'driver_enroute' | 'driver_arrived' | 'pickup_completed' | 'delivery_completed' | 'delivery_canceled' | 'new_charity_submission' | 'new_chat_message' | 'driver_job_available' | 'tax_receipt' | 'donation_summary';
   recipient_email: string;
   recipient_phone?: string;
   recipient_name?: string;
@@ -156,6 +156,12 @@ function getEmailContent(type: string, data: any): { subject: string; html: stri
       return EmailTemplates.newCharitySubmissionEmail(data);
     case 'new_chat_message':
       return EmailTemplates.newChatMessageEmail(data);
+    case 'driver_job_available':
+      return EmailTemplates.driverJobAvailableEmail(data);
+    case 'tax_receipt':
+      return EmailTemplates.taxReceiptEmail(data);
+    case 'donation_summary':
+      return EmailTemplates.donationSummaryEmail(data);
     default:
       throw new Error(`Unknown email type: ${type}`);
   }

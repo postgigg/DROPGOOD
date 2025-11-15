@@ -75,6 +75,9 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
     employee_id: string;
     subsidy_percentage: number;
   } | null>(null);
+  const [calculatingPrice, setCalculatingPrice] = useState(false);
+  const [previewPricing, setPreviewPricing] = useState<any>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Check for company employee eligibility on mount
   useEffect(() => {
@@ -199,7 +202,9 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
           false, // isRushDelivery
           0, // driverTip (added later in payment step)
           charitySubsidyPct,
-          companySubsidyPct
+          companySubsidyPct,
+          0.25, // serviceFeePercentage
+          pickupAddress.state
         );
 
         return {
@@ -284,7 +289,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         if (!uberCost) {
           console.warn('No quote found for', result.name, result.id);
         }
-        const pricing = calculateFinalPrice(uberCost || 0, false, 0);
+        const pricing = calculateFinalPrice(uberCost || 0, false, 0, 0.25, pickupAddress.state);
 
         return {
           id: result.id,
@@ -396,6 +401,56 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
     }
   }
 
+  async function calculatePriceForNewCharity(location: { latitude: number; longitude: number }) {
+    setCalculatingPrice(true);
+    setPreviewPricing(null);
+
+    try {
+      const distance = calculateDistance(
+        pickupAddress.latitude,
+        pickupAddress.longitude,
+        location.latitude,
+        location.longitude
+      );
+
+      console.log('🧮 Calculating price for new charity:', {
+        distance: distance.toFixed(1),
+        pickupLat: pickupAddress.latitude,
+        pickupLng: pickupAddress.longitude,
+        charityLat: location.latitude,
+        charityLng: location.longitude
+      });
+
+      // Check if distance is too far (over 100 miles)
+      if (distance > 100) {
+        alert(`⚠️ This charity is ${distance.toFixed(1)} miles away from your pickup location. Please select a charity closer to your pickup address (within 100 miles).`);
+        setNewCharityAddress('');
+        setSelectedAddressResult(null);
+        setAddressSuggestions([]);
+        setCalculatingPrice(false);
+        return;
+      }
+
+      const baseCost = calculateManualModePricing(distance);
+      const pricing = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state);
+
+      console.log('💰 Pricing calculated:', {
+        baseCost: baseCost.toFixed(2),
+        serviceFee: pricing.our_markup.toFixed(2),
+        total: pricing.total_price.toFixed(2)
+      });
+
+      setPreviewPricing({
+        ...pricing,
+        distance_miles: distance
+      });
+    } catch (error) {
+      console.error('Price calculation error:', error);
+    } finally {
+      setCalculatingPrice(false);
+    }
+  }
+
   function selectAddress(suggestion: any) {
     const [lng, lat] = suggestion.center;
 
@@ -421,6 +476,12 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
       longitude: lng
     });
     setShowAddressSuggestions(false);
+
+    // Trigger price calculation
+    calculatePriceForNewCharity({
+      latitude: lat,
+      longitude: lng
+    });
   }
 
   async function handleAddCharity() {
@@ -504,9 +565,9 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         selectedLocation.longitude
       );
 
-      // Use 35% service fee for inactive charity
+      // Use 40% service fee for inactive charity
       const baseCost = calculateManualModePricing(distance);
-      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE);
+      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state);
 
       // Add to the charities list so user can continue
       const newCharityWithPricing: CharityWithSponsorship = {
@@ -518,9 +579,8 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
         company_benefit: null
       };
 
-      setCharities([newCharityWithPricing]);
-      setShowAddCharityForm(false);
-      alert('Charity added! You can continue with your booking.');
+      // Automatically advance to schedule step with this charity selected
+      onSelect(newCharityWithPricing);
     } catch (error: any) {
       console.error('Error adding charity:', error);
       alert('Failed to add charity. Please try again.');
@@ -660,6 +720,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                         setAddressSuggestions([]);
                         setShowAddressSuggestions(false);
                         setSelectedAddressResult(null);
+                        setPreviewPricing(null);
                       }}
                       className="absolute right-3 top-3.5 text-gray-400 hover:text-white"
                     >
@@ -698,22 +759,57 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                 <p className="text-xs text-gray-400 mt-1">
                   We'll verify this location before it goes live
                 </p>
+
+                {/* Price Preview */}
+                <AnimatePresence>
+                  {calculatingPrice && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-3 bg-gray-700 border border-gray-600 rounded-lg p-4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Loader className="h-4 w-4 animate-spin text-blue-400" />
+                        <span className="text-sm text-gray-300">Calculating price...</span>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {previewPricing && !calculatingPrice && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-3 bg-gray-800/60 backdrop-blur-sm border-2 border-gray-700/50 rounded-lg p-4"
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl font-black text-white">
+                          ${previewPricing.total_price.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Base price + optional tip
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
-                  onClick={handleAddCharity}
-                  disabled={addingCharity}
-                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {addingCharity ? 'Adding...' : 'Continue'}
-                </button>
                 <button
                   onClick={() => setShowAddCharityForm(false)}
                   disabled={addingCharity}
                   className="flex-1 bg-gray-700 text-gray-200 px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition disabled:opacity-50"
                 >
                   Cancel
+                </button>
+                <button
+                  onClick={handleAddCharity}
+                  disabled={addingCharity || !previewPricing}
+                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {addingCharity ? 'Adding...' : previewPricing ? `Continue with $${previewPricing.total_price.toFixed(2)}` : 'Continue'}
                 </button>
               </div>
             </div>
@@ -782,84 +878,109 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
           )}
         </motion.div>
 
-        {/* Filters Row - Uber Style Chips */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          <div className="flex items-center gap-2 text-gray-400 flex-shrink-0">
-            <SlidersHorizontal className="h-5 w-5" />
-            <span className="text-sm font-medium hidden sm:inline">Filters:</span>
-          </div>
+        {/* Filter Toggle Button */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-800 border-2 border-gray-700 rounded-xl text-gray-300 hover:border-gray-600 transition-all"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          <span className="text-sm font-medium">Filters & Sort</span>
+          <motion.div
+            animate={{ rotate: showFilters ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            ▼
+          </motion.div>
+        </button>
 
-          {/* Distance Filter Chips */}
-          <div className="flex gap-2 flex-shrink-0">
-            {[5, 10, 15, 25].map((distance) => (
-              <motion.button
-                key={distance}
-                onClick={() => setMaxDistance(distance)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
-                  maxDistance === distance
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                    : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600'
-                }`}
-              >
-                <Navigation className={`h-4 w-4 ${maxDistance === distance ? 'text-white' : 'text-gray-400'}`} />
-                {distance} mi
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Sort Controls - Icon Based */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-400 flex-shrink-0">Sort by:</span>
-          <div className="flex gap-2 w-full">
-            <motion.button
-              onClick={() => setSortBy('price')}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
-                sortBy === 'price'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
-              }`}
+        {/* Collapsible Filters */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4 overflow-hidden"
             >
-              <DollarSign className="h-4 w-4" />
-              <span className="hidden sm:inline">Price</span>
-              <span className="sm:hidden">$</span>
-            </motion.button>
+              {/* Distance Filter Chips */}
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex items-center gap-2 text-gray-400 flex-shrink-0">
+                  <Navigation className="h-5 w-5" />
+                  <span className="text-sm font-medium">Distance:</span>
+                </div>
 
-            <motion.button
-              onClick={() => setSortBy('distance')}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
-                sortBy === 'distance'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
-              }`}
-            >
-              <MapPin className="h-4 w-4" />
-              <span className="hidden sm:inline">Distance</span>
-              <span className="sm:hidden">Mi</span>
-            </motion.button>
+                <div className="flex gap-2 flex-shrink-0">
+                  {[5, 10, 15, 25].map((distance) => (
+                    <motion.button
+                      key={distance}
+                      onClick={() => setMaxDistance(distance)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`px-4 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
+                        maxDistance === distance
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                          : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600'
+                      }`}
+                    >
+                      {distance} mi
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
 
-            <motion.button
-              onClick={() => setSortBy('rating')}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
-                sortBy === 'rating'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
-              }`}
-            >
-              <Star className="h-4 w-4" />
-              <span className="hidden sm:inline">Rating</span>
-              <span className="sm:hidden">★</span>
-            </motion.button>
-          </div>
-        </div>
+              {/* Sort Controls - Icon Based */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-400 flex-shrink-0">Sort by:</span>
+                <div className="flex gap-2 w-full">
+                  <motion.button
+                    onClick={() => setSortBy('price')}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                      sortBy === 'price'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
+                        : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
+                    }`}
+                  >
+                    <DollarSign className="h-4 w-4" />
+                    <span className="hidden sm:inline">Price</span>
+                    <span className="sm:hidden">$</span>
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => setSortBy('distance')}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                      sortBy === 'distance'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
+                        : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
+                    }`}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span className="hidden sm:inline">Distance</span>
+                    <span className="sm:hidden">Mi</span>
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => setSortBy('rating')}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className={`flex-1 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+                      sortBy === 'rating'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30'
+                        : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-750'
+                    }`}
+                  >
+                    <Star className="h-4 w-4" />
+                    <span className="hidden sm:inline">Rating</span>
+                    <span className="sm:hidden">★</span>
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Active Filters Summary */}
         {(searchQuery || maxDistance !== 15) && (
@@ -922,12 +1043,12 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
             }}
             className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 transition-all duration-300 cursor-pointer group ${
               charity.sponsorship || charity.company_benefit
-                ? 'bg-gradient-to-br from-blue-900/20 via-purple-900/15 to-blue-900/20 border-2 border-blue-500/50 shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-400'
+                ? 'bg-gradient-to-br from-blue-900/20 via-blue-900/15 to-blue-900/20 border-2 border-blue-500/50 shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-400'
                 : 'bg-gray-800/60 backdrop-blur-sm border-2 border-gray-700/50 shadow-lg hover:shadow-xl hover:border-gray-600 hover:bg-gray-800/80'
             }`}
           >
             {/* Hover Gradient Overlay for Premium Feel */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/5 to-purple-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/5 to-blue-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
             {/* Subsidy badges */}
             <div className="mb-3 flex flex-wrap items-center gap-2 relative z-10">
@@ -946,7 +1067,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                     </span>
                   )}
                   {charity.sponsorship && charity.company_benefit && (
-                    <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white animate-pulse">
+                    <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white animate-pulse">
                       ⚡ STACKED SAVINGS
                     </span>
                   )}
@@ -1035,7 +1156,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, o
                       →
                     </motion.span>
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
                 </motion.button>
               </div>
             </div>

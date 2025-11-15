@@ -2,16 +2,24 @@ import { useState, useMemo } from 'react';
 import { Calendar, Clock, Loader } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { DonationCenter } from '../../lib/supabase';
-import { calculateFinalPrice } from '../../lib/pricing';
+import { calculateFinalPrice, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
 
 interface Props {
   charity: DonationCenter & { pricing: any };
+  pickupAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    latitude: number;
+    longitude: number;
+  };
   onNext: (schedule: { date: string; timeStart: string; timeEnd: string; pricing: any }) => void;
   onBack: () => void;
   initialSchedule: { date: string; timeStart: string; timeEnd: string } | null;
 }
 
-export default function StepSchedule({ charity, onNext, onBack, initialSchedule }: Props) {
+export default function StepSchedule({ charity, pickupAddress, onNext, onBack, initialSchedule }: Props) {
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -30,7 +38,18 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
   const isToday = selectedDate === today.toISOString().split('T')[0];
 
   const updatedPricing = useMemo(() => {
-    const basePricing = calculateFinalPrice(charity.pricing.uber_cost, isToday);
+    // Check if charity is inactive/non-verified (use 40% fee) or active (use 25% fee)
+    const serviceFee = charity.is_active === false
+      ? INACTIVE_CHARITY_SERVICE_FEE  // 40% for non-verified charities
+      : DEFAULT_SERVICE_FEE;           // 25% for verified/active charities
+
+    const basePricing = calculateFinalPrice(
+      charity.pricing.uber_cost,
+      isToday,
+      0, // driver tip added in payment step
+      serviceFee, // Use correct service fee based on charity status
+      pickupAddress.state // Pass state for state fee calculation
+    );
 
     if (charity.pricing.subsidized && charity.pricing.subsidy_amount) {
       const subsidyPercentage = (charity.pricing.subsidy_amount / charity.pricing.original_price) * 100;
@@ -46,7 +65,7 @@ export default function StepSchedule({ charity, onNext, onBack, initialSchedule 
     }
 
     return basePricing;
-  }, [charity.pricing.uber_cost, charity.pricing.subsidized, charity.pricing.subsidy_amount, charity.pricing.original_price, isToday]);
+  }, [charity.pricing.uber_cost, charity.pricing.subsidized, charity.pricing.subsidy_amount, charity.pricing.original_price, charity.is_active, isToday]);
 
   const getNextDays = (count: number) => {
     const days = [];
