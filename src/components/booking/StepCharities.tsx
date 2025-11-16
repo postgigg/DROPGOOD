@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { supabase, type DonationCenter } from '../../lib/supabase';
-import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE } from '../../lib/pricing';
+import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
 import { searchDonationCentersNearby } from '../../lib/mapboxSearch';
 
 interface Props {
@@ -202,11 +202,13 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
         const finalPricing = calculateFinalPriceWithSubsidies(
           uberCost,
           false, // isRushDelivery
-          0, // driverTip (added later in payment step)
+          10, // driverTip - $10 guaranteed minimum
           charitySubsidyPct,
           companySubsidyPct,
-          0.25, // serviceFeePercentage
-          pickupAddress.state
+          DEFAULT_SERVICE_FEE, // 35% service fee
+          pickupAddress.state,
+          bagsCount || 0, // Include bag fees
+          boxesCount || 0 // Include box fees
         );
 
         return {
@@ -291,7 +293,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
         if (!uberCost) {
           console.warn('No quote found for', result.name, result.id);
         }
-        const pricing = calculateFinalPrice(uberCost || 0, false, 0, 0.25, pickupAddress.state);
+        const pricing = calculateFinalPrice(uberCost || 0, false, 10, DEFAULT_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
 
         return {
           id: result.id,
@@ -434,7 +436,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
       }
 
       const baseCost = calculateManualModePricing(distance);
-      const pricing = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state);
+      const pricing = calculateFinalPrice(baseCost, false, 10, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
 
       console.log('💰 Pricing calculated:', {
         baseCost: baseCost.toFixed(2),
@@ -567,9 +569,9 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
         selectedLocation.longitude
       );
 
-      // Use 40% service fee for inactive charity
+      // Use 50% service fee for inactive charity
       const baseCost = calculateManualModePricing(distance);
-      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state);
+      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 10, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
 
       // Add to the charities list so user can continue
       const newCharityWithPricing: CharityWithSponsorship = {

@@ -310,7 +310,7 @@ export default function LandingPage() {
                 </form>
 
                 <p className="text-white/70 text-base sm:text-lg">
-                  Typically $10-20 · 2-minute booking · Available in 500+ cities
+                  2-minute booking · Available in 500+ cities · Tax-deductible receipt
                 </p>
               </div>
             </div>
@@ -414,71 +414,127 @@ export default function LandingPage() {
             </div>
 
 
-            {/* What We Accept - Dark Grid */}
-            <div className="mb-20 sm:mb-32 bg-gray-900/50 rounded-3xl p-8 sm:p-12 md:p-16 border border-gray-800">
-              <h2 className="text-3xl sm:text-4xl font-black text-white mb-12 text-center">
+            {/* What We Accept - Improved UI */}
+            <div className="mb-20 sm:mb-32">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6 text-center">
                 What we accept
               </h2>
+              <p className="text-lg sm:text-xl text-gray-400 mb-12 sm:mb-16 max-w-2xl mx-auto text-center">
+                Think: bags and boxes you'd carry yourself
+              </p>
 
-              <div className="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6 sm:p-8">
-                  <div className="text-green-500 font-black text-2xl mb-4">✓</div>
-                  <h3 className="text-xl font-bold text-white mb-4">We take</h3>
-                  <ul className="space-y-2 text-gray-300">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+                {/* We Take */}
+                <div className="bg-gradient-to-br from-green-900/10 to-green-800/5 border border-green-700/20 rounded-2xl sm:rounded-3xl p-8 sm:p-10">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-green-600/20 rounded-xl mb-6 border border-green-600/30">
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-6">We take</h3>
+                  <ul className="space-y-4 text-base sm:text-lg">
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>Clothing & shoes</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>Books & media</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>Small electronics</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>Household items</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>Toys & baby items</span>
                     </li>
                   </ul>
                 </div>
 
-                <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6 sm:p-8">
-                  <div className="text-red-500 font-black text-2xl mb-4">✗</div>
-                  <h3 className="text-xl font-bold text-white mb-4">We don't take</h3>
-                  <ul className="space-y-2 text-gray-300">
-                    <li className="flex items-start gap-2">
-                      <X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                {/* We Don't Take */}
+                <div className="bg-gradient-to-br from-red-900/10 to-red-800/5 border border-red-700/20 rounded-2xl sm:rounded-3xl p-8 sm:p-10">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-red-600/20 rounded-xl mb-6 border border-red-600/30">
+                    <X className="h-6 w-6 text-red-500" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-6">We don't take</h3>
+                  <ul className="space-y-4 text-base sm:text-lg">
+                    <li className="flex items-center gap-3 text-gray-400">
+                      <X className="h-5 w-5 text-red-500 flex-shrink-0" />
                       <span>Furniture of any size</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-400">
+                      <X className="h-5 w-5 text-red-500 flex-shrink-0" />
                       <span>Mattresses</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-400">
+                      <X className="h-5 w-5 text-red-500 flex-shrink-0" />
                       <span>Large appliances</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-400">
+                      <X className="h-5 w-5 text-red-500 flex-shrink-0" />
                       <span>Broken items</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-center gap-3 text-gray-400">
+                      <X className="h-5 w-5 text-red-500 flex-shrink-0" />
                       <span>Hazardous materials</span>
                     </li>
                   </ul>
                 </div>
               </div>
+            </div>
 
-              <p className="text-center text-gray-400 mt-8 text-lg">
-                Think: bags and boxes you'd carry yourself
+            {/* Why DropGood Section */}
+            <div className="mb-20 sm:mb-32">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6 text-center">
+                Why people choose DropGood
+              </h2>
+              <p className="text-lg sm:text-xl text-gray-400 mb-12 sm:mb-16 max-w-2xl mx-auto text-center">
+                The easiest way to donate and make an impact
               </p>
+
+              <div className="grid md:grid-cols-3 gap-8 md:gap-12 max-w-5xl mx-auto">
+                {/* Card 1: Save Time */}
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-blue-600/20 rounded-2xl sm:rounded-3xl mb-6 border border-blue-600/30">
+                    <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                    Save 2+ hours
+                  </h3>
+                  <p className="text-base sm:text-lg text-gray-400 leading-relaxed">
+                    No driving, no waiting in lines. Driver comes to you.
+                  </p>
+                </div>
+
+                {/* Card 2: Tax Deduction */}
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-600/20 rounded-2xl sm:rounded-3xl mb-6 border border-green-600/30">
+                    <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-green-500" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                    Max tax deduction
+                  </h3>
+                  <p className="text-base sm:text-lg text-gray-400 leading-relaxed">
+                    Automatic receipt with fair market value calculation.
+                  </p>
+                </div>
+
+                {/* Card 3: Support Local */}
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-purple-600/20 rounded-2xl sm:rounded-3xl mb-6 border border-purple-600/30">
+                    <Star className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                    Support your cause
+                  </h3>
+                  <p className="text-base sm:text-lg text-gray-400 leading-relaxed">
+                    Choose exactly where your items go to local charities you trust.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* FAQ Section - Dark Accordion Style */}
