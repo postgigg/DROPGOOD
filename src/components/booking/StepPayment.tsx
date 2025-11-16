@@ -552,9 +552,9 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
 
       {/* Contact Information */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
-        <h3 className="text-white font-semibold text-lg mb-6">Contact Information</h3>
+        <h3 className="text-white font-semibold text-xl mb-6">Contact Information</h3>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           {/* Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -565,7 +565,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value.trim())}
-                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                 placeholder="John"
                 required
               />
@@ -578,7 +578,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value.trim())}
-                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                 placeholder="Doe"
                 required
               />
@@ -606,7 +606,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                 }
                 setPhone(value);
               }}
-              className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+              className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
               placeholder="(555) 123-4567"
               maxLength={14}
               required
@@ -623,7 +623,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
-                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                 placeholder="your@email.com"
                 required
               />
@@ -660,7 +660,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
 
       {/* Payment Section */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
-        <h3 className="text-white font-semibold text-lg mb-6">Payment</h3>
+        <h3 className="text-white font-semibold text-xl mb-6">Payment</h3>
 
         {stripeEnabled && paymentReady && clientSecret && bookingId ? (
           <Elements
@@ -798,12 +798,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         </div>
       )}
 
-      {/* Cancellation Policy */}
-      <div className="text-center">
-        <p className="text-xs text-gray-400">
-          Free cancellation up to 2 hours before pickup
-        </p>
-      </div>
+      {/* Cancellation Policy - REMOVED */}
     </div>
   );
 }
