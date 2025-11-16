@@ -75,6 +75,18 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
   }, []); // Only run once on mount
 
   const recalculatedPricing = (() => {
+    // Calculate days in advance for discount
+    const calculateDaysInAdvance = () => {
+      const selected = new Date(schedule.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selected.setHours(0, 0, 0, 0);
+      const diffTime = selected.getTime() - today.getTime();
+      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    const daysInAdvance = calculateDaysInAdvance();
+
     // Use the new stacked subsidy pricing function
     const charitySubsidyPct = charity.pricing.charity_subsidy_percentage || 0;
     const companySubsidyPct = charity.pricing.company_subsidy_percentage || 0;
@@ -94,7 +106,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       serviceFee, // Use correct service fee based on charity status
       pickupAddress.state, // Pass state for state fee calculation
       bagsCount, // Number of bags
-      boxesCount // Number of boxes
+      boxesCount, // Number of boxes
+      daysInAdvance // Days in advance for discount
     );
   })();
 
@@ -458,6 +471,19 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               <span className="text-gray-400">Service fee</span>
               <span className="text-white">${(recalculatedPricing.service_fee + recalculatedPricing.stripe_fee).toFixed(2)}</span>
             </div>
+            {/* Advance booking discount - Color coded: Yellow (good) -> Orange (better) -> Green (best) */}
+            {recalculatedPricing.advance_booking_discount_amount && recalculatedPricing.advance_booking_discount_amount > 0 && (
+              <div className={`flex justify-between ${
+                (recalculatedPricing.days_in_advance || 0) <= 3
+                  ? 'text-yellow-500'   // Good (5-10%)
+                  : (recalculatedPricing.days_in_advance || 0) <= 5
+                    ? 'text-orange-500' // Better (13-16%)
+                    : 'text-green-500'  // Best (18-20%)
+              }`}>
+                <span>Advance booking ({recalculatedPricing.days_in_advance} days)</span>
+                <span>-${recalculatedPricing.advance_booking_discount_amount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-400">Driver tip</span>
               <span className="text-white">${recalculatedPricing.driver_tip.toFixed(2)}</span>

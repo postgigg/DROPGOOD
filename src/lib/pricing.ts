@@ -15,6 +15,10 @@ export interface PricingBreakdown {
   box_fee?: number;
   bag_box_driver_tip?: number; // What driver gets from bags/boxes
   total_driver_tip?: number; // $10 base + bag/box tips + customer extra
+  // Advance booking discount
+  advance_booking_discount_percentage?: number;
+  advance_booking_discount_amount?: number;
+  days_in_advance?: number;
   // Charity subsidy fields
   charity_subsidy_amount?: number;
   charity_subsidy_percentage?: number;
@@ -30,8 +34,8 @@ export interface PricingBreakdown {
 }
 
 const RUSH_FEE = 0.00; // No rush fee
-export const DEFAULT_SERVICE_FEE = 0.25; // 25%
-export const INACTIVE_CHARITY_SERVICE_FEE = 0.40; // 40% for unverified charities
+export const DEFAULT_SERVICE_FEE = 0.35; // 35%
+export const INACTIVE_CHARITY_SERVICE_FEE = 0.50; // 50% for unverified charities
 export const GUARANTEED_DRIVER_TIP = 10.00; // $10 guaranteed tip for every delivery
 
 // Bag/Box fees - driver tips built into delivery fee
@@ -39,6 +43,24 @@ export const BAG_FEE = 1.50; // Per bag - 100% to driver as tip
 export const BOX_FEE = 2.00; // Per box - $1.50 to driver as tip, $0.50 to DropGood
 export const BOX_TIP_AMOUNT = 1.50; // What driver gets per box
 export const BOX_REVENUE = 0.50; // What DropGood keeps per box
+
+// Advance booking discounts - incentivize booking ahead
+// Color scheme: Yellow (good) -> Orange (better) -> Green (best)
+// Max 25% to maintain profitability while incentivizing advance planning
+export const ADVANCE_BOOKING_DISCOUNTS: { [key: number]: number } = {
+  0: 0,    // Today - no discount
+  1: 0,    // Tomorrow - no discount
+  2: 0.05, // 2 days - 5% off (yellow - good)
+  3: 0.10, // 3 days - 10% off (yellow - good)
+  4: 0.15, // 4 days - 15% off (orange - better)
+  5: 0.18, // 5 days - 18% off (orange - better)
+  6: 0.22, // 6 days - 22% off (green - best)
+};
+
+export function getAdvanceBookingDiscount(daysInAdvance: number): number {
+  if (daysInAdvance >= 7) return 0.25; // 7+ days - 25% off (max - green - best)
+  return ADVANCE_BOOKING_DISCOUNTS[daysInAdvance] || 0;
+}
 
 // New fee structure
 export const STATE_FEE = 0.035; // 3.5% additional for certain states
@@ -61,7 +83,8 @@ export function calculateFinalPrice(
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
   pickupState?: string,
   bagsCount: number = 0,
-  boxesCount: number = 0
+  boxesCount: number = 0,
+  daysInAdvance: number = 0
 ): PricingBreakdown {
   // Enforce minimum tip of $10, maximum $100
   const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
@@ -80,10 +103,18 @@ export function calculateFinalPrice(
   const stateFee = (pickupState && shouldApplyStateFee(pickupState))
     ? uberCost * STATE_FEE
     : 0;
-  const deliveryFee = uberCost + deliveryMarkup + stateFee + bagBoxTotal;
+  let deliveryFee = uberCost + deliveryMarkup + stateFee + bagBoxTotal;
 
   // Calculate service fee (10% of Uber cost for display)
-  const serviceFee = uberCost * SERVICE_FEE_DISPLAY;
+  let serviceFee = uberCost * SERVICE_FEE_DISPLAY;
+
+  // Apply advance booking discount (to delivery + service, NOT to tip)
+  const discountPercentage = getAdvanceBookingDiscount(daysInAdvance);
+  const discountableAmount = deliveryFee + serviceFee;
+  const discountAmount = discountableAmount * discountPercentage;
+
+  deliveryFee = deliveryFee - (deliveryFee * discountPercentage);
+  serviceFee = serviceFee - (serviceFee * discountPercentage);
 
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
   const subtotalBeforeTip = deliveryFee + serviceFee + rushFee;
@@ -107,7 +138,10 @@ export function calculateFinalPrice(
     bag_fee: parseFloat(bagFee.toFixed(2)),
     box_fee: parseFloat(boxFee.toFixed(2)),
     bag_box_driver_tip: parseFloat(bagBoxDriverTip.toFixed(2)),
-    total_driver_tip: parseFloat(totalDriverTip.toFixed(2))
+    total_driver_tip: parseFloat(totalDriverTip.toFixed(2)),
+    advance_booking_discount_percentage: discountPercentage,
+    advance_booking_discount_amount: parseFloat(discountAmount.toFixed(2)),
+    days_in_advance: daysInAdvance
   };
 }
 
@@ -299,7 +333,8 @@ export function calculateFinalPriceWithSubsidies(
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
   pickupState?: string,
   bagsCount: number = 0,
-  boxesCount: number = 0
+  boxesCount: number = 0,
+  daysInAdvance: number = 0
 ): PricingBreakdown {
   // Enforce minimum tip of $10, maximum $100
   const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
@@ -318,10 +353,18 @@ export function calculateFinalPriceWithSubsidies(
   const stateFee = (pickupState && shouldApplyStateFee(pickupState))
     ? uberCost * STATE_FEE
     : 0;
-  const deliveryFee = uberCost + deliveryMarkup + stateFee + bagBoxTotal;
+  let deliveryFee = uberCost + deliveryMarkup + stateFee + bagBoxTotal;
 
   // Calculate service fee (10% of Uber cost for display)
-  const serviceFee = uberCost * SERVICE_FEE_DISPLAY;
+  let serviceFee = uberCost * SERVICE_FEE_DISPLAY;
+
+  // Apply advance booking discount (to delivery + service, NOT to tip or subsidies)
+  const discountPercentage = getAdvanceBookingDiscount(daysInAdvance);
+  const discountableAmount = deliveryFee + serviceFee;
+  const discountAmount = discountableAmount * discountPercentage;
+
+  deliveryFee = deliveryFee - (deliveryFee * discountPercentage);
+  serviceFee = serviceFee - (serviceFee * discountPercentage);
 
   const rushFee = isRushDelivery ? RUSH_FEE : 0;
   const subtotalWithoutTip = deliveryFee + serviceFee + rushFee;
@@ -366,6 +409,10 @@ export function calculateFinalPriceWithSubsidies(
     box_fee: parseFloat(boxFee.toFixed(2)),
     bag_box_driver_tip: parseFloat(bagBoxDriverTip.toFixed(2)),
     total_driver_tip: parseFloat(totalDriverTip.toFixed(2)),
+    // Advance booking discount
+    advance_booking_discount_percentage: discountPercentage,
+    advance_booking_discount_amount: parseFloat(discountAmount.toFixed(2)),
+    days_in_advance: daysInAdvance,
     // Subsidy details
     charity_subsidy_amount: subsidies.charity_subsidy_amount,
     charity_subsidy_percentage: charitySubsidyPercentage,

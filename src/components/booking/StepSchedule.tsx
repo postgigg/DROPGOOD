@@ -39,7 +39,22 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
 
   const isToday = selectedDate === today.toISOString().split('T')[0];
 
+  // Calculate days in advance for discount
+  const calculateDaysInAdvance = (dateStr: string) => {
+    const selected = new Date(dateStr);
+    const todayStart = new Date(); // Always get fresh current date
+    todayStart.setHours(0, 0, 0, 0);
+    selected.setHours(0, 0, 0, 0);
+    const diffTime = selected.getTime() - todayStart.getTime();
+    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    // console.log('🔍 calculateDaysInAdvance:', { dateStr, todayStart: todayStart.toISOString(), selected: selected.toISOString(), days });
+    return days;
+  };
+
   const updatedPricing = useMemo(() => {
+    // Recalculate days in advance inside memo so it updates with selectedDate
+    const daysInAdvance = calculateDaysInAdvance(selectedDate);
+
     // Check if charity is inactive/non-verified (use 40% fee) or active (use 25% fee)
     const serviceFee = charity.is_active === false
       ? INACTIVE_CHARITY_SERVICE_FEE  // 40% for non-verified charities
@@ -52,7 +67,8 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
       serviceFee, // Use correct service fee based on charity status
       pickupAddress.state, // Pass state for state fee calculation
       bagsCount, // Number of bags
-      boxesCount // Number of boxes
+      boxesCount, // Number of boxes
+      daysInAdvance // Days in advance for discount
     );
 
     if (charity.pricing.subsidized && charity.pricing.subsidy_amount) {
@@ -69,7 +85,10 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
     }
 
     return basePricing;
-  }, [charity.pricing.uber_cost, charity.pricing.subsidized, charity.pricing.subsidy_amount, charity.pricing.original_price, charity.is_active, isToday]);
+  }, [charity.pricing.uber_cost, charity.pricing.subsidized, charity.pricing.subsidy_amount, charity.pricing.original_price, charity.is_active, isToday, selectedDate, bagsCount, boxesCount, pickupAddress.state]);
+
+  // Calculate days in advance for display in celebration message
+  const daysInAdvance = calculateDaysInAdvance(selectedDate);
 
   const getNextDays = (count: number) => {
     const days = [];
@@ -110,14 +129,41 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white mb-2">When should we pick this up?</h2>
-        <div className="bg-blue-900/20 border border-blue-700/50 p-4 rounded-lg mt-4">
-          <p className="font-semibold text-white">Selected charity: {charity.name}</p>
-          <p className="text-sm text-gray-400">
-            Final price: ${updatedPricing.total_price.toFixed(2)}
-          </p>
-          <p className="text-sm text-gray-400">Distance: {charity.distance_miles} miles</p>
+        <h2 className="text-2xl font-bold text-white mb-4">When should we pick this up?</h2>
+        <div className="bg-blue-900/30 border border-blue-500/50 rounded-xl p-5">
+          <p className="text-sm text-blue-300 mb-1">Donating to</p>
+          <p className="text-xl font-bold text-white mb-3">{charity.name}</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-bold text-blue-400">
+              ${updatedPricing.total_price.toFixed(2)}
+            </p>
+            <p className="text-sm text-gray-400">total</p>
+          </div>
         </div>
+
+        {/* Advance booking discount celebration - HIDDEN FOR NOW */}
+        {/* {daysInAdvance >= 2 && (
+          <div className={`rounded-lg p-3 mt-2 ${
+            daysInAdvance <= 3
+              ? 'bg-yellow-900/20 border border-yellow-700/40'  // Good (5-10%)
+              : daysInAdvance <= 5
+                ? 'bg-orange-900/20 border border-orange-700/40' // Better (13-16%)
+                : 'bg-green-900/20 border border-green-700/40'   // Best (18-20%)
+          }`}>
+            <p className={`text-sm font-semibold ${
+              daysInAdvance <= 3
+                ? 'text-yellow-400'   // Good
+                : daysInAdvance <= 5
+                  ? 'text-orange-400' // Better
+                  : 'text-green-400'  // Best
+            }`}>
+              🎉 {updatedPricing.advance_booking_discount_percentage ? (updatedPricing.advance_booking_discount_percentage * 100).toFixed(0) : '0'}% advance booking discount applied!
+            </p>
+            <p className="text-gray-400 text-xs">
+              You're saving ${updatedPricing.advance_booking_discount_amount ? updatedPricing.advance_booking_discount_amount.toFixed(2) : '0.00'} by booking {daysInAdvance} days in advance
+            </p>
+          </div>
+        )} */}
       </div>
 
       <div>
@@ -144,6 +190,24 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
                     : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-blue-400 hover:bg-gray-700'
                 }`}
               >
+                {/* Advance booking discount badge - HIDDEN FOR NOW */}
+                {/* {idx >= 2 && (
+                  <div className={`absolute -top-2 -right-2 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg ${
+                    idx === 2 ? 'bg-yellow-500' :  // 5% - good
+                    idx === 3 ? 'bg-yellow-500' :  // 10% - good
+                    idx === 4 ? 'bg-orange-500' :  // 15% - better
+                    idx === 5 ? 'bg-orange-500' :  // 18% - better
+                    idx === 6 ? 'bg-green-500' :   // 22% - best
+                    'bg-green-500'                  // 25% - best
+                  }`}>
+                    {idx === 2 && '5% OFF'}
+                    {idx === 3 && '10% OFF'}
+                    {idx === 4 && '15% OFF'}
+                    {idx === 5 && '18% OFF'}
+                    {idx === 6 && '22% OFF'}
+                    {idx >= 7 && '25% OFF'}
+                  </div>
+                )} */}
                 <div className="text-xs font-medium mb-1">{dateInfo.dayName}</div>
                 <div className="text-2xl font-bold">{dateInfo.dayNumber}</div>
                 <div className="text-xs mt-1">{dateInfo.monthName}</div>
