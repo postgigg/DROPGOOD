@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LogOut, Calendar, MapPin, Phone, Clock, AlertCircle, DollarSign, CheckCircle, MessageCircle } from 'lucide-react';
+import { LogOut, Calendar, MapPin, Phone, Clock, AlertCircle, DollarSign, CheckCircle, MessageCircle, Building2, Zap, TrendingUp } from 'lucide-react';
 import AdminSupportChat from '../components/AdminSupportChat';
+import DonationCentersAnalytics from '../components/DonationCentersAnalytics';
+import BookingKanban from '../components/BookingKanban';
 import DropGoodLogo from '../components/DropGoodLogo';
 
 interface Booking {
@@ -36,7 +38,7 @@ export default function AdminOperations() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'completed'>('all');
   const [adminName, setAdminName] = useState('');
   const [adminId, setAdminId] = useState('');
-  const [activeTab, setActiveTab] = useState<'bookings' | 'support'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'support' | 'donation-centers'>('bookings');
 
   useEffect(() => {
     checkAuth();
@@ -111,6 +113,14 @@ export default function AdminOperations() {
     navigate('/admin/login');
   };
 
+  const handleUpdateBooking = (bookingId: string, newStatus: string) => {
+    setBookings(prevBookings =>
+      prevBookings.map(booking =>
+        booking.id === bookingId ? { ...booking, status: newStatus } : booking
+      )
+    );
+  };
+
   const filteredBookings = bookings.filter(booking => {
     if (filter === 'all') return true;
     if (filter === 'pending') return ['scheduled', 'pending_driver', 'payment_pending'].includes(booking.status);
@@ -147,35 +157,64 @@ export default function AdminOperations() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Loading operations...</p>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-900 text-xl font-semibold">Loading operations...</p>
         </div>
       </div>
     );
   }
 
+  // Calculate stats for dashboard
+  const totalRevenue = bookings.reduce((sum, b) => sum + b.total_price, 0);
+  const completedCount = bookings.filter(b => b.status === 'completed').length;
+  const activeCount = bookings.filter(b => ['driver_assigned', 'driver_arrived', 'picked_up', 'in_transit'].includes(b.status)).length;
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Operations Dashboard</h1>
-              <p className="text-sm text-slate-600 mt-1">Welcome back, {adminName}</p>
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <Zap className="w-7 h-7 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900">Operations Dashboard</h1>
+              </div>
+              <p className="text-sm text-gray-600 ml-14">Welcome back, {adminName}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
+              {/* Quick Stats */}
+              <div className="hidden lg:flex items-center gap-6 px-5 py-3 bg-gray-100 rounded-lg border border-gray-200">
+                <div className="text-center">
+                  <p className="text-xl font-bold text-gray-900">{bookings.length}</p>
+                  <p className="text-xs text-gray-600 font-medium">TOTAL</p>
+                </div>
+                <div className="w-px h-10 bg-gray-300"></div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-blue-600">{activeCount}</p>
+                  <p className="text-xs text-gray-600 font-medium">ACTIVE</p>
+                </div>
+                <div className="w-px h-10 bg-gray-300"></div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-gray-900">${totalRevenue.toFixed(0)}</p>
+                  <p className="text-xs text-gray-600 font-medium">REVENUE</p>
+                </div>
+              </div>
+
               <button
                 onClick={() => navigate('/admin/financials')}
-                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors"
               >
-                <DollarSign className="w-4 h-4" />
+                <TrendingUp className="w-4 h-4" />
                 <span>Financials</span>
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium border border-gray-300"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -185,194 +224,56 @@ export default function AdminOperations() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto px-6 py-6">
         {/* Tab Navigation */}
-        <div className="mb-6 flex items-center gap-2 border-b border-slate-200">
+        <div className="mb-6 flex items-center gap-2 bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm">
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
+            className={`flex-1 px-5 py-3 font-semibold transition-all rounded-md ${
               activeTab === 'bookings'
-                ? 'text-emerald-600 border-emerald-600'
-                : 'text-slate-600 border-transparent hover:text-slate-900'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-center gap-2">
-              <DropGoodLogo size={20} />
+            <div className="flex items-center justify-center gap-2">
+              <Zap className="h-4 h-4" />
               Bookings
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('support')}
-            className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
-              activeTab === 'support'
-                ? 'text-emerald-600 border-emerald-600'
-                : 'text-slate-600 border-transparent hover:text-slate-900'
+            onClick={() => setActiveTab('donation-centers')}
+            className={`flex-1 px-5 py-3 font-semibold transition-all rounded-md ${
+              activeTab === 'donation-centers'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
+            <div className="flex items-center justify-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Donation Centers
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('support')}
+            className={`flex-1 px-5 py-3 font-semibold transition-all rounded-md ${
+              activeTab === 'support'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <MessageCircle className="h-4 w-4" />
               Support Chat
             </div>
           </button>
         </div>
 
         {activeTab === 'bookings' && (
-          <>
-            <div className="mb-6 flex items-center gap-4">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'all'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            All ({bookings.length})
-          </button>
-          <button
-            onClick={() => setFilter('pending')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'pending'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            Pending ({bookings.filter(b => ['scheduled', 'pending_driver', 'payment_pending'].includes(b.status)).length})
-          </button>
-          <button
-            onClick={() => setFilter('active')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'active'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            Active ({bookings.filter(b => ['driver_assigned', 'driver_arrived', 'picked_up', 'in_transit'].includes(b.status)).length})
-          </button>
-          <button
-            onClick={() => setFilter('completed')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'completed'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            Completed ({bookings.filter(b => b.status === 'completed').length})
-          </button>
-        </div>
-
-        {filteredBookings.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <DropGoodLogo size={48} className="mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No bookings found</h3>
-            <p className="text-slate-600">
-              {filter === 'all' ? 'No bookings yet' : `No ${filter} bookings`}
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {filteredBookings.map((booking) => (
-              <div
-                key={booking.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => navigate(`/admin/bookings/${booking.id}`)}
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-slate-900">
-                          {booking.customer_name}
-                        </h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                          {getStatusLabel(booking.status)}
-                        </span>
-                        {booking.manual_mode && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            Manual Mode
-                          </span>
-                        )}
-                        {booking.messages_confirmed && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" />
-                            Messages Confirmed
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-slate-600">
-                        <span className="flex items-center gap-1">
-                          <Phone className="w-4 h-4" />
-                          {booking.customer_phone}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(booking.pickup_date).toLocaleDateString()} at {booking.pickup_time}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-emerald-600">
-                        ${booking.total_price.toFixed(2)}
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1">
-                        {new Date(booking.created_at).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="font-medium text-slate-900 mb-1">Pickup</div>
-                          <div className="text-slate-600">{booking.pickup_address}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="font-medium text-slate-900 mb-1">Donation Center</div>
-                          <div className="text-slate-600">{booking.donation_center_name}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-200 pt-4">
-                    <div className="text-sm">
-                      <span className="font-medium text-slate-900">Items: </span>
-                      <span className="text-slate-600">{booking.items_description || 'No description provided'}</span>
-                    </div>
-                  </div>
-
-                  {booking.driver_name && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-blue-600" />
-                        <span className="font-medium text-blue-900">
-                          Driver: {booking.driver_name} • {booking.vehicle_color} {booking.vehicle_make} • {booking.license_plate}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {['scheduled', 'pending_driver', 'payment_pending'].includes(booking.status) && !booking.driver_name && (
-                    <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 flex items-start gap-2">
-                      <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-yellow-900">
-                        <span className="font-medium">Action Required:</span> Assign driver and send details to customer
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <BookingKanban bookings={bookings} onUpdateBooking={handleUpdateBooking} />
         )}
-          </>
+
+        {activeTab === 'donation-centers' && (
+          <DonationCentersAnalytics />
         )}
 
         {activeTab === 'support' && (

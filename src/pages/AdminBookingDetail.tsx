@@ -47,7 +47,7 @@ interface NotificationLog {
   sent_at: string;
 }
 
-type TabType = 'overview' | 'driver' | 'completion' | 'financials' | 'chat';
+type TabType = 'overview' | 'driver' | 'status' | 'completion' | 'financials' | 'chat';
 
 export default function AdminBookingDetail() {
   const { id } = useParams();
@@ -480,6 +480,16 @@ export default function AdminBookingDetail() {
                 Driver Info
               </button>
               <button
+                onClick={() => setActiveTab('status')}
+                className={`py-4 px-6 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === 'status'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                }`}
+              >
+                Status Actions
+              </button>
+              <button
                 onClick={() => setActiveTab('completion')}
                 className={`py-4 px-6 text-sm font-semibold border-b-2 transition-colors ${
                   activeTab === 'completion'
@@ -743,25 +753,6 @@ export default function AdminBookingDetail() {
               </div>
             </div>
 
-            <StatusWorkflow
-              bookingId={booking.id}
-              currentStatus={booking.status}
-              customerEmail={booking.customer_email}
-              customerPhone={booking.customer_phone}
-              customerName={booking.customer_name}
-              driverInfo={
-                driverName && driverPhone
-                  ? {
-                      name: driverName,
-                      phone: driverPhone,
-                      vehicle: `${vehicleColor} ${vehicleMake} (${licensePlate})`,
-                    }
-                  : undefined
-              }
-              donationCenterName={booking.donation_center_name}
-              onStatusChange={loadBooking}
-            />
-
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-blue-500" />
@@ -848,6 +839,29 @@ export default function AdminBookingDetail() {
                 </div>
               </div>
             </div>
+        </div>
+      )}
+
+      {activeTab === 'status' && (
+        <div className="space-y-6">
+          <StatusWorkflow
+            bookingId={booking.id}
+            currentStatus={booking.status}
+            customerEmail={booking.customer_email}
+            customerPhone={booking.customer_phone}
+            customerName={booking.customer_name}
+            driverInfo={
+              driverName && driverPhone
+                ? {
+                    name: driverName,
+                    phone: driverPhone,
+                    vehicle: `${vehicleColor} ${vehicleMake} (${licensePlate})`,
+                  }
+                : undefined
+            }
+            donationCenterName={booking.donation_center_name}
+            onStatusChange={loadBooking}
+          />
         </div>
       )}
 
