@@ -293,7 +293,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
         if (!uberCost) {
           console.warn('No quote found for', result.name, result.id);
         }
-        const pricing = calculateFinalPrice(uberCost || 0, false, 10, DEFAULT_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
+        const pricing = calculateFinalPrice(uberCost || 0, false, 0, DEFAULT_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
 
         return {
           id: result.id,
@@ -436,7 +436,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
       }
 
       const baseCost = calculateManualModePricing(distance);
-      const pricing = calculateFinalPrice(baseCost, false, 10, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
+      const pricing = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
 
       console.log('💰 Pricing calculated:', {
         baseCost: baseCost.toFixed(2),
@@ -571,7 +571,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
 
       // Use 50% service fee for inactive charity
       const baseCost = calculateManualModePricing(distance);
-      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 10, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
+      const pricingWithHigherFee = calculateFinalPrice(baseCost, false, 0, INACTIVE_CHARITY_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
 
       // Add to the charities list so user can continue
       const newCharityWithPricing: CharityWithSponsorship = {
