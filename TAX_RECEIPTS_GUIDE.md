@@ -21,18 +21,33 @@ Our receipts meet all IRS requirements per Publication 1771 and Publication 526:
 
 ### Valuation Guidelines
 
-We estimate fair market value based on item types:
-- Clothing: $15 per item
-- Furniture: $75 per item
-- Electronics: $50 per item
-- Books: $5 per item
-- Household items: $25 per item
-- Kitchen items: $20 per item
-- Toys: $10 per item
-- Sporting goods: $30 per item
-- Other: $15 per item
+We estimate fair market value using a **simple bags/boxes method** based on Salvation Army and Goodwill industry standards:
 
-**Important**: Donors are ultimately responsible for determining fair market value. For donations over $5,000, an independent qualified appraisal is required.
+- **Bags:** $30 per bag (typical clothing/household items)
+- **Boxes:** $40 per box (typical mixed household goods)
+
+**Example Calculation:**
+- 3 bags + 2 boxes = (3 × $30) + (2 × $40) = **$170 estimated value**
+
+**Valuation Breakdown on Receipt:**
+Your receipt will show:
+```
+Items Donated:
+• 3 bags of household donations    3 × $30 = $90
+• 2 boxes of household donations   2 × $40 = $80
+
+Estimated Fair Market Value:       $170.00
+```
+
+**Important Legal Notes:**
+- Values are **conservative estimates** based on industry standards
+- **You (the donor) are responsible** for determining final fair market value
+- Estimates assume items in **good condition**
+- You can adjust values based on actual condition and types of your items
+- For donations over $500, file IRS Form 8283
+- For donations over $5,000, obtain a qualified appraisal
+- Consult your tax advisor for specific guidance
+- See IRS Publication 561 for detailed valuation guidance
 
 ## How It Works
 

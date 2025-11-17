@@ -154,6 +154,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         scheduled_time_end: timeEnd,
         items_count: itemsCount || 1,
         items_types: itemsTypes && itemsTypes.length > 0 ? itemsTypes : ['General Donation'],
+        bags_count: bagsCount || 0,
+        boxes_count: boxesCount || 0,
         photo_urls: photos || [],
         uber_cost: recalculatedPricing.uber_cost,
         our_markup: recalculatedPricing.our_markup || 0,
@@ -354,7 +356,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               scheduled_time: schedule.timeStart,
               total_price: recalculatedPricing.total_price,
               items_description: itemsTypes.join(', '),
-              boxes_count: itemsCount,
+              bags_count: bagsCount || 0,
+              boxes_count: boxesCount || 0,
             }
           }
         });

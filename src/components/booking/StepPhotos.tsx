@@ -142,8 +142,13 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
       alert('Please select at least one bag or box');
       return;
     }
-    onNext([], [], boxesCount, bagsCount, locationType, instructions);
+    onNext(photos, selectedTypes, boxesCount, bagsCount, locationType, instructions);
   };
+
+  // Calculate estimated tax value
+  const BAG_VALUE = 30;
+  const BOX_VALUE = 40;
+  const estimatedValue = (bagsCount * BAG_VALUE) + (boxesCount * BOX_VALUE);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -228,6 +233,63 @@ export default function StepPhotos({ onNext, onBack, initialPhotos, initialTypes
             <p><span className="font-semibold text-gray-200">Type:</span> Large trash bags or sturdy shopping bags</p>
           </div>
         </div>
+      </div>
+
+      {/* What's Inside - Optional Item Type Selection */}
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+        <div className="mb-4">
+          <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+            <span>💰</span> What's inside? (optional)
+          </h3>
+          <p className="text-sm text-gray-400">
+            Select item types to see your estimated tax deduction value
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          {itemTypeOptions.map((type) => (
+            <label
+              key={type}
+              className={`flex items-center gap-3 p-4 rounded-lg border-2 transition cursor-pointer ${
+                selectedTypes.includes(type)
+                  ? 'bg-blue-900/30 border-blue-500'
+                  : 'bg-gray-900/50 border-gray-600 hover:border-gray-500'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={selectedTypes.includes(type)}
+                onChange={() => handleTypeToggle(type)}
+                className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-gray-200 font-medium">{type}</span>
+            </label>
+          ))}
+        </div>
+
+        {/* Estimated Value Display */}
+        <div className="bg-blue-900/20 border border-blue-700/50 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400 mb-1">Estimated tax deduction value</p>
+              <div className="text-xs text-gray-500">
+                {bagsCount > 0 && <span>{bagsCount} bag{bagsCount > 1 ? 's' : ''} × $30 </span>}
+                {bagsCount > 0 && boxesCount > 0 && <span>+ </span>}
+                {boxesCount > 0 && <span>{boxesCount} box{boxesCount > 1 ? 'es' : ''} × $40</span>}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-black text-green-400">
+                ${estimatedValue}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Based on industry standards</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-500 mt-3">
+          💡 Item types help charities prepare for your donation. Values are conservative estimates based on Salvation Army/Goodwill guides.
+        </p>
       </div>
 
       <div>

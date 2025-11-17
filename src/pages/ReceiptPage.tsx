@@ -16,9 +16,18 @@ interface Receipt {
   donor_address: string;
   donation_date: string;
   donation_items: {
-    types: string[];
+    types?: string[];
     count: number;
     description: string;
+    bags?: number;
+    boxes?: number;
+    valuation_method?: string;
+    breakdown?: Array<{
+      item: string;
+      quantity: number;
+      unit_value: number;
+      total: number;
+    }>;
   };
   estimated_value: number;
   goods_or_services_provided: boolean;
@@ -242,17 +251,47 @@ export default function ReceiptPage() {
             <div>
               <h3 className="font-bold text-gray-900 mb-3">Items Donated</h3>
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <p className="text-gray-700 mb-2">{receipt.donation_items.description}</p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {receipt.donation_items.types.map((type, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                    >
-                      {type}
-                    </span>
-                  ))}
-                </div>
+                <p className="text-gray-700 mb-3 font-medium">{receipt.donation_items.description}</p>
+
+                {/* Bags and Boxes Breakdown */}
+                {(receipt.donation_items.bags > 0 || receipt.donation_items.boxes > 0) && (
+                  <div className="mt-3 space-y-2">
+                    {receipt.donation_items.bags > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">
+                          {receipt.donation_items.bags} bag{receipt.donation_items.bags > 1 ? 's' : ''} of household items
+                        </span>
+                        <span className="text-gray-900 font-medium">
+                          {receipt.donation_items.bags} × $30
+                        </span>
+                      </div>
+                    )}
+                    {receipt.donation_items.boxes > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">
+                          {receipt.donation_items.boxes} box{receipt.donation_items.boxes > 1 ? 'es' : ''} of household items
+                        </span>
+                        <span className="text-gray-900 font-medium">
+                          {receipt.donation_items.boxes} × $40
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Show types if available (legacy support) */}
+                {receipt.donation_items.types && receipt.donation_items.types.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {receipt.donation_items.types.map((type, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                      >
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -290,6 +329,28 @@ export default function ReceiptPage() {
 
             {receipt.receipt_type === 'tax_receipt' ? (
               <>
+                {/* Valuation Methodology Info Box */}
+                <div className="bg-blue-50 border border-blue-300 rounded-lg p-6">
+                  <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Valuation Methodology
+                  </h3>
+                  <div className="text-sm text-gray-700 space-y-2">
+                    <p>
+                      Fair market value estimates are based on <strong>Salvation Army and Goodwill</strong> industry standard valuation guides, using conservative averages:
+                    </p>
+                    <ul className="list-disc list-inside ml-3 space-y-1">
+                      <li><strong>Bags:</strong> $30 per bag (typical clothing/household items)</li>
+                      <li><strong>Boxes:</strong> $40 per box (typical mixed household goods)</li>
+                    </ul>
+                    <p className="text-xs text-gray-600 mt-3 pt-3 border-t border-blue-200">
+                      These estimates assume items in good condition. As the donor, you are responsible for determining the final fair market value based on the actual condition and type of your donated items. See IRS Publication 561 for detailed guidance.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
                   <h3 className="font-bold text-gray-900 mb-3">IRS Acknowledgment</h3>
                   <div className="text-sm text-gray-700 space-y-2">
@@ -313,19 +374,28 @@ export default function ReceiptPage() {
                   <h4 className="font-bold text-gray-900 mb-2">Important Tax Information</h4>
                   <ul className="list-disc list-inside space-y-1">
                     <li>
-                      For donations of $250 or more, this receipt is required to claim a tax deduction.
+                      <strong>Valuation Method:</strong> Estimated values based on Salvation Army and Goodwill industry standard valuation guides (bags: $30, boxes: $40).
                     </li>
                     <li>
-                      For non-cash donations valued at more than $500, you must file Form 8283 with your tax return.
+                      <strong>Your Responsibility:</strong> You are responsible for determining the final fair market value of donated items. The estimates provided are conservative industry averages.
                     </li>
                     <li>
-                      For property valued at more than $5,000, you must obtain a qualified appraisal.
+                      <strong>For donations $250+:</strong> This receipt is required to claim a tax deduction.
                     </li>
                     <li>
-                      The estimated value provided is a good faith estimate. You are responsible for determining the fair market value of donated items.
+                      <strong>For donations $500+:</strong> You must file IRS Form 8283 (Noncash Charitable Contributions) with your tax return.
                     </li>
                     <li>
-                      Keep this receipt with your tax records. IRS Publication 526 provides additional guidance on charitable contributions.
+                      <strong>For donations $5,000+:</strong> You must obtain a qualified appraisal from a certified appraiser.
+                    </li>
+                    <li>
+                      <strong>IRS Resources:</strong> See IRS Publication 561 (Determining the Value of Donated Property) and Publication 526 (Charitable Contributions) for complete guidance.
+                    </li>
+                    <li>
+                      <strong>Tax Advice:</strong> Consult your tax advisor regarding the deductibility of your specific donation.
+                    </li>
+                    <li>
+                      Keep this receipt with your tax records for at least 3 years.
                     </li>
                   </ul>
                 </div>

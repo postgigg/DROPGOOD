@@ -95,32 +95,34 @@ Deno.serve(async (req: Request) => {
     const donorName = booking.pickup_street_address.split(',')[0] || 'Donor';
     const donorAddress = `${booking.pickup_street_address}, ${booking.pickup_city}, ${booking.pickup_state} ${booking.pickup_zip_code}`;
 
-    // Calculate estimated value based on item types and count
-    const itemTypeValues: Record<string, number> = {
-      'Clothing': 15,
-      'Furniture': 75,
-      'Electronics': 50,
-      'Books': 5,
-      'Household items': 25,
-      'Toys': 10,
-      'Kitchen items': 20,
-      'Sporting goods': 30,
-      'Other': 15,
-    };
+    // Calculate estimated value based on bags and boxes
+    // Values based on Salvation Army/Goodwill industry standards
+    const BAG_VALUE = 30;  // Average bag of clothing/household items
+    const BOX_VALUE = 40;  // Average box of mixed household items
 
-    let estimatedValue = 0;
-    const items = booking.items_types || [];
-    items.forEach((itemType: string) => {
-      const valuePerItem = itemTypeValues[itemType] || 15;
-      estimatedValue += valuePerItem * Math.max(1, Math.floor(booking.items_count / items.length));
-    });
+    const bagsCount = booking.bags_count || 0;
+    const boxesCount = booking.boxes_count || 0;
+    const totalItems = bagsCount + boxesCount;
+
+    // Conservative estimate using industry standards
+    const estimatedValue = (bagsCount * BAG_VALUE) + (boxesCount * BOX_VALUE);
 
     // Create donation items description
+    const itemsParts = [];
+    if (bagsCount > 0) itemsParts.push(`${bagsCount} bag${bagsCount > 1 ? 's' : ''}`);
+    if (boxesCount > 0) itemsParts.push(`${boxesCount} box${boxesCount > 1 ? 'es' : ''}`);
+
     const donationItems = {
-      types: booking.items_types,
-      count: booking.items_count,
+      bags: bagsCount,
+      boxes: boxesCount,
+      count: totalItems,
       photos: booking.photo_urls || [],
-      description: `Approximately ${booking.items_count} items including: ${booking.items_types.join(', ')}`
+      description: `${itemsParts.join(' and ')} of household donations`,
+      valuation_method: 'Industry standard per-bag/box average',
+      breakdown: [
+        { item: 'Bags', quantity: bagsCount, unit_value: BAG_VALUE, total: bagsCount * BAG_VALUE },
+        { item: 'Boxes', quantity: boxesCount, unit_value: BOX_VALUE, total: boxesCount * BOX_VALUE }
+      ]
     };
 
     // For partner centers with auto-issue capability, create full tax receipt
