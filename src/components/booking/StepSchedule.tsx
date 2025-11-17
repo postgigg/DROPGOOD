@@ -63,7 +63,7 @@ export default function StepSchedule({ charity, pickupAddress, bagsCount = 0, bo
     const basePricing = calculateFinalPrice(
       charity.pricing.uber_cost,
       isToday,
-      10, // $10 guaranteed driver tip
+      0, // No base tip - driver gets bag/box fees
       serviceFee, // Use correct service fee based on charity status
       pickupAddress.state, // Pass state for state fee calculation
       bagsCount, // Number of bags

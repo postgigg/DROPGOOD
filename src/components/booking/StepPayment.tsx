@@ -100,7 +100,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     return calculateFinalPriceWithSubsidies(
       charity.pricing.uber_cost,
       isRushDelivery,
-      driverTip, // Use customer-selected tip (minimum $10)
+      driverTip, // Use customer-selected tip (optional, $0-$100)
       charitySubsidyPct,
       companySubsidyPct,
       serviceFee, // Use correct service fee based on charity status
@@ -497,15 +497,15 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
 
       {/* Driver Tip Section */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
-        <h3 className="text-white font-semibold text-lg mb-2">Driver Tip</h3>
-        <p className="text-gray-400 text-sm mb-6">$10 minimum • 100% goes to driver</p>
+        <h3 className="text-white font-semibold text-lg mb-2">Add a Tip (Optional)</h3>
+        <p className="text-gray-400 text-sm mb-6">Driver earns $2/bag + $2.50/box • Extra tips appreciated!</p>
 
         <div className="grid grid-cols-4 gap-3 mb-6">
           {[
+            { value: 0, label: 'No tip' },
+            { value: 5, label: '$5' },
             { value: 10, label: '$10' },
-            { value: 15, label: '$15' },
-            { value: 20, label: '$20' },
-            { value: 25, label: '$25' }
+            { value: 15, label: '$15' }
           ].map((option) => (
             <button
               key={option.value}
