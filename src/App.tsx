@@ -35,6 +35,7 @@ import CompanyTerms from './pages/CompanyTerms';
 import BrandKit from './pages/BrandKit';
 import DriverBoard from './pages/DriverBoard';
 import ForDrivers from './pages/ForDrivers';
+import BusinessPlan from './pages/BusinessPlan';
 import SupportChat from './components/SupportChat';
 
 function App() {
@@ -86,6 +87,8 @@ function App() {
         <Route path="/company-terms" element={<CompanyTerms />} />
         {/* Brand Kit */}
         <Route path="/brand-kit" element={<BrandKit />} />
+        {/* Business Plan */}
+        <Route path="/business-plan" element={<BusinessPlan />} />
       </Routes>
 
       {/* Global Support Chat Widget - Hidden on tracking page */}

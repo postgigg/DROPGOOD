@@ -335,13 +335,13 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
             send_sms: false,
             data: {
               booking_id: completedBookingId,
-              customer_name: name,
+              donor_name: `${firstName} ${lastName}`,
               customer_phone: phone,
               customer_email: contactMethod === 'both' ? email : '',
               pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
               donation_center_name: charity.name,
-              scheduled_date: schedule.date,
-              scheduled_time: schedule.timeStart,
+              pickup_date: schedule.date,
+              pickup_time: `${schedule.timeStart} - ${schedule.timeEnd}`,
               total_price: recalculatedPricing.total_price,
               items_description: itemsTypes.join(', '),
               bags_count: bagsCount || 0,
@@ -455,11 +455,13 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
 
           <div className="mt-6 space-y-3 text-sm pt-6 border-t border-gray-700">
             <div className="flex justify-between">
-              <span className="text-gray-400">Delivery fee</span>
+              <span className="text-gray-400">DropGood Pickup & Delivery</span>
               <span className="text-white">${recalculatedPricing.delivery_fee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Service fee</span>
+              <span className="text-gray-400">
+                Service Fee <span className="text-xs text-gray-500">(helps with operations)</span>
+              </span>
               <span className="text-white">${(recalculatedPricing.service_fee + recalculatedPricing.stripe_fee).toFixed(2)}</span>
             </div>
             {/* Advance booking discount - Color coded: Yellow (good) -> Orange (better) -> Green (best) */}
@@ -476,7 +478,9 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-400">Driver tip</span>
+              <span className="text-gray-400">
+                Tip <span className="text-xs text-green-500">(100% to driver)</span>
+              </span>
               <span className="text-white">${recalculatedPricing.driver_tip.toFixed(2)}</span>
             </div>
           </div>
@@ -486,7 +490,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       {/* Driver Tip Section */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 sm:p-8">
         <h3 className="text-white font-semibold text-lg mb-2">Add a Tip (Optional)</h3>
-        <p className="text-gray-400 text-sm mb-6">Driver earns $2/bag + $2.50/box • Extra tips appreciated!</p>
+        <p className="text-gray-400 text-sm mb-6">Extra tips are appreciated!</p>
 
         <div className="grid grid-cols-4 gap-3 mb-6">
           {[
@@ -675,8 +679,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
                     border: '1px solid #4b5563', // border-gray-600
                     boxShadow: 'none !important',
                     backgroundColor: '#374151', // bg-gray-700
-                    padding: '10px 16px', // py-2.5 px-4
-                    fontSize: '14px',
+                    padding: '16px', // py-4 px-4 to match other inputs
+                    fontSize: '18px', // text-lg to match other inputs
                   },
                   '.Input:focus': {
                     border: '1px solid transparent',

@@ -208,7 +208,8 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
           DEFAULT_SERVICE_FEE, // 35% service fee
           pickupAddress.state,
           bagsCount || 0, // Include bag fees
-          boxesCount || 0 // Include box fees
+          boxesCount || 0, // Include box fees
+          0 // daysInAdvance - Step 3 doesn't know scheduled date yet
         );
 
         return {

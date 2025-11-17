@@ -379,9 +379,14 @@ export function calculateFinalPriceWithSubsidies(
     companySubsidyPercentage
   );
 
-  // Calculate tip with its own Stripe fee
-  const tipWithStripeFee = (finalTip + 0.30) / 0.971;
-  const stripeFeeOnTip = tipWithStripeFee - finalTip;
+  // Calculate tip with its own Stripe fee (only if there is a tip)
+  let tipWithStripeFee = 0;
+  let stripeFeeOnTip = 0;
+
+  if (finalTip > 0) {
+    tipWithStripeFee = (finalTip + 0.30) / 0.971;
+    stripeFeeOnTip = tipWithStripeFee - finalTip;
+  }
 
   // Final calculations
   const totalStripeFee = stripeFeeWithoutTip + stripeFeeOnTip;
