@@ -202,7 +202,7 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
         const finalPricing = calculateFinalPriceWithSubsidies(
           uberCost,
           false, // isRushDelivery
-          10, // driverTip - $10 guaranteed minimum
+          0, // driverTip - optional (no mandatory tip)
           charitySubsidyPct,
           companySubsidyPct,
           DEFAULT_SERVICE_FEE, // 35% service fee
