@@ -258,6 +258,106 @@ export default function ConfirmationPage() {
             </div>
           </div>
 
+          {/* Uber Direct Tracking Banner */}
+          {booking.uber_tracking_url && (
+            <div className="mx-8 mb-6 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-white text-lg mb-1">Track Your Pickup</h3>
+                  <p className="text-white/90 text-sm">
+                    {booking.uber_status === 'pending' && 'Finding a driver...'}
+                    {booking.uber_status === 'pickup' && 'Driver is on the way to you!'}
+                    {booking.uber_status === 'dropoff' && 'Driver is delivering your donation!'}
+                    {booking.uber_status === 'delivered' && 'Delivery complete!'}
+                    {!booking.uber_status && 'Real-time tracking available'}
+                  </p>
+                </div>
+                <a
+                  href={booking.uber_tracking_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white text-blue-600 px-6 py-2.5 rounded-full font-bold hover:bg-gray-100 transition shadow-lg"
+                >
+                  Track Live
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Roadie Tracking Banner */}
+          {booking.roadie_tracking_url && (
+            <div className="mx-8 mb-6 bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-white text-lg mb-1">Track Your Pickup</h3>
+                  <p className="text-white/90 text-sm">
+                    {booking.roadie_state === 'scheduled' && 'Pickup scheduled - driver will be assigned soon'}
+                    {booking.roadie_state === 'driver_assigned' && 'Driver assigned!'}
+                    {booking.roadie_state === 'en_route_to_pickup' && 'Driver is on the way to you!'}
+                    {booking.roadie_state === 'at_pickup' && 'Driver has arrived'}
+                    {booking.roadie_state === 'pickup_confirmed' && 'Items picked up - on the way to charity!'}
+                    {booking.roadie_state === 'en_route_to_delivery' && 'Delivering your donation!'}
+                    {booking.roadie_state === 'delivery_confirmed' && 'Delivery complete! Thank you!'}
+                    {!booking.roadie_state && 'Real-time tracking available'}
+                  </p>
+                </div>
+                <a
+                  href={booking.roadie_tracking_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white text-green-600 px-6 py-2.5 rounded-full font-bold hover:bg-gray-100 transition shadow-lg"
+                >
+                  Track Live
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Roadie Delivery Images */}
+          {(booking.roadie_pickup_image_url || booking.roadie_delivery_image_url || booking.roadie_signature_image_url) && (
+            <div className="mx-8 mb-6 bg-gray-800 border border-gray-700 rounded-xl p-6">
+              <h3 className="text-white font-bold text-lg mb-4">📸 Delivery Confirmation Photos</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {booking.roadie_pickup_image_url && (
+                  <div className="space-y-2">
+                    <h4 className="text-gray-400 text-sm font-medium">Pickup Photo</h4>
+                    <img
+                      src={booking.roadie_pickup_image_url}
+                      alt="Pickup confirmation"
+                      className="w-full rounded-lg border border-gray-600"
+                    />
+                  </div>
+                )}
+                {booking.roadie_delivery_image_url && (
+                  <div className="space-y-2">
+                    <h4 className="text-gray-400 text-sm font-medium">Delivery Photo</h4>
+                    <img
+                      src={booking.roadie_delivery_image_url}
+                      alt="Delivery confirmation"
+                      className="w-full rounded-lg border border-gray-600"
+                    />
+                  </div>
+                )}
+                {booking.roadie_signature_image_url && (
+                  <div className="space-y-2">
+                    <h4 className="text-gray-400 text-sm font-medium">Signature</h4>
+                    <img
+                      src={booking.roadie_signature_image_url}
+                      alt="Delivery signature"
+                      className="w-full rounded-lg border border-gray-600"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Tax Receipt Banner */}
           {receiptNumber && receiptType === 'tax_receipt' && (
             <div className="mx-8 mb-6 bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 shadow-lg">

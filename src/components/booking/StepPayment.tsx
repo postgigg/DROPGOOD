@@ -171,6 +171,8 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
         // Combined subsidy
         total_subsidy_amount: recalculatedPricing.total_subsidy_amount || 0,
         original_price: recalculatedPricing.subsidized ? recalculatedPricing.original_price : null,
+        // Uber Direct quote_id (if available)
+        uber_quote_id: recalculatedPricing.uber_quote_id || null,
       };
 
       console.log('Booking data:', bookingData);
@@ -233,6 +235,169 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     }
   };
 
+  const createRoadieShipment = async (completedBookingId: string) => {
+    try {
+      console.log('🚗 Creating Roadie shipment for booking:', completedBookingId);
+
+      // Format pickup datetime (scheduled_date + scheduled_time_start)
+      const pickupDateTime = new Date(`${schedule.date}T${schedule.timeStart}:00`).toISOString();
+
+      // Delivery window: scheduled time to 2 hours after
+      const [hours, minutes] = schedule.timeStart.split(':');
+      const endHour = (parseInt(hours) + 2).toString().padStart(2, '0');
+      const deliveryStart = pickupDateTime;
+      const deliveryEnd = new Date(`${schedule.date}T${endHour}:${minutes}:00`).toISOString();
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/roadie-create-shipment`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            booking_id: completedBookingId,
+            description: `DropGood donation pickup for ${charity.name}`,
+            pickup_location: {
+              address: {
+                street: pickupAddress.street,
+                city: pickupAddress.city,
+                state: pickupAddress.state,
+                zip_code: pickupAddress.zip
+              },
+              latitude: pickupAddress.latitude,
+              longitude: pickupAddress.longitude,
+              contact: {
+                name: `${firstName} ${lastName}`.trim() || 'Customer',
+                phone: phone || '5555555555',
+                email: contactMethod === 'both' ? email : undefined
+              },
+              notes: instructions || ''
+            },
+            delivery_location: {
+              address: {
+                street: charity.street_address,
+                city: charity.city,
+                state: charity.state,
+                zip_code: charity.zip_code
+              },
+              latitude: charity.latitude,
+              longitude: charity.longitude,
+              contact: {
+                name: charity.name,
+                phone: charity.phone || '5555555555'
+              }
+            },
+            pickup_after: pickupDateTime,
+            deliver_between: {
+              start: deliveryStart,
+              end: deliveryEnd
+            },
+            bags_count: bagsCount || 0,
+            boxes_count: boxesCount || 0
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to create Roadie shipment:', errorText);
+        return;
+      }
+
+      const shipmentData = await response.json();
+      console.log('✅ Roadie shipment created:', shipmentData);
+      console.log('📍 Tracking URL:', shipmentData.tracking_url);
+
+    } catch (error) {
+      console.error('❌ Error creating Roadie shipment:', error);
+      // Don't throw - allow booking to complete even if Roadie shipment fails
+    }
+  };
+
+  const createUberDelivery = async (completedBookingId: string, quoteId?: string) => {
+    // Only create Uber delivery if we have a quote_id (real Uber API was used)
+    if (!quoteId) {
+      console.log('⏭️ Skipping Uber delivery creation - no quote_id (manual/mock mode)');
+      return;
+    }
+
+    try {
+      console.log('🚗 Creating Uber Direct delivery with quote_id:', quoteId);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/uber-create-delivery`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            booking_id: completedBookingId,
+            quote_id: quoteId,
+            pickup_name: `${firstName} ${lastName}`.trim() || 'DropGood Customer',
+            pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
+            pickup_latitude: pickupAddress.latitude,
+            pickup_longitude: pickupAddress.longitude,
+            pickup_phone_number: phone || '+15555555555',
+            dropoff_name: charity.name,
+            dropoff_address: `${charity.street_address}, ${charity.city}, ${charity.state} ${charity.zip_code}`,
+            dropoff_latitude: charity.latitude,
+            dropoff_longitude: charity.longitude,
+            dropoff_phone_number: charity.phone || '+15555555555',
+            dropoff_notes: `Donation pickup for ${charity.name}. Items: ${itemsTypes.join(', ')}. ${instructions || ''}`.trim(),
+            manifest_reference: completedBookingId,
+            manifest_items: [
+              ...(bagsCount > 0 ? [{
+                name: 'Donation Bags',
+                quantity: bagsCount,
+                size: 'medium'
+              }] : []),
+              ...(boxesCount > 0 ? [{
+                name: 'Donation Boxes',
+                quantity: boxesCount,
+                size: 'large'
+              }] : []),
+              ...itemsTypes.map(item => ({
+                name: item,
+                quantity: 1,
+                size: 'small'
+              }))
+            ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to create Uber delivery:', errorText);
+        // Don't throw - allow booking to complete even if Uber delivery fails
+        return;
+      }
+
+      const deliveryData = await response.json();
+      console.log('✅ Uber delivery created:', deliveryData);
+      console.log('📍 Tracking URL:', deliveryData.tracking_url);
+
+      // Update booking with Uber delivery info
+      await supabase
+        .from('bookings')
+        .update({
+          uber_delivery_id: deliveryData.delivery_id,
+          uber_tracking_url: deliveryData.tracking_url,
+          uber_status: deliveryData.status,
+        })
+        .eq('id', completedBookingId);
+
+      console.log('✅ Booking updated with Uber delivery info');
+    } catch (error) {
+      console.error('❌ Error creating Uber delivery:', error);
+      // Don't throw - allow booking to complete even if Uber delivery fails
+    }
+  };
+
   const completeBooking = async (completedBookingId: string) => {
     try {
       console.log('🎉 Completing booking:', completedBookingId);
@@ -252,6 +417,18 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       }
 
       console.log('✅ Booking status updated');
+
+      // Create delivery based on provider
+      const deliveryProvider = recalculatedPricing.provider || (recalculatedPricing.uber_quote_id ? 'uber' : 'manual');
+
+      if (deliveryProvider === 'roadie') {
+        await createRoadieShipment(completedBookingId);
+      } else if (recalculatedPricing.uber_quote_id) {
+        // Create Uber Direct delivery if quote_id exists
+        await createUberDelivery(completedBookingId, recalculatedPricing.uber_quote_id);
+      } else {
+        console.log('⏭️ Manual mode - no delivery service creation needed');
+      }
 
       // Deduct charity sponsorship credit if applicable
       if (charity.sponsorship && recalculatedPricing.charity_subsidy_amount > 0) {

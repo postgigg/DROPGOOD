@@ -10,6 +10,7 @@ import DropGoodLogo from '../components/DropGoodLogo';
 interface FinancialStats {
   totalRevenue: number;
   totalUberCosts: number;
+  totalDriverPayouts: number; // Total paid to drivers (bag/box fees + tips)
   totalProfit: number;
   totalBookings: number;
   avgOrderValue: number;
@@ -98,17 +99,31 @@ export default function AdminFinancialDashboard() {
         !['completed', 'cancelled', 'failed'].includes(b.status)
       ) || [];
 
+      const BAG_FEE = 2.00;
+      const BOX_FEE = 2.50;
+
       const totalRevenue = completedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0);
       const totalUberCosts = completedBookings.reduce((sum, b) => {
         const cost = b.manual_mode && b.actual_cost !== null ? b.actual_cost : (b.uber_cost || 0);
         return sum + cost;
       }, 0);
-      const totalProfit = totalRevenue - totalUberCosts;
+
+      // Calculate total driver payouts (bag/box fees + optional tips)
+      const totalDriverPayouts = completedBookings.reduce((sum, b) => {
+        const bagFees = (b.bags_count || 0) * BAG_FEE;
+        const boxFees = (b.boxes_count || 0) * BOX_FEE;
+        const optionalTip = b.driver_tip || 0;
+        return sum + bagFees + boxFees + optionalTip;
+      }, 0);
+
+      // Profit = Revenue - Uber Costs - Driver Payouts
+      const totalProfit = totalRevenue - totalUberCosts - totalDriverPayouts;
       const avgOrderValue = completedBookings.length > 0 ? totalRevenue / completedBookings.length : 0;
 
       setStats({
         totalRevenue,
         totalUberCosts,
+        totalDriverPayouts,
         totalProfit,
         totalBookings: bookings?.length || 0,
         avgOrderValue,
@@ -240,7 +255,7 @@ export default function AdminFinancialDashboard() {
 
         {stats && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
               <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-emerald-500">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-medium text-slate-600">Total Revenue</h3>
@@ -260,6 +275,17 @@ export default function AdminFinancialDashboard() {
                   {stats.totalRevenue > 0
                     ? `${((stats.totalUberCosts / stats.totalRevenue) * 100).toFixed(1)}% of revenue`
                     : '0% of revenue'}
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-slate-600">Driver Payouts</h3>
+                  <Users className="w-5 h-5 text-orange-500" />
+                </div>
+                <div className="text-3xl font-bold text-slate-900">${stats.totalDriverPayouts.toFixed(2)}</div>
+                <p className="text-sm text-slate-500 mt-1">
+                  Bag/box fees + tips (100% to drivers)
                 </p>
               </div>
 

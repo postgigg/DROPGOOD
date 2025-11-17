@@ -5,8 +5,8 @@ import { LogIn, Truck } from 'lucide-react';
 
 export default function AdminAuth() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('admin123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -16,26 +16,32 @@ export default function AdminAuth() {
     setError('');
 
     try {
-      console.log('LOGIN ATTEMPT:', { email, password });
+      // Authenticate with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      // BYPASS SUPABASE AUTH - Check credentials directly against database
-      if (email === 'admin@example.com' && password === 'admin123456') {
-        console.log('CREDENTIALS MATCH - LOGGING IN');
-        // HARDCODED BYPASS - Just fucking log them in
-        localStorage.setItem('admin_logged_in', 'true');
-        localStorage.setItem('admin_email', email);
+      if (authError) throw authError;
 
-        // Small delay so user sees loading
-        await new Promise(resolve => setTimeout(resolve, 500));
+      // Check if user is an admin
+      const { data: adminUser, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .maybeSingle();
 
-        console.log('NAVIGATING TO /admin/operations');
-        navigate('/admin/operations');
-      } else {
-        console.log('INVALID CREDENTIALS');
-        throw new Error('Invalid credentials');
+      if (adminError) throw adminError;
+
+      if (!adminUser) {
+        await supabase.auth.signOut();
+        throw new Error('Unauthorized: Not an admin user');
       }
+
+      // Success - navigate to admin dashboard
+      navigate('/admin/operations');
     } catch (err: any) {
-      console.error('LOGIN ERROR:', err);
+      console.error('Login error:', err);
       setError(err.message || 'Failed to sign in');
     } finally {
       setLoading(false);
@@ -66,7 +72,7 @@ export default function AdminAuth() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="superadmin@dropgood.app"
+                placeholder="admin@example.com"
               />
             </div>
 

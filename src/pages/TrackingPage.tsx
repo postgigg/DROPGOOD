@@ -65,7 +65,9 @@ export default function TrackingPage() {
             name,
             street_address,
             city,
-            state
+            state,
+            is_partner,
+            can_auto_issue_receipts
           )
         `)
         .eq('id', id)
@@ -521,8 +523,16 @@ export default function TrackingPage() {
                       <FileText className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-bold text-lg">Tax Receipt</p>
-                      <p className="text-white/90 text-sm">IRS-compliant 501(c)(3) receipt</p>
+                      <p className="text-white font-bold text-lg">
+                        {booking.donation_centers?.is_partner || booking.donation_centers?.can_auto_issue_receipts
+                          ? 'Tax Receipt'
+                          : 'Tax Summary'}
+                      </p>
+                      <p className="text-white/90 text-sm">
+                        {booking.donation_centers?.is_partner || booking.donation_centers?.can_auto_issue_receipts
+                          ? 'IRS-compliant 501(c)(3) receipt'
+                          : 'Donation summary for your records'}
+                      </p>
                     </div>
                     <button
                       onClick={() => navigate(`/receipt/${receiptNumber}`)}

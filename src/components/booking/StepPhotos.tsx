@@ -20,7 +20,7 @@ const itemTypeOptions = [
   'Toys & Baby Items'
 ];
 
-const MAX_TOTAL_ITEMS = 7;
+const MAX_TOTAL_ITEMS = 8;
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_PHOTOS = 5;
 const TARGET_WIDTH = 1200;

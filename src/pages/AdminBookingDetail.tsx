@@ -33,6 +33,9 @@ interface Booking {
   manual_eta: string | null;
   delivery_photo_url: string | null;
   actual_cost: number | null;
+  bags_count: number;
+  boxes_count: number;
+  driver_tip: number;
   photo_urls: string[];
   messages_confirmed: boolean;
   messages_confirmed_at: string | null;
@@ -132,7 +135,16 @@ export default function AdminBookingDetail() {
       setEta(formattedBooking.manual_eta || '');
       setStatus(formattedBooking.status || 'pending');
       setActualCost(formattedBooking.actual_cost?.toString() || '');
-      setActualTip(formattedBooking.driver_tip?.toString() || '4.00');
+
+      // Calculate total driver tip: bag fees + box fees + optional customer tip
+      const BAG_FEE = 2.00;
+      const BOX_FEE = 2.50;
+      const bagFees = (formattedBooking.bags_count || 0) * BAG_FEE;
+      const boxFees = (formattedBooking.boxes_count || 0) * BOX_FEE;
+      const optionalTip = formattedBooking.driver_tip || 0;
+      const totalDriverTip = bagFees + boxFees + optionalTip;
+
+      setActualTip(totalDriverTip.toFixed(2));
 
       // Load confirmed by admin name if exists
       if (formattedBooking.messages_confirmed_by) {
@@ -189,9 +201,8 @@ export default function AdminBookingDetail() {
         updates.actual_cost = parseFloat(actualCost);
       }
 
-      if (actualTip) {
-        updates.driver_tip = parseFloat(actualTip);
-      }
+      // Don't save actualTip - it's auto-calculated from bags/boxes/tip!
+      // Saving it would overwrite driver_tip and cause exponential growth bug.
 
       const { error } = await supabase
         .from('bookings')
@@ -934,9 +945,17 @@ export default function AdminBookingDetail() {
                     <span className="font-medium">${booking.our_markup?.toFixed(2) || '0.00'}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Driver Tip</span>
-                    <span className="font-medium">${booking.driver_tip?.toFixed(2) || '0.00'}</span>
+                    <span className="text-slate-600">Driver Tip (Bags/Boxes)</span>
+                    <span className="font-medium">
+                      ${((booking.bags_count || 0) * 2.00 + (booking.boxes_count || 0) * 2.50).toFixed(2)}
+                    </span>
                   </div>
+                  {booking.driver_tip > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600">Optional Customer Tip</span>
+                      <span className="font-medium">${booking.driver_tip.toFixed(2)}</span>
+                    </div>
+                  )}
                   {booking.rush_fee && booking.rush_fee > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600">Rush Fee</span>
@@ -994,15 +1013,16 @@ export default function AdminBookingDetail() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Actual Tip Given
+                        Total Driver Payout (Auto-calculated)
                       </label>
                       <input
                         type="number"
+                        disabled
+                        readOnly
                         step="0.01"
                         value={actualTip}
-                        onChange={(e) => setActualTip(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        placeholder="4.00"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-700 cursor-not-allowed"
+                        placeholder="Auto-calculated"
                       />
                     </div>
                   </div>
@@ -1030,7 +1050,7 @@ export default function AdminBookingDetail() {
                         <span className="font-medium text-red-600">-${parseFloat(actualCost).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-600">Actual Tip</span>
+                        <span className="text-slate-600">Driver Payout</span>
                         <span className="font-medium text-red-600">-${parseFloat(actualTip).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">

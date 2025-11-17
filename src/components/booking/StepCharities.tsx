@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { supabase, type DonationCenter } from '../../lib/supabase';
-import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
+import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getRoadieEstimates, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
 import { searchDonationCentersNearby } from '../../lib/mapboxSearch';
 
 interface Props {
@@ -282,19 +282,84 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
       }));
 
       console.log('Getting pricing quotes for', locationQuotes.length, 'locations');
-      const quotes = await getUberDirectQuotes(
-        pickupAddress.latitude,
-        pickupAddress.longitude,
-        locationQuotes
-      );
+
+      // Build manifest for quote request
+      const manifest = {
+        items: [
+          ...(bagsCount > 0 ? [{
+            name: 'Donation Bags',
+            quantity: bagsCount,
+            size: 'medium' as const
+          }] : []),
+          ...(boxesCount > 0 ? [{
+            name: 'Donation Boxes',
+            quantity: boxesCount,
+            size: 'large' as const
+          }] : [])
+        ],
+        // Estimated value for insurance (you can adjust this)
+        total_value: Math.max(1000, (bagsCount * 500) + (boxesCount * 1000)) // in cents
+      };
+
+      // Try Roadie first (if enabled), then fall back to Uber
+      const ROADIE_ENABLED = import.meta.env.VITE_ROADIE_ENABLED === 'true';
+      const UBER_ENABLED = import.meta.env.VITE_UBER_ENABLED === 'true';
+
+      let quotes: Map<string, { price: number; quote_id?: string; provider?: string }>;
+
+      if (ROADIE_ENABLED) {
+        console.log('🚗 Trying Roadie quotes first...');
+        const roadieQuotes = await getRoadieEstimates(
+          pickupAddress.latitude,
+          pickupAddress.longitude,
+          locationQuotes,
+          pickupAddress,
+          bagsCount,
+          boxesCount
+        );
+
+        if (roadieQuotes.size > 0) {
+          console.log('✅ Using Roadie prices for', roadieQuotes.size, 'locations');
+          quotes = roadieQuotes;
+        } else if (UBER_ENABLED) {
+          console.log('⚠️ Roadie quotes failed, falling back to Uber...');
+          quotes = await getUberDirectQuotes(
+            pickupAddress.latitude,
+            pickupAddress.longitude,
+            locationQuotes,
+            pickupAddress,
+            manifest.items.length > 0 ? manifest : undefined
+          );
+        } else {
+          throw new Error('No delivery quotes available');
+        }
+      } else if (UBER_ENABLED) {
+        console.log('🚗 Using Uber quotes...');
+        quotes = await getUberDirectQuotes(
+          pickupAddress.latitude,
+          pickupAddress.longitude,
+          locationQuotes,
+          pickupAddress,
+          manifest.items.length > 0 ? manifest : undefined
+        );
+      } else {
+        throw new Error('No delivery service enabled');
+      }
+
       console.log('Received quotes for', quotes.size, 'locations');
 
       const charitiesWithPricing: CharityWithSponsorship[] = mapboxResults.map((result) => {
-        const uberCost = quotes.get(result.id);
-        if (!uberCost) {
+        const quoteData = quotes.get(result.id);
+        if (!quoteData) {
           console.warn('No quote found for', result.name, result.id);
         }
-        const pricing = calculateFinalPrice(uberCost || 0, false, 0, DEFAULT_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
+        const uberCost = quoteData?.price || 0;
+        const quoteId = quoteData?.quote_id; // Extract quote_id from Uber
+        const pricing = calculateFinalPrice(uberCost, false, 0, DEFAULT_SERVICE_FEE, pickupAddress.state, bagsCount || 0, boxesCount || 0);
+
+        // Add quote_id to pricing object for later use
+        pricing.uber_quote_id = quoteId;
+        pricing.provider = quoteData?.provider; // Store 'roadie' or 'uber' for automatic delivery creation
 
         return {
           id: result.id,

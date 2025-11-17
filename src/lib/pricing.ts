@@ -39,8 +39,8 @@ export const INACTIVE_CHARITY_SERVICE_FEE = 0.50; // 50% for unverified charitie
 export const GUARANTEED_DRIVER_TIP = 0.00; // No base tip - driver gets bag/box fees
 
 // Bag/Box fees - 100% to driver as tip
-export const BAG_FEE = 2.00; // Per bag - 100% to driver as tip
-export const BOX_FEE = 2.50; // Per box - 100% to driver as tip
+export const BAG_FEE = 0.25; // Per bag - 100% to driver as tip
+export const BOX_FEE = 0.50; // Per box - 100% to driver as tip
 
 // Advance booking discounts - incentivize booking ahead
 // Color scheme: Yellow (good) -> Orange (better) -> Green (best)
@@ -172,12 +172,145 @@ export interface UberQuoteResponse {
   dropoff_name: string;
 }
 
+/**
+ * Get Roadie delivery quotes with automatic vehicle size determination
+ */
+export async function getRoadieEstimates(
+  pickupLat: number,
+  pickupLng: number,
+  dropoffLocations: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    id: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+  }>,
+  pickupAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  },
+  bagsCount: number,
+  boxesCount: number
+): Promise<Map<string, { price: number; provider: string }>> {
+  const results = new Map<string, { price: number; provider: string }>();
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  console.log(`🚗 Getting Roadie estimates for ${bagsCount} bags, ${boxesCount} boxes`);
+
+  try {
+    const batchSize = 5;
+    for (let i = 0; i < dropoffLocations.length; i += batchSize) {
+      const batch = dropoffLocations.slice(i, i + batchSize);
+
+      const quotes = await Promise.all(
+        batch.map(async (location) => {
+          try {
+            const requestBody = {
+              pickup_location: {
+                address: {
+                  street: pickupAddress.street,
+                  city: pickupAddress.city,
+                  state: pickupAddress.state,
+                  zip_code: pickupAddress.zip
+                },
+                latitude: pickupLat,
+                longitude: pickupLng
+              },
+              delivery_location: {
+                address: {
+                  street: location.address || location.name,
+                  city: location.city || pickupAddress.city,
+                  state: location.state || pickupAddress.state,
+                  zip_code: location.zip_code || pickupAddress.zip
+                },
+                latitude: location.latitude,
+                longitude: location.longitude
+              },
+              bags_count: bagsCount,
+              boxes_count: boxesCount
+            };
+
+            const response = await fetch(
+              `${supabaseUrl}/functions/v1/roadie-estimate`,
+              {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error('Failed to get Roadie quote');
+            }
+
+            const quoteData = await response.json();
+            return {
+              id: location.id,
+              price: quoteData.roadie_base_price,
+              provider: 'roadie'
+            };
+          } catch (err) {
+            console.error(`Failed to get Roadie quote for ${location.name}:`, err);
+            return null;
+          }
+        })
+      );
+
+      quotes.forEach(q => {
+        if (q) {
+          results.set(q.id, { price: q.price, provider: q.provider });
+        }
+      });
+
+      if (i + batchSize < dropoffLocations.length) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+  } catch (err) {
+    console.error('Batch Roadie quote error:', err);
+  }
+
+  return results;
+}
+
 export async function getUberDirectQuotes(
   pickupLat: number,
   pickupLng: number,
-  dropoffLocations: Array<{ latitude: number; longitude: number; name: string; id: string; address?: string }>
-): Promise<Map<string, number>> {
-  const results = new Map<string, number>();
+  dropoffLocations: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    id: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+  }>,
+  pickupAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  },
+  manifest?: {
+    items?: Array<{
+      name: string;
+      quantity: number;
+      size?: 'small' | 'medium' | 'large' | 'xlarge';
+    }>;
+    total_value?: number;
+  }
+): Promise<Map<string, { price: number; quote_id?: string }>> {
+  const results = new Map<string, { price: number; quote_id?: string }>();
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -188,7 +321,7 @@ export async function getUberDirectQuotes(
     console.log('Manual mode enabled - using manual pricing formula ($9.25 + $0.75/mile)');
     dropoffLocations.forEach(loc => {
       const distance = calculateDistanceSimple(pickupLat, pickupLng, loc.latitude, loc.longitude);
-      results.set(loc.id, calculateManualModePricing(distance));
+      results.set(loc.id, { price: calculateManualModePricing(distance) });
     });
     return results;
   }
@@ -197,7 +330,7 @@ export async function getUberDirectQuotes(
     console.log('Using mock Uber pricing (set USE_REAL_UBER = true to use real API)');
     dropoffLocations.forEach(loc => {
       const distance = calculateDistanceSimple(pickupLat, pickupLng, loc.latitude, loc.longitude);
-      results.set(loc.id, mockUberQuote(distance));
+      results.set(loc.id, { price: mockUberQuote(distance) });
     });
     return results;
   }
@@ -210,6 +343,43 @@ export async function getUberDirectQuotes(
       const quotes = await Promise.all(
         batch.map(async (location) => {
           try {
+            // Build request body with proper address formatting
+            const requestBody: any = {
+              pickup_latitude: pickupLat,
+              pickup_longitude: pickupLng,
+              pickup_address: pickupAddress?.street || 'Pickup Location',
+              dropoff_latitude: location.latitude,
+              dropoff_longitude: location.longitude,
+              dropoff_address: location.address || location.name,
+            };
+
+            // Add pickup address components if available
+            if (pickupAddress) {
+              requestBody.pickup_city = pickupAddress.city;
+              requestBody.pickup_state = pickupAddress.state;
+              requestBody.pickup_zip_code = pickupAddress.zip;
+              requestBody.pickup_country = 'US';
+            }
+
+            // Add dropoff address components if available
+            if (location.city) requestBody.dropoff_city = location.city;
+            if (location.state) requestBody.dropoff_state = location.state;
+            if (location.zip_code) requestBody.dropoff_zip_code = location.zip_code;
+            requestBody.dropoff_country = 'US';
+
+            // Add manifest items if provided
+            if (manifest?.items && manifest.items.length > 0) {
+              requestBody.manifest_items = manifest.items;
+            }
+
+            // Add manifest total value if provided
+            if (manifest?.total_value) {
+              requestBody.manifest_total_value = manifest.total_value;
+            }
+
+            // Add external store ID for tracking
+            requestBody.external_store_id = `quote_${location.id}`;
+
             const response = await fetch(
               `${supabaseUrl}/functions/v1/uber-quote`,
               {
@@ -218,14 +388,7 @@ export async function getUberDirectQuotes(
                   'Authorization': `Bearer ${supabaseKey}`,
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                  pickup_latitude: pickupLat,
-                  pickup_longitude: pickupLng,
-                  pickup_address: 'Pickup Location',
-                  dropoff_latitude: location.latitude,
-                  dropoff_longitude: location.longitude,
-                  dropoff_address: location.address || location.name,
-                }),
+                body: JSON.stringify(requestBody),
               }
             );
 
@@ -235,7 +398,11 @@ export async function getUberDirectQuotes(
 
             const quoteData = await response.json();
             const priceDollars = quoteData.fee_cents / 100;
-            return { id: location.id, price: priceDollars };
+            return {
+              id: location.id,
+              price: priceDollars,
+              quote_id: quoteData.quote_id // Store quote_id for delivery creation
+            };
           } catch (err) {
             console.error(`Failed to get real quote for ${location.name}, using mock:`, err);
             const distance = calculateDistanceSimple(pickupLat, pickupLng, location.latitude, location.longitude);
@@ -244,7 +411,7 @@ export async function getUberDirectQuotes(
         })
       );
 
-      quotes.forEach(q => results.set(q.id, q.price));
+      quotes.forEach(q => results.set(q.id, { price: q.price, quote_id: q.quote_id }));
 
       if (i + batchSize < dropoffLocations.length) {
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -254,7 +421,7 @@ export async function getUberDirectQuotes(
     console.error('Batch quote error, falling back to mock pricing:', err);
     dropoffLocations.forEach(loc => {
       const distance = calculateDistanceSimple(pickupLat, pickupLng, loc.latitude, loc.longitude);
-      results.set(loc.id, mockUberQuote(distance));
+      results.set(loc.id, { price: mockUberQuote(distance) });
     });
   }
 

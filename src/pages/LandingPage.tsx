@@ -31,11 +31,6 @@ export default function LandingPage() {
 
   const stats: Stat[] = [
     {
-      value: '<10 min',
-      label: 'Pickup time',
-      icon: <Clock className="h-5 w-5" />,
-    },
-    {
       value: '500+',
       label: 'Cities nationwide',
       icon: <MapPin className="h-5 w-5" />,

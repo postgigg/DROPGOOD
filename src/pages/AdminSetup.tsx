@@ -20,42 +20,58 @@ const generateRandomPassword = () => {
 
 export default function AdminSetup() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('admin123456');
-  const [name] = useState('Admin User');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [details, setDetails] = useState('');
   const [createdCredentials, setCreatedCredentials] = useState<{email: string, password: string} | null>(null);
 
-  const handleLogin = async () => {
+  const handleCreateAdmin = async () => {
     setLoading(true);
     setError('');
     setSuccess(false);
     setDetails('');
 
     try {
-      setDetails('Logging in...');
+      setDetails('Creating admin account...');
 
-      // BYPASS SUPABASE AUTH - Just check hardcoded credentials
-      if (email === 'admin@example.com' && password === 'admin123456') {
-        setDetails('Success! Redirecting to admin dashboard...');
-        setSuccess(true);
-        setCreatedCredentials({ email, password });
+      // Create Supabase auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-        // Store login state
-        localStorage.setItem('admin_logged_in', 'true');
-        localStorage.setItem('admin_email', email);
+      if (authError) throw authError;
 
-        setTimeout(() => {
-          navigate('/admin/operations');
-        }, 1000);
-      } else {
-        throw new Error('Invalid credentials');
+      if (!authData.user) {
+        throw new Error('Failed to create user');
       }
+
+      setDetails('Creating admin profile...');
+
+      // Create admin user record
+      const { error: adminError } = await supabase
+        .from('admin_users')
+        .insert({
+          id: authData.user.id,
+          email,
+          name: name || 'Admin User',
+        });
+
+      if (adminError) throw adminError;
+
+      setDetails('Success! Admin account created. Redirecting...');
+      setSuccess(true);
+      setCreatedCredentials({ email, password });
+
+      setTimeout(() => {
+        navigate('/admin/login');
+      }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to login');
+      setError(err.message || 'Failed to create admin account');
       setDetails('');
     } finally {
       setLoading(false);
@@ -98,9 +114,20 @@ export default function AdminSetup() {
             <>
               <div className="mb-6 space-y-4">
                 <div className="bg-slate-50 rounded-lg p-4">
-                  <h3 className="font-medium text-slate-900 mb-3">Admin Login</h3>
-                  <p className="text-xs text-slate-600 mb-3">Enter your admin credentials</p>
+                  <h3 className="font-medium text-slate-900 mb-3">Create Admin Account</h3>
+                  <p className="text-xs text-slate-600 mb-3">Set up a new admin user</p>
                   <div className="space-y-3">
+                    <div>
+                      <label className="text-slate-600 text-sm block mb-1">Name:</label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        placeholder="Admin User"
+                        required
+                      />
+                    </div>
                     <div>
                       <label className="text-slate-600 text-sm block mb-1">Email:</label>
                       <input
@@ -109,6 +136,7 @@ export default function AdminSetup() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         placeholder="admin@dropgood.co"
+                        required
                       />
                     </div>
                     <div>
@@ -119,7 +147,10 @@ export default function AdminSetup() {
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         placeholder="••••••••"
+                        required
+                        minLength={6}
                       />
+                      <p className="text-xs text-slate-500 mt-1">Minimum 6 characters</p>
                     </div>
                   </div>
                 </div>
@@ -144,33 +175,30 @@ export default function AdminSetup() {
               </div>
 
               <button
-                onClick={handleLogin}
-                disabled={loading}
+                onClick={handleCreateAdmin}
+                disabled={loading || !email || !password || password.length < 6}
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Logging in...
+                    Creating account...
                   </>
                 ) : (
                   <>
                     <UserPlus className="w-5 h-5" />
-                    Login as Admin
+                    Create Admin Account
                   </>
                 )}
               </button>
 
-              <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
+              <div className="mt-6 pt-6 border-t border-slate-200">
                 <button
                   onClick={() => navigate('/admin/login')}
                   className="text-sm text-slate-600 hover:text-slate-900 w-full text-center"
                 >
                   Already have an account? Sign in
                 </button>
-                <p className="text-xs text-slate-500 text-center">
-                  Use email: admin@example.com / password: admin123456
-                </p>
               </div>
             </>
           )}
