@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Lock, Building2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 interface Props {
   pickupAddress: any;
   charity: DonationCenter & { pricing: any; distance_miles?: number; duration_minutes?: number };
-  schedule: { date: string; timeStart: string; timeEnd: string };
+  schedule: { date: string; timeStart: string; timeEnd: string; pricing?: any };
   itemsTypes: string[];
   itemsCount: number;
   bagsCount?: number;
@@ -74,42 +74,30 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     }
   }, []); // Only run once on mount
 
-  const recalculatedPricing = (() => {
-    // Calculate days in advance for discount
-    const calculateDaysInAdvance = () => {
-      const selected = new Date(schedule.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      selected.setHours(0, 0, 0, 0);
-      const diffTime = selected.getTime() - today.getTime();
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    };
+  // Use pricing from Step 4 (schedule), only adjust for tip changes
+  const recalculatedPricing = useMemo(() => {
+    // Use the final pricing calculated in Step 4 (includes all discounts)
+    const basePricing = schedule.pricing || charity.pricing;
 
-    const daysInAdvance = calculateDaysInAdvance();
+    // If user added a tip, adjust the pricing
+    if (driverTip > 0) {
+      // Calculate tip with Stripe fees
+      const tipWithStripeFee = (driverTip + 0.30) / 0.971;
+      const stripeFeeOnTip = tipWithStripeFee - driverTip;
 
-    // Use the new stacked subsidy pricing function
-    const charitySubsidyPct = charity.pricing.charity_subsidy_percentage || 0;
-    const companySubsidyPct = charity.pricing.company_subsidy_percentage || 0;
-    const isRushDelivery = (charity.pricing.rush_fee || 0) > 0;
+      return {
+        ...basePricing,
+        driver_tip: driverTip,
+        total_driver_tip: (basePricing.total_driver_tip || 0) + driverTip,
+        subtotal: basePricing.subtotal + driverTip,
+        stripe_fee: basePricing.stripe_fee + stripeFeeOnTip,
+        total_price: basePricing.total_price + tipWithStripeFee
+      };
+    }
 
-    // Check if charity is inactive/non-verified (use 40% fee) or active (use 25% fee)
-    const serviceFee = charity.is_active === false
-      ? INACTIVE_CHARITY_SERVICE_FEE  // 40% for non-verified charities
-      : DEFAULT_SERVICE_FEE;           // 25% for verified/active charities
-
-    return calculateFinalPriceWithSubsidies(
-      charity.pricing.uber_cost,
-      isRushDelivery,
-      driverTip, // Use customer-selected tip (optional, $0-$100)
-      charitySubsidyPct,
-      companySubsidyPct,
-      serviceFee, // Use correct service fee based on charity status
-      pickupAddress.state, // Pass state for state fee calculation
-      bagsCount, // Number of bags
-      boxesCount, // Number of boxes
-      daysInAdvance // Days in advance for discount
-    );
-  })();
+    // No tip - use Step 4's pricing exactly as calculated
+    return basePricing;
+  }, [driverTip, schedule.pricing, charity.pricing]);
 
   // Create booking and payment intent
   const initializePayment = async () => {
