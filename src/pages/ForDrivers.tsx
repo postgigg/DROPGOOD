@@ -89,7 +89,7 @@ export default function ForDrivers() {
   const stats = [
     { value: '30-60 min', label: 'Average time', icon: <Clock className="h-5 w-5" /> },
     { value: '5-15 mi', label: 'Local routes', icon: <MapPin className="h-5 w-5" /> },
-    { value: '$10 tip', label: 'Guaranteed', icon: <DollarSign className="h-5 w-5" /> },
+    { value: 'Up to $10', label: 'Tip guarantee', icon: <DollarSign className="h-5 w-5" /> },
   ];
 
   return (
@@ -254,14 +254,14 @@ export default function ForDrivers() {
             </p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-              {/* Guaranteed Tips - FEATURED */}
+              {/* Tip Guarantee - FEATURED */}
               <div className="bg-gradient-to-br from-green-900/40 to-blue-900/40 rounded-3xl p-8 border-2 border-green-600/50 shadow-xl">
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-green-500/30 rounded-2xl mb-6 border border-green-500/50">
                   <DollarSign className="h-7 w-7 text-green-400" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-green-400 mb-4">$10 Guaranteed Tip</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-green-400 mb-4">Tip Guarantee Up To $10</h3>
                 <p className="text-gray-300 leading-relaxed font-medium">
-                  Every delivery includes a $10 tip already paid by the customer. You know exactly what you'll earn before accepting.
+                  Earn $2.00 per bag + $2.50 per box picked up, plus any customer tips. DropGood guarantees fair compensation for every delivery.
                 </p>
               </div>
 
@@ -466,9 +466,9 @@ export default function ForDrivers() {
               </div>
 
               <div className="bg-gray-900 rounded-3xl p-8 border border-gray-800">
-                <h3 className="text-xl font-bold text-white mb-3">When do I get the $10 tip?</h3>
+                <h3 className="text-xl font-bold text-white mb-3">How does the tip guarantee work?</h3>
                 <p className="text-gray-400 leading-relaxed">
-                  The $10 guaranteed tip is paid out after successful delivery and photo confirmation, just like your regular Uber Direct earnings. It's automatically included in your payout - you don't need to do anything special.
+                  DropGood guarantees driver compensation up to $10 per delivery. You earn $2.00 per bag and $2.50 per box picked up, plus any additional tips customers add. This ensures you're fairly paid based on the work required. All earnings are paid out after successful delivery and photo confirmation, just like regular Uber Direct earnings.
                 </p>
               </div>
             </div>

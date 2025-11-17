@@ -31,7 +31,7 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [contactMethod, setContactMethod] = useState<'both' | 'phone'>('both');
-  const [driverTip, setDriverTip] = useState(10); // Start at $10 guaranteed minimum
+  const [driverTip, setDriverTip] = useState(0); // Optional tip (no minimum required)
   const [customTip, setCustomTip] = useState('');
   const [processing, setProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);

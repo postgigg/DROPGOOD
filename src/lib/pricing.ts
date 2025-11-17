@@ -36,13 +36,11 @@ export interface PricingBreakdown {
 const RUSH_FEE = 0.00; // No rush fee
 export const DEFAULT_SERVICE_FEE = 0.35; // 35%
 export const INACTIVE_CHARITY_SERVICE_FEE = 0.50; // 50% for unverified charities
-export const GUARANTEED_DRIVER_TIP = 10.00; // $10 guaranteed tip for every delivery
+export const GUARANTEED_DRIVER_TIP = 0.00; // No base tip - driver gets bag/box fees
 
-// Bag/Box fees - driver tips built into delivery fee
-export const BAG_FEE = 1.50; // Per bag - 100% to driver as tip
-export const BOX_FEE = 2.00; // Per box - $1.50 to driver as tip, $0.50 to DropGood
-export const BOX_TIP_AMOUNT = 1.50; // What driver gets per box
-export const BOX_REVENUE = 0.50; // What DropGood keeps per box
+// Bag/Box fees - 100% to driver as tip
+export const BAG_FEE = 2.00; // Per bag - 100% to driver as tip
+export const BOX_FEE = 2.50; // Per box - 100% to driver as tip
 
 // Advance booking discounts - incentivize booking ahead
 // Color scheme: Yellow (good) -> Orange (better) -> Green (best)
@@ -79,23 +77,23 @@ export function shouldApplyStateFee(state: string): boolean {
 export function calculateFinalPrice(
   uberCost: number,
   isRushDelivery: boolean = false,
-  driverTip: number = GUARANTEED_DRIVER_TIP, // Minimum $10 guaranteed tip
+  driverTip: number = 0, // Optional tip (no minimum)
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
   pickupState?: string,
   bagsCount: number = 0,
   boxesCount: number = 0,
   daysInAdvance: number = 0
 ): PricingBreakdown {
-  // Enforce minimum tip of $10, maximum $100
-  const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
+  // Optional tip, maximum $100
+  const finalTip = Math.max(0, Math.min(driverTip, 100));
 
   // Calculate bag/box fees
   const bagFee = bagsCount * BAG_FEE;
   const boxFee = boxesCount * BOX_FEE;
   const bagBoxTotal = bagFee + boxFee;
 
-  // Calculate driver tip from bags/boxes
-  const bagBoxDriverTip = (bagsCount * BAG_FEE) + (boxesCount * BOX_TIP_AMOUNT);
+  // Calculate driver tip from bags/boxes (100% of bag/box fees go to driver)
+  const bagBoxDriverTip = bagFee + boxFee;
   const totalDriverTip = finalTip + bagBoxDriverTip;
 
   // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee + bag/box fees)
@@ -327,7 +325,7 @@ export function calculateStackedSubsidies(
 export function calculateFinalPriceWithSubsidies(
   uberCost: number,
   isRushDelivery: boolean = false,
-  driverTip: number = GUARANTEED_DRIVER_TIP, // Minimum $10 guaranteed tip
+  driverTip: number = 0, // Optional tip (no minimum)
   charitySubsidyPercentage: number = 0,
   companySubsidyPercentage: number = 0,
   serviceFeePercentage: number = DEFAULT_SERVICE_FEE,
@@ -336,16 +334,16 @@ export function calculateFinalPriceWithSubsidies(
   boxesCount: number = 0,
   daysInAdvance: number = 0
 ): PricingBreakdown {
-  // Enforce minimum tip of $10, maximum $100
-  const finalTip = Math.max(GUARANTEED_DRIVER_TIP, Math.min(driverTip, 100));
+  // Optional tip, maximum $100
+  const finalTip = Math.max(0, Math.min(driverTip, 100));
 
   // Calculate bag/box fees
   const bagFee = bagsCount * BAG_FEE;
   const boxFee = boxesCount * BOX_FEE;
   const bagBoxTotal = bagFee + boxFee;
 
-  // Calculate driver tip from bags/boxes
-  const bagBoxDriverTip = (bagsCount * BAG_FEE) + (boxesCount * BOX_TIP_AMOUNT);
+  // Calculate driver tip from bags/boxes (100% of bag/box fees go to driver)
+  const bagBoxDriverTip = bagFee + boxFee;
   const totalDriverTip = finalTip + bagBoxDriverTip;
 
   // Calculate delivery fee (Uber + 15% delivery markup + optional 3.5% state fee + bag/box fees)
