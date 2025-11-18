@@ -173,6 +173,133 @@ export interface UberQuoteResponse {
 }
 
 /**
+ * Get DoorDash Drive delivery quotes
+ * DoorDash pricing: $9.75 base (up to 5 miles) + $0.75/mile after (max 15 miles)
+ */
+export async function getDoorDashQuotes(
+  pickupLat: number,
+  pickupLng: number,
+  dropoffLocations: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    id: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+  }>,
+  pickupAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  },
+  bagsCount: number,
+  boxesCount: number
+): Promise<Map<string, { price: number; provider: string; quote_id?: string }>> {
+  const results = new Map<string, { price: number; provider: string; quote_id?: string }>();
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  // Get saved phone number from localStorage (collected in payment step)
+  const savedPhone = localStorage.getItem('dropgood_last_phone') || '+16505555555';
+
+  console.log(`🚗 Getting DoorDash quotes for ${bagsCount} bags, ${boxesCount} boxes`);
+
+  // Determine vehicle type based on bags/boxes
+  // Small loads (1-3 items) = bicycle/walker, Medium (4-6) = car, Large (7+) = car only
+  const totalItems = bagsCount + boxesCount;
+  const dasherAllowedVehicles = totalItems <= 3
+    ? ['bicycle', 'walker', 'car']
+    : totalItems <= 6
+      ? ['car']
+      : ['car'];
+
+  try {
+    const batchSize = 5;
+    for (let i = 0; i < dropoffLocations.length; i += batchSize) {
+      const batch = dropoffLocations.slice(i, i + batchSize);
+
+      const quotes = await Promise.all(
+        batch.map(async (location) => {
+          try {
+            const requestBody = {
+              external_delivery_id: `quote_${location.id}_${Date.now()}`,
+              pickup_address: {
+                street: pickupAddress.street,
+                city: pickupAddress.city,
+                state: pickupAddress.state,
+                zip_code: pickupAddress.zip
+              },
+              pickup_phone_number: savedPhone, // Customer phone from localStorage
+              dropoff_address: {
+                street: location.address || location.name,
+                city: location.city || pickupAddress.city,
+                state: location.state || pickupAddress.state,
+                zip_code: location.zip_code || pickupAddress.zip
+              },
+              dropoff_phone_number: savedPhone, // Using customer phone for quotes (charity phone used during actual delivery)
+              order_value: 1000, // $10 in cents (estimated value)
+              items: [
+                {
+                  name: 'Donation Items',
+                  description: `${bagsCount} bags, ${boxesCount} boxes of donated items`,
+                  quantity: totalItems
+                }
+              ],
+              dasher_allowed_vehicles: dasherAllowedVehicles,
+              contactless_dropoff: true
+            };
+
+            const response = await fetch(
+              `${supabaseUrl}/functions/v1/doordash-quote`,
+              {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error('Failed to get DoorDash quote');
+            }
+
+            const quoteData = await response.json();
+            return {
+              id: location.id,
+              price: quoteData.fee_dollars,
+              quote_id: quoteData.quote_id,
+              provider: 'doordash'
+            };
+          } catch (err) {
+            console.error(`Failed to get DoorDash quote for ${location.name}:`, err);
+            return null;
+          }
+        })
+      );
+
+      quotes.forEach(q => {
+        if (q) {
+          results.set(q.id, { price: q.price, provider: q.provider, quote_id: q.quote_id });
+        }
+      });
+
+      if (i + batchSize < dropoffLocations.length) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+  } catch (err) {
+    console.error('Batch DoorDash quote error:', err);
+  }
+
+  return results;
+}
+
+/**
  * Get Roadie delivery quotes with automatic vehicle size determination
  */
 export async function getRoadieEstimates(

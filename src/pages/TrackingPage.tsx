@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, User, Phone, CheckCircle, FileText, MessageCircle, Package, Loader2, XCircle, AlertTriangle } from 'lucide-react';
+import { MapPin, Clock, User, Phone, CheckCircle, FileText, MessageCircle, Package, Loader2, XCircle, AlertTriangle, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO/SEO';
 import { seoPages } from '../components/SEO/seoConfig';
@@ -425,7 +425,7 @@ export default function TrackingPage() {
             transition={{ delay: 0.7 }}
             className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-2xl border border-gray-700"
           >
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
                 <User className="h-8 w-8 text-white" />
               </div>
@@ -452,6 +452,21 @@ export default function TrackingPage() {
                 </motion.a>
               )}
             </div>
+
+            {/* DoorDash Live Tracking */}
+            {booking.doordash_tracking_url && (
+              <motion.a
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                href={booking.doordash_tracking_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition flex items-center justify-center gap-3"
+              >
+                <MapPin className="h-5 w-5" />
+                Track Live on DoorDash
+              </motion.a>
+            )}
           </motion.div>
         )}
 

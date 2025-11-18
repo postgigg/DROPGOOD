@@ -398,6 +398,114 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
     }
   };
 
+  const createDoorDashDelivery = async (completedBookingId: string, quoteId?: string) => {
+    try {
+      console.log('🚗 Creating DoorDash delivery for booking:', completedBookingId);
+      console.log('📋 DoorDash quote_id:', quoteId);
+
+      // Format pickup datetime (scheduled_date + scheduled_time_start)
+      const pickupDateTime = new Date(`${schedule.date}T${schedule.timeStart}:00`).toISOString();
+
+      // Delivery window: scheduled time to 2 hours after
+      const [hours, minutes] = schedule.timeStart.split(':');
+      const endHour = (parseInt(hours) + 2).toString().padStart(2, '0');
+      const deliveryEnd = new Date(`${schedule.date}T${endHour}:${minutes}:00`).toISOString();
+
+      // Determine vehicle type based on bags/boxes
+      const totalItems = (bagsCount || 0) + (boxesCount || 0);
+      const dasherAllowedVehicles = totalItems <= 3
+        ? ['bicycle', 'walker', 'car']
+        : totalItems <= 6
+          ? ['car']
+          : ['car'];
+
+      const requestBody: any = {
+        booking_id: completedBookingId,
+        external_delivery_id: `dropgood_${completedBookingId}`,
+
+        // Pickup details
+        pickup_address: {
+          street: pickupAddress.street,
+          city: pickupAddress.city,
+          state: pickupAddress.state,
+          zip_code: pickupAddress.zip
+        },
+        pickup_phone_number: phone || '+15555555555',
+        pickup_business_name: `${firstName} ${lastName}`.trim() || 'DropGood Customer',
+        pickup_instructions: instructions || 'Donation pickup',
+
+        // Dropoff details
+        dropoff_address: {
+          street: charity.street_address,
+          city: charity.city,
+          state: charity.state,
+          zip_code: charity.zip_code
+        },
+        dropoff_phone_number: charity.phone || '+15555555555',
+        dropoff_business_name: charity.name,
+        dropoff_instructions: `Donation drop-off for ${charity.name}. Items: ${itemsTypes.join(', ')}.`,
+
+        // Order details
+        order_value: 1000, // $10 estimated value in cents
+        items: [
+          ...(bagsCount > 0 ? [{
+            name: 'Donation Bags',
+            description: `${bagsCount} bags of donated items`,
+            quantity: bagsCount
+          }] : []),
+          ...(boxesCount > 0 ? [{
+            name: 'Donation Boxes',
+            description: `${boxesCount} boxes of donated items`,
+            quantity: boxesCount
+          }] : []),
+        ],
+
+        // Delivery options
+        dasher_allowed_vehicles: dasherAllowedVehicles,
+        contactless_dropoff: true,
+        pickup_time: pickupDateTime,
+        dropoff_time: deliveryEnd,
+      };
+
+      // Add quote_id if available (for quote acceptance)
+      if (quoteId) {
+        requestBody.quote_id = quoteId;
+      }
+
+      console.log('📦 DoorDash request payload:', JSON.stringify(requestBody, null, 2));
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/doordash-create-delivery`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to create DoorDash delivery:', errorText);
+        // Don't throw - allow booking to complete even if DoorDash delivery fails
+        return;
+      }
+
+      const deliveryData = await response.json();
+      console.log('✅ DoorDash delivery created:', deliveryData);
+      console.log('📍 DoorDash tracking URL:', deliveryData.tracking_url);
+
+      // Note: The edge function already updates the booking with delivery info
+      // But we can log it here for confirmation
+      console.log('✅ Booking updated with DoorDash delivery info');
+    } catch (error) {
+      console.error('❌ Error creating DoorDash delivery:', error);
+      // Don't throw - allow booking to complete even if DoorDash delivery fails
+    }
+  };
+
   const completeBooking = async (completedBookingId: string) => {
     try {
       console.log('🎉 Completing booking:', completedBookingId);
@@ -421,7 +529,9 @@ export default function StepPayment({ pickupAddress, charity, schedule, itemsTyp
       // Create delivery based on provider
       const deliveryProvider = recalculatedPricing.provider || (recalculatedPricing.uber_quote_id ? 'uber' : 'manual');
 
-      if (deliveryProvider === 'roadie') {
+      if (deliveryProvider === 'doordash') {
+        await createDoorDashDelivery(completedBookingId, recalculatedPricing.quote_id);
+      } else if (deliveryProvider === 'roadie') {
         await createRoadieShipment(completedBookingId);
       } else if (recalculatedPricing.uber_quote_id) {
         // Create Uber Direct delivery if quote_id exists

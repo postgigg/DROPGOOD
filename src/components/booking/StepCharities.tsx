@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { supabase, type DonationCenter } from '../../lib/supabase';
-import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getRoadieEstimates, getUberDirectQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
+import { calculateFinalPrice, calculateFinalPriceWithSubsidies, getRoadieEstimates, getUberDirectQuotes, getDoorDashQuotes, mockUberQuote, calculateManualModePricing, INACTIVE_CHARITY_SERVICE_FEE, DEFAULT_SERVICE_FEE } from '../../lib/pricing';
 import { searchDonationCentersNearby } from '../../lib/mapboxSearch';
 
 interface Props {
@@ -160,6 +160,90 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
 
       if (sponsorshipsError) throw sponsorshipsError;
 
+      // Get real delivery quotes for database charities
+      const locationQuotes = (centers || []).map(c => ({
+        id: c.id,
+        name: c.name,
+        latitude: c.latitude,
+        longitude: c.longitude
+      }));
+
+      // Fetch quotes from all enabled providers
+      const ROADIE_ENABLED = import.meta.env.VITE_ROADIE_ENABLED === 'true';
+      const UBER_ENABLED = import.meta.env.VITE_UBER_ENABLED === 'true';
+      const DOORDASH_ENABLED = import.meta.env.VITE_DOORDASH_ENABLED === 'true';
+
+      let quotes = new Map<string, { price: number; quote_id?: string; provider?: string }>();
+
+      if (DOORDASH_ENABLED || ROADIE_ENABLED || UBER_ENABLED) {
+        const quotePromises: Promise<Map<string, { price: number; quote_id?: string; provider?: string }>>[] = [];
+
+        if (DOORDASH_ENABLED) {
+          console.log('🚗 Requesting DoorDash quotes for database charities...');
+          quotePromises.push(
+            getDoorDashQuotes(
+              pickupAddress.latitude,
+              pickupAddress.longitude,
+              locationQuotes,
+              pickupAddress,
+              bagsCount,
+              boxesCount
+            ).catch(err => {
+              console.error('❌ DoorDash quotes failed:', err);
+              return new Map();
+            })
+          );
+        }
+
+        if (ROADIE_ENABLED) {
+          console.log('🚗 Requesting Roadie quotes for database charities...');
+          quotePromises.push(
+            getRoadieEstimates(
+              pickupAddress.latitude,
+              pickupAddress.longitude,
+              locationQuotes,
+              pickupAddress,
+              bagsCount,
+              boxesCount
+            ).catch(err => {
+              console.error('❌ Roadie quotes failed:', err);
+              return new Map();
+            })
+          );
+        }
+
+        if (UBER_ENABLED) {
+          console.log('🚗 Requesting Uber quotes for database charities...');
+          quotePromises.push(
+            getUberDirectQuotes(
+              pickupAddress.latitude,
+              pickupAddress.longitude,
+              locationQuotes,
+              pickupAddress,
+              bagsCount,
+              boxesCount
+            ).catch(err => {
+              console.error('❌ Uber quotes failed:', err);
+              return new Map();
+            })
+          );
+        }
+
+        if (quotePromises.length > 0) {
+          const allQuoteMaps = await Promise.all(quotePromises);
+
+          // Merge quotes, selecting cheapest for each location
+          for (const quoteMap of allQuoteMaps) {
+            for (const [locationId, quoteData] of quoteMap.entries()) {
+              const existing = quotes.get(locationId);
+              if (!existing || quoteData.price < existing.price) {
+                quotes.set(locationId, quoteData);
+              }
+            }
+          }
+        }
+      }
+
       const charitiesWithPricing: CharityWithSponsorship[] = (centers || []).map((charity: any) => {
         const distanceMiles = calculateDistance(
           pickupAddress.latitude,
@@ -192,8 +276,10 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
           }
         }
 
+        // Get real quote if available, otherwise fallback to mock
+        const quoteData = quotes.get(charity.id);
         const isManualMode = import.meta.env.VITE_MANUAL_MODE === 'true';
-        const uberCost = isManualMode ? calculateManualModePricing(distanceMiles) : mockUberQuote(distanceMiles);
+        const uberCost = quoteData?.price || (isManualMode ? calculateManualModePricing(distanceMiles) : mockUberQuote(distanceMiles));
 
         // Apply stacked subsidies (charity + company)
         const charitySubsidyPct = sponsorship?.subsidy_percentage || 0;
@@ -211,6 +297,12 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
           boxesCount || 0, // Include box fees
           0 // daysInAdvance - Step 3 doesn't know scheduled date yet
         );
+
+        // Add provider and quote_id to pricing
+        if (quoteData) {
+          finalPricing.provider = quoteData.provider;
+          finalPricing.quote_id = quoteData.quote_id;
+        }
 
         return {
           ...charity,
@@ -301,49 +393,87 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
         total_value: Math.max(1000, (bagsCount * 500) + (boxesCount * 1000)) // in cents
       };
 
-      // Try Roadie first (if enabled), then fall back to Uber
+      // Multi-provider quote comparison: Get quotes from all enabled providers and use the cheapest
       const ROADIE_ENABLED = import.meta.env.VITE_ROADIE_ENABLED === 'true';
       const UBER_ENABLED = import.meta.env.VITE_UBER_ENABLED === 'true';
+      const DOORDASH_ENABLED = import.meta.env.VITE_DOORDASH_ENABLED === 'true';
 
       let quotes: Map<string, { price: number; quote_id?: string; provider?: string }>;
 
-      if (ROADIE_ENABLED) {
-        console.log('🚗 Trying Roadie quotes first...');
-        const roadieQuotes = await getRoadieEstimates(
-          pickupAddress.latitude,
-          pickupAddress.longitude,
-          locationQuotes,
-          pickupAddress,
-          bagsCount,
-          boxesCount
-        );
+      // Get quotes from all enabled providers in parallel
+      const quotePromises: Promise<Map<string, { price: number; quote_id?: string; provider?: string }>>[] = [];
 
-        if (roadieQuotes.size > 0) {
-          console.log('✅ Using Roadie prices for', roadieQuotes.size, 'locations');
-          quotes = roadieQuotes;
-        } else if (UBER_ENABLED) {
-          console.log('⚠️ Roadie quotes failed, falling back to Uber...');
-          quotes = await getUberDirectQuotes(
+      if (ROADIE_ENABLED) {
+        console.log('🚗 Requesting Roadie quotes...');
+        quotePromises.push(
+          getRoadieEstimates(
+            pickupAddress.latitude,
+            pickupAddress.longitude,
+            locationQuotes,
+            pickupAddress,
+            bagsCount,
+            boxesCount
+          ).catch(err => {
+            console.error('❌ Roadie quotes failed:', err);
+            return new Map();
+          })
+        );
+      }
+
+      if (UBER_ENABLED) {
+        console.log('🚗 Requesting Uber quotes...');
+        quotePromises.push(
+          getUberDirectQuotes(
             pickupAddress.latitude,
             pickupAddress.longitude,
             locationQuotes,
             pickupAddress,
             manifest.items.length > 0 ? manifest : undefined
-          );
-        } else {
-          throw new Error('No delivery quotes available');
-        }
-      } else if (UBER_ENABLED) {
-        console.log('🚗 Using Uber quotes...');
-        quotes = await getUberDirectQuotes(
-          pickupAddress.latitude,
-          pickupAddress.longitude,
-          locationQuotes,
-          pickupAddress,
-          manifest.items.length > 0 ? manifest : undefined
+          ).catch(err => {
+            console.error('❌ Uber quotes failed:', err);
+            return new Map();
+          })
         );
-      } else {
+      }
+
+      if (DOORDASH_ENABLED) {
+        console.log('🚗 Requesting DoorDash quotes...');
+        quotePromises.push(
+          getDoorDashQuotes(
+            pickupAddress.latitude,
+            pickupAddress.longitude,
+            locationQuotes,
+            pickupAddress,
+            bagsCount,
+            boxesCount
+          ).catch(err => {
+            console.error('❌ DoorDash quotes failed:', err);
+            return new Map();
+          })
+        );
+      }
+
+      if (quotePromises.length === 0) {
         throw new Error('No delivery service enabled');
+      }
+
+      // Wait for all quote providers to respond
+      const allQuoteMaps = await Promise.all(quotePromises);
+
+      // Merge all quotes, selecting the cheapest price for each location
+      quotes = new Map();
+      for (const quoteMap of allQuoteMaps) {
+        for (const [locationId, quoteData] of quoteMap.entries()) {
+          const existing = quotes.get(locationId);
+          if (!existing || quoteData.price < existing.price) {
+            quotes.set(locationId, quoteData);
+            console.log(`✅ Best price for ${locationId}: $${quoteData.price.toFixed(2)} from ${quoteData.provider || 'unknown'}`);
+          }
+        }
+      }
+
+      if (quotes.size === 0) {
+        throw new Error('No delivery quotes available from any provider');
       }
 
       console.log('Received quotes for', quotes.size, 'locations');
