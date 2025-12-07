@@ -150,7 +150,7 @@ export function mockUberQuote(distanceMiles: number): number {
 }
 
 export function calculateManualModePricing(distanceMiles: number): number {
-  const baseFee = 27.65; // $27.65 base
+  const baseFee = 15.00; // $15 base
   const perMile = 1.70;
   return baseFee + (distanceMiles * perMile);
 }
