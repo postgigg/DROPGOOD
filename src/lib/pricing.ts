@@ -34,13 +34,13 @@ export interface PricingBreakdown {
 }
 
 const RUSH_FEE = 0.00; // No rush fee
-export const DEFAULT_SERVICE_FEE = 0.50; // 50%
-export const INACTIVE_CHARITY_SERVICE_FEE = 0.65; // 65% for unverified charities
+export const DEFAULT_SERVICE_FEE = 0.75; // 75% (was 50%, +50%)
+export const INACTIVE_CHARITY_SERVICE_FEE = 0.975; // 97.5% for unverified charities (was 65%, +50%)
 export const GUARANTEED_DRIVER_TIP = 0.00; // No base tip - driver gets bag/box fees
 
 // Bag/Box fees - 100% to driver as tip
-export const BAG_FEE = 0.38; // Per bag - 100% to driver as tip (50% markup)
-export const BOX_FEE = 0.75; // Per box - 100% to driver as tip (50% markup)
+export const BAG_FEE = 0.57; // Per bag (was $0.38, +50%)
+export const BOX_FEE = 1.13; // Per box (was $0.75, +50%)
 
 // Advance booking discounts - incentivize booking ahead
 // Color scheme: Yellow (good) -> Orange (better) -> Green (best)
@@ -60,10 +60,10 @@ export function getAdvanceBookingDiscount(daysInAdvance: number): number {
   return ADVANCE_BOOKING_DISCOUNTS[daysInAdvance] || 0;
 }
 
-// New fee structure - 50% markup across the board
-export const STATE_FEE = 0.05; // 5% additional for certain states
-export const DELIVERY_MARKUP = 0.50; // 50% included in delivery fee
-export const SERVICE_FEE_DISPLAY = 0.15; // 15% shown separately
+// New fee structure - 75% markup across the board (+50% increase)
+export const STATE_FEE = 0.075; // 7.5% additional for certain states (was 5%)
+export const DELIVERY_MARKUP = 0.75; // 75% included in delivery fee (was 50%)
+export const SERVICE_FEE_DISPLAY = 0.225; // 22.5% shown separately (was 15%)
 
 export const STATES_WITH_FEE = [
   'CA', 'CO', 'TX', 'FL', 'GA', 'MS', 'OH', // Standard states
@@ -144,14 +144,14 @@ export function calculateFinalPrice(
 }
 
 export function mockUberQuote(distanceMiles: number): number {
-  const baseFee = 5.25; // 50% markup
-  const perMile = 1.28; // 50% markup
+  const baseFee = 7.88; // +50% (was $5.25)
+  const perMile = 1.92; // +50% (was $1.28)
   return baseFee + (distanceMiles * perMile);
 }
 
 export function calculateManualModePricing(distanceMiles: number): number {
-  const baseFee = 13.88; // 50% markup
-  const perMile = 1.13; // 50% markup
+  const baseFee = 20.82; // +50% (was $13.88)
+  const perMile = 1.70; // +50% (was $1.13)
   return baseFee + (distanceMiles * perMile);
 }
 

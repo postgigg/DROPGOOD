@@ -397,83 +397,92 @@ export default function StepCharities({ pickupAddress, itemsTypes, itemsCount, b
       const ROADIE_ENABLED = import.meta.env.VITE_ROADIE_ENABLED === 'true';
       const UBER_ENABLED = import.meta.env.VITE_UBER_ENABLED === 'true';
       const DOORDASH_ENABLED = import.meta.env.VITE_DOORDASH_ENABLED === 'true';
+      const MANUAL_MODE = import.meta.env.VITE_MANUAL_MODE === 'true';
 
-      let quotes: Map<string, { price: number; quote_id?: string; provider?: string }>;
+      let quotes: Map<string, { price: number; quote_id?: string; provider?: string }> = new Map();
 
-      // Get quotes from all enabled providers in parallel
-      const quotePromises: Promise<Map<string, { price: number; quote_id?: string; provider?: string }>>[] = [];
-
-      if (ROADIE_ENABLED) {
-        console.log('🚗 Requesting Roadie quotes...');
-        quotePromises.push(
-          getRoadieEstimates(
+      // If manual mode or no providers enabled, use local pricing calculation (fast)
+      if (MANUAL_MODE || (!ROADIE_ENABLED && !UBER_ENABLED && !DOORDASH_ENABLED)) {
+        console.log('📍 Using manual/local pricing (no API calls needed)');
+        // Calculate prices locally - no API calls needed
+        for (const loc of locationQuotes) {
+          const distance = calculateDistance(
             pickupAddress.latitude,
             pickupAddress.longitude,
-            locationQuotes,
-            pickupAddress,
-            bagsCount,
-            boxesCount
-          ).catch(err => {
-            console.error('❌ Roadie quotes failed:', err);
-            return new Map();
-          })
-        );
-      }
+            loc.latitude,
+            loc.longitude
+          );
+          quotes.set(loc.id, { price: calculateManualModePricing(distance), provider: 'manual' });
+        }
+      } else {
+        // Get quotes from all enabled providers in parallel
+        const quotePromises: Promise<Map<string, { price: number; quote_id?: string; provider?: string }>>[] = [];
 
-      if (UBER_ENABLED) {
-        console.log('🚗 Requesting Uber quotes...');
-        quotePromises.push(
-          getUberDirectQuotes(
-            pickupAddress.latitude,
-            pickupAddress.longitude,
-            locationQuotes,
-            pickupAddress,
-            manifest.items.length > 0 ? manifest : undefined
-          ).catch(err => {
-            console.error('❌ Uber quotes failed:', err);
-            return new Map();
-          })
-        );
-      }
+        if (ROADIE_ENABLED) {
+          console.log('🚗 Requesting Roadie quotes...');
+          quotePromises.push(
+            getRoadieEstimates(
+              pickupAddress.latitude,
+              pickupAddress.longitude,
+              locationQuotes,
+              pickupAddress,
+              bagsCount,
+              boxesCount
+            ).catch(err => {
+              console.error('❌ Roadie quotes failed:', err);
+              return new Map();
+            })
+          );
+        }
 
-      if (DOORDASH_ENABLED) {
-        console.log('🚗 Requesting DoorDash quotes...');
-        quotePromises.push(
-          getDoorDashQuotes(
-            pickupAddress.latitude,
-            pickupAddress.longitude,
-            locationQuotes,
-            pickupAddress,
-            bagsCount,
-            boxesCount
-          ).catch(err => {
-            console.error('❌ DoorDash quotes failed:', err);
-            return new Map();
-          })
-        );
-      }
+        if (UBER_ENABLED) {
+          console.log('🚗 Requesting Uber quotes...');
+          quotePromises.push(
+            getUberDirectQuotes(
+              pickupAddress.latitude,
+              pickupAddress.longitude,
+              locationQuotes,
+              pickupAddress,
+              manifest.items.length > 0 ? manifest : undefined
+            ).catch(err => {
+              console.error('❌ Uber quotes failed:', err);
+              return new Map();
+            })
+          );
+        }
 
-      if (quotePromises.length === 0) {
-        throw new Error('No delivery service enabled');
-      }
+        if (DOORDASH_ENABLED) {
+          console.log('🚗 Requesting DoorDash quotes...');
+          quotePromises.push(
+            getDoorDashQuotes(
+              pickupAddress.latitude,
+              pickupAddress.longitude,
+              locationQuotes,
+              pickupAddress,
+              bagsCount,
+              boxesCount
+            ).catch(err => {
+              console.error('❌ DoorDash quotes failed:', err);
+              return new Map();
+            })
+          );
+        }
 
-      // Wait for all quote providers to respond
-      const allQuoteMaps = await Promise.all(quotePromises);
+        if (quotePromises.length > 0) {
+          // Wait for all quote providers to respond
+          const allQuoteMaps = await Promise.all(quotePromises);
 
-      // Merge all quotes, selecting the cheapest price for each location
-      quotes = new Map();
-      for (const quoteMap of allQuoteMaps) {
-        for (const [locationId, quoteData] of quoteMap.entries()) {
-          const existing = quotes.get(locationId);
-          if (!existing || quoteData.price < existing.price) {
-            quotes.set(locationId, quoteData);
-            console.log(`✅ Best price for ${locationId}: $${quoteData.price.toFixed(2)} from ${quoteData.provider || 'unknown'}`);
+          // Merge all quotes, selecting the cheapest price for each location
+          for (const quoteMap of allQuoteMaps) {
+            for (const [locationId, quoteData] of quoteMap.entries()) {
+              const existing = quotes.get(locationId);
+              if (!existing || quoteData.price < existing.price) {
+                quotes.set(locationId, quoteData);
+                console.log(`✅ Best price for ${locationId}: $${quoteData.price.toFixed(2)} from ${quoteData.provider || 'unknown'}`);
+              }
+            }
           }
         }
-      }
-
-      if (quotes.size === 0) {
-        throw new Error('No delivery quotes available from any provider');
       }
 
       console.log('Received quotes for', quotes.size, 'locations');
