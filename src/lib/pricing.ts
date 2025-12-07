@@ -39,8 +39,8 @@ export const INACTIVE_CHARITY_SERVICE_FEE = 0.975; // 97.5% for unverified chari
 export const GUARANTEED_DRIVER_TIP = 0.00; // No base tip - driver gets bag/box fees
 
 // Bag/Box fees - 100% to driver as tip
-export const BAG_FEE = 0.57; // Per bag (was $0.38, +50%)
-export const BOX_FEE = 1.13; // Per box (was $0.75, +50%)
+export const BAG_FEE = 2.50; // Per bag - flat $2.50
+export const BOX_FEE = 3.00; // Per box - flat $3.00
 
 // Advance booking discounts - incentivize booking ahead
 // Color scheme: Yellow (good) -> Orange (better) -> Green (best)
