@@ -38,11 +38,11 @@ export const DEFAULT_SERVICE_FEE = 0.75; // 75% (was 50%, +50%)
 export const INACTIVE_CHARITY_SERVICE_FEE = 0.975; // 97.5% for unverified charities (was 65%, +50%)
 export const GUARANTEED_DRIVER_TIP = 0.00; // No base tip - driver gets bag/box fees
 
-// Bag/Box fees - 100% to driver as tip (only charged for excess)
-export const BAG_FEE = 2.50; // Per bag over 15 - flat $2.50
-export const BOX_FEE = 3.00; // Per box over 10 - flat $3.00
-export const INCLUDED_BAGS = 15; // Up to 15 bags included in base price
-export const INCLUDED_BOXES = 10; // Up to 10 boxes included in base price
+// Bag/Box limits - up to these amounts included in base price, no extra charge
+export const BAG_FEE = 0; // No extra charge
+export const BOX_FEE = 0; // No extra charge
+export const MAX_BAGS = 15; // Max 15 bags allowed
+export const MAX_BOXES = 10; // Max 10 boxes allowed
 
 // Advance booking discounts - incentivize booking ahead
 // Color scheme: Yellow (good) -> Orange (better) -> Green (best)
@@ -89,12 +89,10 @@ export function calculateFinalPrice(
   // Optional tip, maximum $100
   const finalTip = Math.max(0, Math.min(driverTip, 100));
 
-  // Calculate bag/box fees (only charge for excess over included amounts)
-  const excessBags = Math.max(0, bagsCount - INCLUDED_BAGS);
-  const excessBoxes = Math.max(0, boxesCount - INCLUDED_BOXES);
-  const bagFee = excessBags * BAG_FEE;
-  const boxFee = excessBoxes * BOX_FEE;
-  const bagBoxTotal = bagFee + boxFee;
+  // No extra bag/box fees - included in base price (up to 15 bags, 10 boxes)
+  const bagFee = 0;
+  const boxFee = 0;
+  const bagBoxTotal = 0;
 
   // Calculate driver tip from bags/boxes (100% of bag/box fees go to driver)
   const bagBoxDriverTip = bagFee + boxFee;
@@ -635,12 +633,10 @@ export function calculateFinalPriceWithSubsidies(
   // Optional tip, maximum $100
   const finalTip = Math.max(0, Math.min(driverTip, 100));
 
-  // Calculate bag/box fees (only charge for excess over included amounts)
-  const excessBags = Math.max(0, bagsCount - INCLUDED_BAGS);
-  const excessBoxes = Math.max(0, boxesCount - INCLUDED_BOXES);
-  const bagFee = excessBags * BAG_FEE;
-  const boxFee = excessBoxes * BOX_FEE;
-  const bagBoxTotal = bagFee + boxFee;
+  // No extra bag/box fees - included in base price (up to 15 bags, 10 boxes)
+  const bagFee = 0;
+  const boxFee = 0;
+  const bagBoxTotal = 0;
 
   // Calculate driver tip from bags/boxes (100% of bag/box fees go to driver)
   const bagBoxDriverTip = bagFee + boxFee;
